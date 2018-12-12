@@ -1,0 +1,535 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProductVersion>3.5</ProductVersion>
+    <ProjectGuid>{1589467E-2C45-4FD0-B0BA-F09FBAEC2E2B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>Gold</AssemblyName>
+    <SuppressWarnings>H0;W63;W3;H10;H11;H7;H8;H6;H14</SuppressWarnings>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <AllowUnsafeCode>True</AllowUnsafeCode>
+    <TargetFramework>.NETFramework4.5</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <Optimize>False</Optimize>
+    <OutputPath>.\Bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <GeneratePDB>True</GeneratePDB>
+    <GenerateMDB>True</GenerateMDB>
+    <EnableAsserts>True</EnableAsserts>
+    <CpuType>anycpu</CpuType>
+    <RuntimeVersion>v25</RuntimeVersion>
+    <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>.\Bin\Release</OutputPath>
+    <CpuType>anycpu</CpuType>
+    <RuntimeVersion>v25</RuntimeVersion>
+    <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Echoes' ">
+    <Mode>Echoes</Mode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.Windows' ">
+    <Mode>Island</Mode>
+    <SubMode>Windows</SubMode>
+    <Architecture>i386</Architecture>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.Linux' ">
+    <Mode>Island</Mode>
+    <SubMode>Linux</SubMode>
+    <Architecture>x86_64</Architecture>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <Target>Echoes</Target>
+    </Reference>
+    <Reference Include="System">
+      <Target>Echoes</Target>
+    </Reference>
+    <Reference Include="System.Core">
+      <Target>Echoes</Target>
+    </Reference>
+    <Reference Include="rt">
+      <Target>Cooper</Target>
+    </Reference>
+    <Reference Include="rtl">
+      <Target>Island.Windows</Target>
+    </Reference>
+    <Reference Include="gc">
+      <Target>Island.Windows</Target>
+    </Reference>
+    <Reference Include="Island">
+      <Target>Island.Windows</Target>
+    </Reference>
+    <Reference Include="rtl">
+      <Target>Island.Linux</Target>
+    </Reference>
+    <Reference Include="gc">
+      <Target>Island.Linux</Target>
+    </Reference>
+    <Reference Include="Island">
+      <Target>Island.Linux</Target>
+    </Reference>
+    <ProjectReference Include="GoldAspect">
+      <HintPath>..\GoldAspect\Bin\Debug\GoldAspect.dll</HintPath>
+      <Project>{631D3965-3D71-4DFD-9864-EBF841EA6192}</Project>
+      <ProjectFile>..\GoldAspect\GoldAspect.elements</ProjectFile>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fmt.pas"></None>
+    <Compile Include="Gold.pas"></Compile>
+    <Compile Include="Properties\AssemblyInfo.pas" />
+    <Compile Include="Gold.Channels.Echoes.pas" />
+    <Compile Include="reflect.pas"></Compile>
+    <Compile Include="Aliases.pas" />
+    <Compile Include="Partials.pas" />
+    <Compile Include="database\sql\convert.go">
+      <SubType>Content</SubType>
+    </Compile>
+    <Compile Include="database\sql\ctxutil.go">
+      <SubType>Content</SubType>
+    </Compile>
+    <Compile Include="database\sql\driver\driver.go">
+      <SubType>Content</SubType>
+    </Compile>
+    <Compile Include="database\sql\driver\types.go">
+      <SubType>Content</SubType>
+    </Compile>
+    <Compile Include="database\sql\sql.go">
+      <SubType>Content</SubType>
+    </Compile>
+    <Compile Include="context\context.go" />
+    <Compile Include="errors\errors.go" />
+    <Compile Include="unicode\casetables.go" />
+    <Compile Include="unicode\digit.go" />
+    <Compile Include="unicode\graphic.go" />
+    <Compile Include="unicode\letter.go" />
+    <Compile Include="unicode\tables.go" />
+    <Compile Include="io\io.go" />
+    <Compile Include="io\multi.go" />
+    <Compile Include="io\pipe.go" />
+    <Compile Include="sync.atomic.pas" />
+    <Compile Include="unicode.utf8.pas" />
+    <Compile Include="runtime.pas" />
+    <Compile Include="sort.pas" />
+    <Compile Include="strconv\atob.go" />
+    <Compile Include="strconv\atof.go" />
+    <Compile Include="strconv\atoi.go" />
+    <Compile Include="strconv\decimal.go" />
+    <Compile Include="strconv\doc.go" />
+    <Compile Include="strconv\extfloat.go" />
+    <Compile Include="strconv\ftoa.go" />
+    <Compile Include="strconv\isprint.go" />
+    <Compile Include="strconv\itoa.go" />
+    <Compile Include="strconv\quote.go" />
+    <Compile Include="sync.pas" />
+    <Compile Include="os.cs" />
+    <Compile Include="math.pas" />
+    <Compile Include="os.pas" />
+    <Compile Include="math\bits\bits.go" />
+    <Compile Include="math\bits\bits_tables.go" />
+    <Compile Include="time\format.go" />
+    <Compile Include="time\sleep.go" />
+    <Compile Include="time\tick.go" />
+    <Compile Include="time\time.go" />
+    <Compile Include="time\zoneinfo.go" />
+    <Compile Include="time\zoneinfo_read.go" />
+    <None Include="time\zoneinfo_unix.go" />
+    <Compile Include="archive\tar\common.go" />
+    <Compile Include="archive\tar\format.go" />
+    <Compile Include="archive\tar\reader.go" />
+    <Compile Include="archive\tar\strconv.go" />
+    <Compile Include="archive\tar\writer.go" />
+    <Compile Include="archive\zip\reader.go" />
+    <Compile Include="archive\zip\register.go" />
+    <Compile Include="archive\zip\struct.go" />
+    <Compile Include="archive\zip\writer.go" />
+    <Compile Include="hash\hash.go" />
+    <Compile Include="hash\adler32\adler32.go" />
+    <Compile Include="hash\crc32\crc32.go" />
+    <Compile Include="hash\crc32\crc32_generic.go" />
+    <Compile Include="hash\crc32\crc32_otherarch.go" />
+    <Compile Include="hash\crc64\crc64.go" />
+    <Compile Include="hash\fnv\fnv.go" />
+    <Compile Include="path\match.go" />
+    <Compile Include="path\path.go" />
+    <Compile Include="path\path.go" />
+    <Compile Include="path\filepath\match.go" />
+    <Compile Include="path\filepath\path.go" />
+    <Compile Include="path\filepath\symlink.go" />
+    <None Include="os\dir.go" />
+    <Compile Include="os\env.go" />
+    <Compile Include="os\error.go" />
+    <None Include="os\exec.go" />
+    <Compile Include="os\executable.go" />
+    <None Include="os\file.go" />
+    <None Include="os\getwd.go" />
+    <Compile Include="os\path.go" />
+    <None Include="os\proc.go" />
+    <Compile Include="os\stat.go" />
+    <Compile Include="os\str.go" />
+    <Compile Include="os\sys.go" />
+    <None Include="os\types.go" />
+    <Compile Include="strings\compare.go" />
+    <Compile Include="strings\reader.go" />
+    <Compile Include="strings\replace.go" />
+    <Compile Include="strings\search.go" />
+    <Compile Include="strings\strings.go" />
+    <None Include="io\ioutil\ioutil.go" />
+    <None Include="io\ioutil\tempfile.go" />
+    <Compile Include="flag\flag.go" />
+    <Compile Include="compress\bzip2\bit_reader.go" />
+    <Compile Include="compress\bzip2\bzip2.go" />
+    <Compile Include="compress\bzip2\huffman.go" />
+    <Compile Include="compress\bzip2\move_to_front.go" />
+    <Compile Include="compress\flate\deflate.go" />
+    <Compile Include="compress\flate\deflatefast.go" />
+    <Compile Include="compress\flate\dict_decoder.go" />
+    <Compile Include="compress\flate\huffman_bit_writer.go" />
+    <Compile Include="compress\flate\huffman_code.go" />
+    <Compile Include="compress\flate\inflate.go" />
+    <Compile Include="compress\flate\token.go" />
+    <Compile Include="compress\gzip\gunzip.go" />
+    <Compile Include="compress\gzip\gzip.go" />
+    <Compile Include="compress\lzw\reader.go" />
+    <Compile Include="compress\lzw\writer.go" />
+    <Compile Include="compress\zlib\reader.go" />
+    <Compile Include="compress\zlib\writer.go" />
+    <Compile Include="log\log.go" />
+    <Compile Include="bufio\bufio.go" />
+    <Compile Include="bufio\scan.go" />
+    <Compile Include="bytes\buffer.go" />
+    <Compile Include="bytes\bytes.go" />
+    <Compile Include="bytes\bytes_decl.go" />
+    <Compile Include="bytes\reader.go" />
+    <Compile Include="encoding\binary\binary.go" />
+    <Compile Include="encoding\binary\varint.go" />
+    <Compile Include="encoding\encoding.go" />
+    <Compile Include="sort\search.go" />
+    <Compile Include="sort\slice.go" />
+    <Compile Include="sort\sort.go" />
+    <Compile Include="sort\zfuncversion.go" />
+    <Compile Include="container\heap\heap.go" />
+    <Compile Include="container\list\list.go" />
+    <Compile Include="container\ring\ring.go" />
+    <Compile Include="expvar\expvar.go" />
+    <Compile Include="index\suffixarray\qsufsort.go" />
+    <Compile Include="index\suffixarray\suffixarray.go" />
+    <Compile Include="regexp\backtrack.go" />
+    <Compile Include="regexp\exec.go" />
+    <Compile Include="regexp\onepass.go" />
+    <Compile Include="regexp\regexp.go" />
+    <Compile Include="regexp\syntax\compile.go" />
+    <Compile Include="regexp\syntax\doc.go" />
+    <Compile Include="regexp\syntax\op_string.go" />
+    <Compile Include="regexp\syntax\parse.go" />
+    <Compile Include="regexp\syntax\perl_groups.go" />
+    <Compile Include="regexp\syntax\prog.go" />
+    <Compile Include="regexp\syntax\regexp.go" />
+    <Compile Include="regexp\syntax\simplify.go" />
+    <Compile Include="text\scanner\scanner.go" />
+    <Compile Include="text\tabwriter\tabwriter.go" />
+    <Compile Include="text\template\doc.go" />
+    <Compile Include="text\template\exec.go" />
+    <Compile Include="text\template\funcs.go" />
+    <Compile Include="text\template\helper.go" />
+    <Compile Include="text\template\option.go" />
+    <Compile Include="text\template\template.go" />
+    <Compile Include="text\template\parse\lex.go" />
+    <Compile Include="text\template\parse\node.go" />
+    <Compile Include="text\template\parse\parse.go" />
+    <Compile Include="net\url\url.go" />
+    <Compile Include="html\entity.go" />
+    <Compile Include="html\escape.go" />
+    <Compile Include="html\template\attr.go" />
+    <Compile Include="html\template\attr_string.go" />
+    <Compile Include="html\template\content.go" />
+    <Compile Include="html\template\context.go" />
+    <Compile Include="html\template\css.go" />
+    <Compile Include="html\template\delim_string.go" />
+    <Compile Include="html\template\doc.go" />
+    <Compile Include="html\template\element_string.go" />
+    <Compile Include="html\template\error.go" />
+    <Compile Include="html\template\escape.go" />
+    <Compile Include="html\template\html.go" />
+    <Compile Include="html\template\js.go" />
+    <Compile Include="html\template\jsctx_string.go" />
+    <Compile Include="html\template\state_string.go" />
+    <Compile Include="html\template\template.go" />
+    <Compile Include="html\template\transition.go" />
+    <Compile Include="html\template\url.go" />
+    <Compile Include="html\template\urlpart_string.go" />
+    <Compile Include="encoding\json\decode.go" />
+    <Compile Include="encoding\json\encode.go" />
+    <Compile Include="encoding\json\fold.go" />
+    <Compile Include="encoding\json\indent.go" />
+    <Compile Include="encoding\json\scanner.go" />
+    <Compile Include="encoding\json\stream.go" />
+    <Compile Include="encoding\json\tables.go" />
+    <Compile Include="encoding\json\tags.go" />
+    <Compile Include="encoding\base64\base64.go" />
+    <Compile Include="unicode\utf16\utf16.go" />
+    <Compile Include="image\format.go" />
+    <Compile Include="image\geom.go" />
+    <Compile Include="image\image.go" />
+    <Compile Include="image\names.go" />
+    <Compile Include="image\ycbcr.go" />
+    <Compile Include="image\color\palette\palette.go" />
+    <Compile Include="image\color\color.go" />
+    <Compile Include="image\color\ycbcr.go" />
+    <Compile Include="image\draw\draw.go" />
+    <Compile Include="image\internal\imageutil\impl.go" />
+    <Compile Include="image\jpeg\fdct.go" />
+    <Compile Include="image\jpeg\huffman.go" />
+    <Compile Include="image\jpeg\idct.go" />
+    <Compile Include="image\jpeg\reader.go" />
+    <Compile Include="image\jpeg\scan.go" />
+    <Compile Include="image\jpeg\writer.go" />
+    <Compile Include="image\png\paeth.go" />
+    <Compile Include="image\png\reader.go" />
+    <Compile Include="image\png\writer.go" />
+    <Compile Include="net\textproto\header.go" />
+    <Compile Include="net\textproto\pipeline.go" />
+    <Compile Include="net\textproto\reader.go" />
+    <Compile Include="net\textproto\textproto.go" />
+    <Compile Include="net\textproto\writer.go" />
+    <Compile Include="net\smtp\auth.go" />
+    <Compile Include="net\smtp\smtp.go" />
+    <Compile Include="net\mail\message.go" />
+    <Compile Include="net\http\client.go" />
+    <Compile Include="net\http\cookie.go" />
+    <Compile Include="net\http\doc.go" />
+    <Compile Include="net\http\filetransport.go" />
+    <Compile Include="net\http\fs.go" />
+    <Compile Include="net\http\h2_bundle.go" />
+    <Compile Include="net\http\header.go" />
+    <Compile Include="net\http\http.go" />
+    <Compile Include="net\http\jar.go" />
+    <Compile Include="net\http\method.go" />
+    <Compile Include="net\http\request.go" />
+    <Compile Include="net\http\response.go" />
+    <Compile Include="net\http\roundtrip.go" />
+    <Compile Include="net\http\server.go" />
+    <Compile Include="net\http\sniff.go" />
+    <Compile Include="net\http\socks_bundle.go" />
+    <Compile Include="net\http\status.go" />
+    <Compile Include="net\http\transfer.go" />
+    <Compile Include="net\http\transport.go" />
+    <Compile Include="net\http\cgi\child.go" />
+    <Compile Include="net\http\cgi\host.go" />
+    <Compile Include="net\http\cookiejar\jar.go" />
+    <Compile Include="net\http\cookiejar\punycode.go" />
+    <Compile Include="net\http\fcgi\child.go" />
+    <Compile Include="net\http\fcgi\fcgi.go" />
+    <Compile Include="net\http\httptest\httptest.go" />
+    <Compile Include="net\http\httptest\recorder.go" />
+    <Compile Include="net\http\httptest\server.go" />
+    <Compile Include="net\http\httptrace\trace.go" />
+    <Compile Include="net\http\httputil\dump.go" />
+    <Compile Include="net\http\httputil\httputil.go" />
+    <Compile Include="net\http\httputil\persist.go" />
+    <Compile Include="net\http\httputil\reverseproxy.go" />
+    <Compile Include="net\http\internal\chunked.go" />
+    <Compile Include="net\http\internal\testcert.go" />
+    <None Include="net\http\pprof\pprof.go" />
+    <None Include="net\addrselect.go" />
+    <None Include="net\conf.go" />
+    <None Include="net\dial.go" />
+    <None Include="net\dnsclient.go" />
+    <None Include="net\file.go" />
+    <None Include="net\hook.go" />
+    <None Include="net\hosts.go" />
+    <None Include="net\interface.go" />
+    <Compile Include="net\ip.go" />
+    <None Include="net\iprawsock.go" />
+    <Compile Include="net\ipsock.go" />
+    <None Include="net\lookup.go" />
+    <Compile Include="net\mac.go" />
+    <None Include="net\net.go" />
+    <None Include="net\nss.go" />
+    <Compile Include="net\parse.go" />
+    <None Include="net\pipe.go" />
+    <None Include="net\port.go" />
+    <None Include="net\rawconn.go" />
+    <None Include="net\tcpsock.go" />
+    <None Include="net\udpsock.go" />
+    <None Include="net\unixsock.go" />
+    <None Include="crypto\aes\aes_gcm.go" />
+    <Compile Include="crypto\aes\block.go" />
+    <Compile Include="crypto\aes\cipher.go" />
+    <Compile Include="crypto\aes\cipher_generic.go" />
+    <Compile Include="crypto\aes\const.go" />
+    <Compile Include="crypto\aes\modes.go" />
+    <Compile Include="crypto\cipher\cbc.go" />
+    <Compile Include="crypto\cipher\cfb.go" />
+    <Compile Include="crypto\cipher\cipher.go" />
+    <Compile Include="crypto\cipher\ctr.go" />
+    <Compile Include="crypto\cipher\gcm.go" />
+    <Compile Include="crypto\cipher\io.go" />
+    <Compile Include="crypto\cipher\ofb.go" />
+    <Compile Include="crypto\des\block.go" />
+    <Compile Include="crypto\des\cipher.go" />
+    <Compile Include="crypto\des\const.go" />
+    <Compile Include="crypto\dsa\dsa.go" />
+    <Compile Include="crypto\ecdsa\ecdsa.go" />
+    <Compile Include="crypto\elliptic\elliptic.go" />
+    <Compile Include="crypto\elliptic\p224.go" />
+    <Compile Include="crypto\elliptic\p256.go" />
+    <Compile Include="crypto\elliptic\p256_generic.go" />
+    <Compile Include="crypto\hmac\hmac.go" />
+    <Compile Include="crypto\internal\randutil\randutil.go" />
+    <Compile Include="crypto\md5\md5.go" />
+    <Compile Include="crypto\md5\md5block_decl.go" />
+    <Compile Include="crypto\md5\md5block_generic.go" />
+    <Compile Include="crypto\rand\rand.go" />
+    <Compile Include="crypto\rand\util.go" />
+    <Compile Include="crypto\rc4\rc4.go" />
+    <Compile Include="crypto\rsa\pkcs1v15.go" />
+    <Compile Include="crypto\rsa\pss.go" />
+    <Compile Include="crypto\rsa\rsa.go" />
+    <Compile Include="crypto\sha1\sha1.go" />
+    <Compile Include="crypto\sha1\sha1block.go" />
+    <Compile Include="crypto\sha1\sha1block_decl.go" />
+    <Compile Include="crypto\sha1\sha1block_generic.go" />
+    <Compile Include="crypto\sha256\sha256.go" />
+    <Compile Include="crypto\sha256\sha256block.go" />
+    <Compile Include="crypto\sha256\sha256block_decl.go" />
+    <Compile Include="crypto\sha256\sha256block_generic.go" />
+    <Compile Include="crypto\sha512\sha512.go" />
+    <Compile Include="crypto\sha512\sha512block.go" />
+    <Compile Include="crypto\sha512\sha512block_decl.go" />
+    <Compile Include="crypto\sha512\sha512block_generic.go" />
+    <Compile Include="crypto\subtle\constant_time.go" />
+    <Compile Include="crypto\tls\alert.go" />
+    <Compile Include="crypto\tls\auth.go" />
+    <Compile Include="crypto\tls\cipher_suites.go" />
+    <Compile Include="crypto\tls\common.go" />
+    <Compile Include="crypto\tls\conn.go" />
+    <Compile Include="crypto\tls\generate_cert.go" />
+    <Compile Include="crypto\tls\handshake_client.go" />
+    <Compile Include="crypto\tls\handshake_messages.go" />
+    <Compile Include="crypto\tls\handshake_server.go" />
+    <Compile Include="crypto\tls\key_agreement.go" />
+    <Compile Include="crypto\tls\prf.go" />
+    <Compile Include="crypto\tls\ticket.go" />
+    <Compile Include="crypto\tls\tls.go" />
+    <Compile Include="crypto\x509\cert_pool.go" />
+    <Compile Include="crypto\x509\pem_decrypt.go" />
+    <Compile Include="crypto\x509\pkcs1.go" />
+    <Compile Include="crypto\x509\pkcs8.go" />
+    <Compile Include="crypto\x509\root.go" />
+    <Compile Include="crypto\x509\sec1.go" />
+    <Compile Include="crypto\x509\verify.go" />
+    <Compile Include="crypto\x509\x509.go" />
+    <Compile Include="crypto\x509\pkix\pkix.go" />
+    <Compile Include="math\big\accuracy_string.go" />
+    <Compile Include="math\big\arith.go" />
+    <Compile Include="math\big\arith_decl.go" />
+    <Compile Include="math\big\arith_decl_pure.go" />
+    <Compile Include="math\big\decimal.go" />
+    <Compile Include="math\big\doc.go" />
+    <Compile Include="math\big\float.go" />
+    <Compile Include="math\big\floatconv.go" />
+    <Compile Include="math\big\floatmarsh.go" />
+    <Compile Include="math\big\ftoa.go" />
+    <Compile Include="math\big\int.go" />
+    <Compile Include="math\big\intconv.go" />
+    <Compile Include="math\big\intmarsh.go" />
+    <Compile Include="math\big\nat.go" />
+    <Compile Include="math\big\natconv.go" />
+    <Compile Include="math\big\prime.go" />
+    <Compile Include="math\big\rat.go" />
+    <Compile Include="math\big\ratconv.go" />
+    <Compile Include="math\big\ratmarsh.go" />
+    <Compile Include="math\big\roundingmode_string.go" />
+    <Compile Include="math\big\sqrt.go" />
+    <Compile Include="math\rand\exp.go" />
+    <None Include="math\rand\gen_cooked.go" />
+    <Compile Include="math\rand\normal.go" />
+    <Compile Include="math\rand\rand.go" />
+    <Compile Include="math\rand\rng.go" />
+    <Compile Include="math\rand\zipf.go" />
+    <Compile Include="encoding\asn1\asn1.go" />
+    <Compile Include="encoding\asn1\common.go" />
+    <Compile Include="encoding\asn1\marshal.go" />
+    <Compile Include="crypto\crypto.go" />
+    <Compile Include="golang_org\x\net\http2\hpack\encode.go" />
+    <Compile Include="golang_org\x\net\http2\hpack\hpack.go" />
+    <Compile Include="golang_org\x\net\http2\hpack\huffman.go" />
+    <Compile Include="golang_org\x\net\http2\hpack\tables.go" />
+    <Compile Include="mime\encodedword.go" />
+    <Compile Include="mime\grammar.go" />
+    <Compile Include="mime\mediatype.go" />
+    <Compile Include="mime\type.go" />
+    <Compile Include="mime\multipart\formdata.go" />
+    <Compile Include="mime\multipart\multipart.go" />
+    <Compile Include="mime\multipart\writer.go" />
+    <Compile Include="mime\quotedprintable\reader.go" />
+    <Compile Include="mime\quotedprintable\writer.go" />
+    <Compile Include="encoding\pem\pem.go" />
+    <Compile Include="fmt\doc.go" />
+    <Compile Include="fmt\format.go" />
+    <Compile Include="fmt\print.go" />
+    <Compile Include="fmt\scan.go" />
+    <Compile Include="internal\singleflight\singleflight.go" />
+    <None Include="net\dnsconfig_unix.go" />
+    <Compile Include="runtime\trace\annotation.go" />
+    <Compile Include="runtime\trace\trace.go" />
+    <None Include="net\interface_stub.go" />
+    <Compile Include="golang_org\x\crypto\curve25519\curve25519.go" />
+    <Compile Include="golang_org\x\crypto\curve25519\doc.go" />
+    <Compile Include="golang_org\x\net\http\httpguts\guts.go" />
+    <Compile Include="golang_org\x\net\http\httpguts\httplex.go" />
+    <Compile Include="golang_org\x\net\idna\idna.go" />
+    <Compile Include="golang_org\x\net\idna\punycode.go" />
+    <Compile Include="golang_org\x\net\idna\tables.go" />
+    <Compile Include="golang_org\x\net\idna\trie.go" />
+    <Compile Include="golang_org\x\net\idna\trieval.go" />
+    <Compile Include="golang_org\x\text\unicode\bidi\bidi.go" />
+    <Compile Include="golang_org\x\text\unicode\bidi\bracket.go" />
+    <Compile Include="golang_org\x\text\unicode\bidi\core.go" />
+    <Compile Include="golang_org\x\text\unicode\bidi\prop.go" />
+    <Compile Include="golang_org\x\text\unicode\bidi\tables.go" />
+    <Compile Include="golang_org\x\text\unicode\bidi\trieval.go" />
+    <Compile Include="golang_org\x\text\unicode\norm\composition.go" />
+    <Compile Include="golang_org\x\text\unicode\norm\forminfo.go" />
+    <Compile Include="golang_org\x\text\unicode\norm\input.go" />
+    <Compile Include="golang_org\x\text\unicode\norm\iter.go" />
+    <Compile Include="golang_org\x\text\unicode\norm\normalize.go" />
+    <Compile Include="golang_org\x\text\unicode\norm\readwriter.go" />
+    <Compile Include="golang_org\x\text\unicode\norm\tables.go" />
+    <Compile Include="golang_org\x\text\unicode\norm\transform.go" />
+    <Compile Include="golang_org\x\text\unicode\norm\trie.go" />
+    <Compile Include="golang_org\x\text\unicode\norm\triegen.go" />
+    <Compile Include="golang_org\x\text\transform\transform.go" />
+    <Compile Include="golang_org\x\text\secure\bidirule\bidirule.go" />
+    <Compile Include="syscall\net.go" />
+    <Compile Include="net.pas" />
+    <Compile Include="encoding\hex\hex.go" />
+    <Compile Include="golang_org\x\crypto\cryptobyte\asn1.go" />
+    <Compile Include="golang_org\x\crypto\cryptobyte\builder.go" />
+    <Compile Include="golang_org\x\crypto\cryptobyte\string.go" />
+    <Compile Include="golang_org\x\crypto\cryptobyte\asn1\asn1.go" />
+    <Compile Include="golang_org\x\crypto\chacha20poly1305\chacha20poly1305.go" />
+    <Compile Include="golang_org\x\crypto\chacha20poly1305\chacha20poly1305_generic.go" />
+    <Compile Include="golang_org\x\crypto\chacha20poly1305\chacha20poly1305_noasm.go" />
+    <Compile Include="golang_org\x\crypto\poly1305\poly1305.go" />
+    <Compile Include="golang_org\x\crypto\poly1305\sum_noasm.go" />
+    <Compile Include="golang_org\x\crypto\poly1305\sum_ref.go" />
+    <Compile Include="golang_org\x\crypto\internal\chacha20\chacha_generic.go" />
+    <Compile Include="golang_org\x\crypto\internal\chacha20\chacha_noasm.go" />
+    <Compile Include="golang_org\x\crypto\internal\chacha20\xor.go" />
+    <Compile Include="internal\cpu\cpu.go" />
+    <Compile Include="golang_org\x\net\http\httpproxy\proxy.go" />
+    <Compile Include="crypto\md5\md5block_elements.go" />
+    <Compile Include="internal\nettrace\nettrace.go" />
+    <Compile Include="crypto\cipher\xor_elements.go" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.targets" />
+</Project>
