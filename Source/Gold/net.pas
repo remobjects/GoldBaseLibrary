@@ -1,7 +1,9 @@
 ﻿// based on the golang sources
 namespace net;
 uses
+  {$IF ECHOES}
   System.Net.Sockets,
+  {$ENDIF}
   System.Linq,
   builtin;
 
