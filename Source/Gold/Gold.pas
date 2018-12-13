@@ -352,21 +352,23 @@ type
 
   method append<T>(sl: Slice<T>; elems: T): Slice<T>;
   begin
-    var lNew := new T[sl.Length + 1];
-    for i: Integer := 0 to sl.Length -1 do
+    var slc := if sl = nil then 0 else sl.Length;
+    var lNew := new T[slc + 1];
+    for i: Integer := 0 to slc -1 do
       lNew[i] := sl[i];
-      lNew[1 + sl.Length] := elems;
+      lNew[slc] := elems;
     exit lNew;
   end;
   method append<T>(sl: Slice<T>; a: T; params elems: array of T): Slice<T>;
   begin
     var c := if elems = nil then 0 else IList<T>(elems).Count;
-    var lNew := new T[sl.Length + c + 1];
-    for i: Integer := 0 to sl.Length -1 do
+    var slc := if sl = nil then 0 else sl.Length;
+    var lNew := new T[slc + c + 1];
+    for i: Integer := 0 to slc -1 do
       lNew[i] := sl[i];
-      lNew[sl.Length + 1] := a;
+      lNew[slc + 1] := a;
     for i: Integer := 0 to c -1 do
-      lNew[i + sl.Length + 1] := IList<T>(elems)[i];
+      lNew[i + slc + 1] := IList<T>(elems)[i];
     exit lNew;
   end;
 
@@ -375,23 +377,25 @@ type
     if elems is Slice<T> then
       exit appendSlice(sl, elems as Slice<T>);
     var c := if elems = nil then 0 else IList<T>(elems).Count;
-    var lNew := new T[sl.Length + c];
-    for i: Integer := 0 to sl.Length -1 do
+    var lNew := new T[(if sl = nil then 0 else sl.Length) + c];
+    var slc := if sl = nil then 0 else sl.Length;
+    for i: Integer := 0 to slc -1 do
       lNew[i] := sl[i];
     for i: Integer := 0 to c -1 do
-      lNew[i + sl.Length] := IList<T>(elems)[i];
+      lNew[i + slc] := IList<T>(elems)[i];
     exit lNew;
   end;
 
   method appendSlice<T>(sl, elems: Slice<T>): Slice<T>;
   begin
     var c := if elems = nil then 0 else elems.Length;
-    var lNew := new T[sl.Length + c];
-    for i: Integer := 0 to sl.Length -1 do
+    var slc := if sl = nil then 0 else sl.Length;
+    var lNew := new T[slc + c];
+    for i: Integer := 0 to slc -1 do
       lNew[i] := sl[i];
     for i: Integer := 0 to c -1 do
-      lNew[i + sl.Length] := elems[i];
-    exit lNew;
+      lNew[i + slc] := elems[i];
+    exit lNew; 
   end;
 
   method append(sl: Slice<byte>; elems: string): Slice<byte>;

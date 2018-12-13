@@ -73,10 +73,14 @@ end;
 
 type
   builtin.__Global = public partial class
+  private
+    class var dtbase : DateTime := new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+
     class method now(): tuple of (Int64, Int32, Int64); assembly;
     begin
-      raise new NotImplementedException;
-    end;
+      var q := DateTime.UtcNow - dtbase;
+      exit (Int64(q.TotalSeconds), (q.Ticks * 100) mod 1 000 000 000, System.Diagnostics.StopWatch.GetTimestamp  * 100);
+    end; 
 
   end;
 
