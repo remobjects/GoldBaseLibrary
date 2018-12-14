@@ -559,12 +559,16 @@ end;
 [ValueTypeSemantics]
 Process= public partial class
 public
-  Process: System.Diagnostics.Process;
+  Process: ProcessType;
   property Pid: Integer read Process.Id;
   method Kill: builtin.error;
   begin
     try
+      {$IF ISLAND}
+      Process.Stop;
+      {$ELSEIF ECHOES}
       Process.Kill;
+      {$ENDIF}
       exit nil;
     except
       on e: Exception do
@@ -586,7 +590,11 @@ public
   method Wait: tuple of (builtin.Reference<ProcessState>, builtin.error);
   begin
     try
+      {$IF ISLAND}
+      Process.WaitFor;
+      {$ELSEIF ECHOES}
       Process.WaitForExit;
+      {$ENDIF}
       exit (new ProcessState(Process), nil);
     except
       on e: Exception do
@@ -628,7 +636,11 @@ begin
     end;
   end;
   try
+    {$IF ISLAND}
+    exit (new Process(Process := ProcessType.Run(lPSI)), nil);
+    {$ELSEIF ECHOES}
     exit (new Process(Process := ProcessType.Start(lPSI)), nil);
+    {$ENDIF}
   except
     on e: Exception do
       exit (nil, errors.New(e.Message));
