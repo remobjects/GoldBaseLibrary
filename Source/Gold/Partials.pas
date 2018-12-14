@@ -155,7 +155,7 @@ type
   encoding.json.SyntaxError = public partial class(builtin.error);
   encoding.json.MarshalerError = public partial class(builtin.error);
   encoding.json.byIndex = public partial record(sort.Interface);
-  encoding.json.RawMessage = public partial record(encoding.json.Marshaler, encoding.json.Unmarshaler);
+  encoding.json.RawMessage = public partial record(:encoding.json.Marshaler, :encoding.json.Unmarshaler);
 
   image.color.NRGBA = public partial class(image.color.Color);
   image.color.RGBA = public partial class(image.color.Color);
@@ -271,8 +271,8 @@ type
   expvar.Map = public partial class(expvar.Var);
   expvar.Func = public partial record(expvar.Var);
 
-  encoding.binary.bigEndian = public partial class(encoding.binary.ByteOrder);
-  encoding.binary.littleEndian = public partial class(encoding.binary.ByteOrder);
+  encoding.binary.bigEndian = public partial class(:encoding.binary.ByteOrder);
+  encoding.binary.littleEndian = public partial class(:encoding.binary.ByteOrder);
   net.http.httpError = public partial class(builtin.error);
   net.http.http2ConnectionError = public partial record(builtin.error);
 
@@ -381,12 +381,12 @@ type
   net.http.globalOptionsHandler = public partial class(net.http.Handler);
 
   encoding.asn1.StructuralError = public partial class(builtin.error);
-  encoding.asn1.multiEncoder = public partial record(encoding.asn1.encoder);
-  encoding.asn1.bytesEncoder = public partial record(encoding.asn1.encoder);
-  encoding.asn1.oidEncoder = public partial record(encoding.asn1.encoder);
-  encoding.asn1.stringEncoder = public partial record(encoding.asn1.encoder);
-  encoding.asn1.bitStringEncoder = public partial record(encoding.asn1.encoder);
-  encoding.asn1.int64Encoder = public partial record(encoding.asn1.encoder);
+  encoding.asn1.multiEncoder = public partial record(:encoding.asn1.encoder);
+  encoding.asn1.bytesEncoder = public partial record(:encoding.asn1.encoder);
+  encoding.asn1.oidEncoder = public partial record(:encoding.asn1.encoder);
+  encoding.asn1.stringEncoder = public partial record(:encoding.asn1.encoder);
+  encoding.asn1.bitStringEncoder = public partial record(:encoding.asn1.encoder);
+  encoding.asn1.int64Encoder = public partial record(:encoding.asn1.encoder);
 
   fmt.stringReader = public partial record(io.Reader);
 
@@ -471,8 +471,8 @@ type
   net.http.fileTransport = public partial class(net.http.RoundTripper);
   net.http.Transport = public partial class(net.http.RoundTripper);
 
-  encoding.asn1.byteEncoder = public partial record(encoding.asn1.encoder);
-  encoding.asn1.taggedEncoder = public partial class(encoding.asn1.encoder);
+  encoding.asn1.byteEncoder = public partial record(:encoding.asn1.encoder);
+  encoding.asn1.taggedEncoder = public partial class(:encoding.asn1.encoder);
   encoding.pem.lineBreaker = public partial class(io.Writer);
 
 
