@@ -527,6 +527,7 @@
     <Compile Include="crypto\md5\md5block_elements.go" />
     <Compile Include="internal\nettrace\nettrace.go" />
     <Compile Include="crypto\cipher\xor_elements.go" />
+    <Compile Include="Complex.pas" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
