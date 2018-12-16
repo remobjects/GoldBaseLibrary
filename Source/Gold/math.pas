@@ -211,7 +211,7 @@ begin
   result := PlatformMath.Atan(x);
 end;
 
-method Atan2(y, x: float64): float64; public;
+method Atan2(y, x: float64): float64; public; // via https://en.wikipedia.org/wiki/Atan2
 begin
   if (x > 0) or (y ≠ 0) then begin
     result := 2 * Atan( y / (Sqrt(x*x + y*y) + x));
