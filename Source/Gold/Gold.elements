@@ -528,6 +528,20 @@
     <Compile Include="internal\nettrace\nettrace.go" />
     <Compile Include="crypto\cipher\xor_elements.go" />
     <Compile Include="Complex.pas" />
+    <Compile Include="math\cmplx\abs.go" />
+    <Compile Include="math\cmplx\asin.go" />
+    <Compile Include="math\cmplx\conj.go" />
+    <Compile Include="math\cmplx\exp.go" />
+    <Compile Include="math\cmplx\isinf.go" />
+    <Compile Include="math\cmplx\isnan.go" />
+    <Compile Include="math\cmplx\log.go" />
+    <Compile Include="math\cmplx\phase.go" />
+    <Compile Include="math\cmplx\polar.go" />
+    <Compile Include="math\cmplx\pow.go" />
+    <Compile Include="math\cmplx\rect.go" />
+    <Compile Include="math\cmplx\sin.go" />
+    <Compile Include="math\cmplx\sqrt.go" />
+    <Compile Include="math\cmplx\tan.go" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
