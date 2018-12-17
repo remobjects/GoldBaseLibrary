@@ -154,11 +154,19 @@ namespace os {
 	namespace exec {
 		public partial class __Global {
 			public static (string, builtin.error) LookPath(String file) {
+				#if ECHOES
 				if (System.IO.File.Exists(file)) return (file, null);
 				foreach (var el in os.Getenv("PATH").Split(System.IO.Path.PathSeparator)) {
 					var p = System.IO.Path.Combine(el, file);
 					if (System.IO.File.Exists(p)) return (p, null);
 				}
+				#else
+				if (new RemObjects.Elements.System.File(file).Exists()) return (file, null);
+				foreach (var el in os.Getenv("PATH").Split(Path.DirectorySeparatorChar)) {
+					var p = RemObjects.Elements.System.Path.Combine(el, file);
+					if (new RemObjects.Elements.System.File(p).Exists()) return (p, null);
+				}
+				#endif
 				return (null, errors.New("Could not find file"));
 			}
 			public static Reference<Cmd> Command(string name, params string[] args) {

@@ -50,7 +50,7 @@ type
     method Wait;
     begin
       {$IFDEF ISLAND}
-      fCond.Wait(fMutex.fMutex);
+      fCond.Wait(Mutex(fMutex).fMutex);
       {$ELSE}
       System.Threading.Monitor.Wait(Mutex(fMutex).fMutex);
       {$ENDIF}
