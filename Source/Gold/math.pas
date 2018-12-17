@@ -75,12 +75,12 @@ end;
 
 method Abs(v: Double): Double; public;
 begin
-  exit Math.Abs(v);
+  exit PlatformMath.Abs(v);
 end;
 
 method Sqrt(v: Double): Double; public; inline;
 begin
-  exit :Math.Sqrt(v);
+  exit PlatformMath.Sqrt(v);
 end;
 
 
@@ -113,27 +113,27 @@ end;
 
 method Log(x: Double): Double; public;
 begin
-  exit :Math.Log(x);
+  exit PlatformMath.Log(x);
 end;
 
 method Exp(x: Double): Double; public;
 begin
-  exit :Math.Exp(x);
+  exit PlatformMath.Exp(x);
 end;
 
 method Floor(x: Double): Double; public;
 begin
-  exit :Math.Floor(x);
+  exit PlatformMath.Floor(x);
 end;
 
 method Ceil(x: Double): Double; public;
 begin
-  exit :Math.Ceil(x);
+  exit PlatformMath.Ceiling(x);
 end;
 
 method Ldexp(frac: Double; aexp: Integer): Double; public;
 begin
-  exit Math.Pow(2, aexp) * frac;
+  exit PlatformMath.Pow(2, aexp) * frac;
 end;
 
 method Frexp(value: Double): tuple of (Double, Integer); public;
@@ -184,7 +184,7 @@ end;
 
 method Log2(d: Double): Double;
 begin
-  exit :System.Math.Log(d, 2);
+  exit PlatformMath.Log(d, 2);
 end;
 
 method Signbit(d: Double): Boolean;
@@ -246,12 +246,12 @@ end;
 
 method Pow(x, y: float64): float64; public; inline;
 begin
-  //result := x ** y; // E64 Type mismatch, cannot find operator to evaluate "float64" ** "float64"
+  result := x ** y; // E64 Type mismatch, cannot find operator to evaluate "float64" ** "float64"
 end;
 
 method Pow10(n: int): float64; public; inline;
 begin
-  //result := 10 ** n; // E64 Type mismatch, cannot find operator to evaluate "System.Int32" ** "builtin.int"
+  result := 10 ** n; // E64 Type mismatch, cannot find operator to evaluate "System.Int32" ** "builtin.int"
 end;
 
 method Sin(x: float64): float64; public; inline;

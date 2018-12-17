@@ -50,6 +50,9 @@
     <Reference Include="System.Core">
       <Target>Echoes</Target>
     </Reference>
+    <Reference Include="Echoes">
+      <Target>Echoes</Target>
+    </Reference>
     <Reference Include="rt">
       <Target>Cooper</Target>
     </Reference>
