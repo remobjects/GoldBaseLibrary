@@ -138,7 +138,11 @@ end;
 
 method Frexp(value: Double): tuple of (Double, Integer); public;
 begin
+  {$IF ISLAND}
+  var bits: int64 := Convert.ToInt64(value);
+  {$ELSEIF ECHOES}
   var bits: int64 := BitConverter.DoubleToInt64Bits(value);
+  {$ENDIF}
   var realMant: Double := 1.0;
   var exponent: Integer;
   var resmmantissa: Double;
@@ -184,7 +188,11 @@ end;
 
 method Log2(d: Double): Double;
 begin
+  {$IF ISLAND}
+  exit PlatformMath.Log2(d);
+  {$ELSEIF ECHOES}
   exit PlatformMath.Log(d, 2);
+  {$ENDIF}
 end;
 
 method Signbit(d: Double): Boolean;
@@ -246,12 +254,12 @@ end;
 
 method Pow(x, y: float64): float64; public; inline;
 begin
-  result := x ** y; // E64 Type mismatch, cannot find operator to evaluate "float64" ** "float64"
+  result := x ** y;
 end;
 
 method Pow10(n: int): float64; public; inline;
 begin
-  result := 10 ** n; // E64 Type mismatch, cannot find operator to evaluate "System.Int32" ** "builtin.int"
+  result := 10 ** n;
 end;
 
 method Sin(x: float64): float64; public; inline;

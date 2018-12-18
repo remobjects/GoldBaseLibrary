@@ -82,7 +82,7 @@ type
 
       {$IFDEF ISLAND}
       if IsVT  then
-        exit (typeOf(V).Instantiate as T, false);
+        exit (typeOf(V).Instantiate as V, false);
       {$ELSE}
       if IsVT then
         exit (Activator.CreateInstance<V>(), false);
@@ -395,7 +395,7 @@ type
       lNew[i] := sl[i];
     for i: Integer := 0 to c -1 do
       lNew[i + slc] := elems[i];
-    exit lNew; 
+    exit lNew;
   end;
 
   method append(sl: Slice<byte>; elems: string): Slice<byte>;
@@ -585,7 +585,7 @@ type
   operator Implicit(aVal: Slice<rune>): string; public;
   begin
   {$IF ISLAND}
-  exit string.FromCharArray(aVal.Select(a -> a.Value).ToArray());
+  exit string.FromCharArray(aVal.ToArray().Select(a -> a.Value).ToArray());
   {$ELSEIF ECHOES}
   exit new string(aVal.ToArray());
   {$ENDIF}
@@ -616,7 +616,11 @@ type
     public
       constructor(aVal: array of builtin.rune);
       begin
+        {$IF ISLAND}
+        exit string.FromCharArray(aVal.Select(a -> a.Value).ToArray());
+        {$ELSEIF ECHOES}
         exit new string(aVal.Select(a -> a.Value).ToArray());
+        {$ENDIF}
       end;
 
      method GoldIterate: sequence of tuple of (Integer, builtin.rune); iterator; public;

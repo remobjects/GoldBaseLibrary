@@ -1,5 +1,9 @@
 ﻿namespace os;
-{$IFDEF ECHOES}
+
+{$IF ISLAND}
+uses
+  RemObjects.Elements.System;
+{$ELSEIF ECHOES}
 uses
   System.IO, System.Diagnostics, System.Linq;
 {$ENDIF}
@@ -357,9 +361,12 @@ method &OpenFile(name: string; aFlags: Integer; perm: FileMode): tuple of (File,
 begin
   try
     {$IF ISLAND}
-
-    {$ERROR FIX THIS}
-    exit (new File(fs := new FileStream(name, RemObjects.Elements.System.FileMode.Open, FileAccess.Read), path := name), nil);
+    var lCreate := if (O_CREATE and aFlags) <> 0 then (if (O_EXCL and aFlags) <> 0 then RemObjects.Elements.System.FileMode.CreateNew else RemObjects.Elements.System.FileMode.Create) else
+      if( O_APPEND and aFlags) <> 0 then RemObjects.Elements.System.FileMode.Open else RemObjects.Elements.System.FileMode.Truncate;
+    var lAccess :=
+    if (O_RDONLY and aFlags) <> 0 then RemObjects.Elements.System.FileAccess.Read else
+      if (O_WRONLY and aFlags) <> 0 then RemObjects.Elements.System.FileAccess.Write else RemObjects.Elements.System.FileAccess.ReadWrite;
+    exit (new File(fs := new FileStream(name, lCreate, lAccess), path := name), nil);
     {$ELSEIF ECHOES}
     var lCreate := if (O_CREATE and aFlags) <> 0 then (if (O_EXCL and aFlags) <> 0 then System.IO.FileMode.CreateNew else System.IO.FileMode.Create) else
       if( O_APPEND and aFlags) <>0 then System.IO.FileMode.Append else System.IO.FileMode.Open;
@@ -509,9 +516,13 @@ type
 
     class method TempFile(dir, pattern: String): tuple of (builtin.Reference<os.File>, builtin.error);
     begin
+      {$IF ISLAND}
+      // TODO
+      {$ELSEIF ECHOES}
       if String.IsNullOrEmpty(dir) then
         dir := Path.GetTempPath;
       exit (new builtin.Reference<os.File>(new os.File(fs := System.IO.File.Create(System.IO.Path.GetTempFileName))), nil);
+      {$ENDIF}
     end;
 
     class method NopCloser(r: io.Reader): io.ReadCloser;
@@ -578,7 +589,11 @@ public
 
   method Release: builtin.error;
   begin
+    {$IF ISLAND}
+    // TODO
+    {$ELSEIF ECHOES}
     Process.Dispose;
+    {$ENDIF}
     exit nil;
   end;
 
@@ -612,6 +627,9 @@ end;
 
 method IntStartProcess(name: string; argv: builtin.Slice<string>; attr: builtin.Reference<ProcAttr>): tuple of (Reference<Process>, builtin.error);
 begin
+  {$IF ISLAND}
+  // TODO
+  {$ELSEIF ECHOES}
   var lPSI := new System.Diagnostics.ProcessStartInfo(name);
   if argv <> nil then begin
     for each el in argv do
@@ -629,8 +647,13 @@ begin
         lPSI.WorkingDirectory := p.Dir;
       if p.Env <> nil then
         for each el in p.Env do begin
+          {$IF ISLAND}
+          var n := el.Item2.Split('=');
+          if n.Length < 2 then continue;
+          {$ELSEIF ECHOES}
           var n := el.Item2.Split(['='], 2);
           if n.Length <> 2 then continue;
+          {$ENDIF}
           lPSI.EnvironmentVariables.Add(n[0], n[1]);
         end;
     end;
@@ -645,6 +668,7 @@ begin
     on e: Exception do
       exit (nil, errors.New(e.Message));
   end;
+  {$ENDIF}
 end;
 
 method StartProcess(name: string; argv: builtin.Slice<string>; attr: builtin.Reference<ProcAttr>): tuple of (Reference<Process>, builtin.error);
@@ -655,7 +679,11 @@ end;
 method FindProcess(pid: Integer): tuple of (builtin.Reference<Process>, builtin.error);
 begin
   try
+    {$IF ISLAND}
+    var p: ProcessType := nil; // TODO
+    {$ELSEIF ECHOES}
     var p := ProcessType.GetProcessById(pid);
+    {$ENDIF}
     if p = nil then
       exit (nil, errors.New('No such process'));;
     exit (new Process(Process := p), nil);
