@@ -254,12 +254,12 @@ end;
 
 method Pow(x, y: float64): float64; public; inline;
 begin
-  result := x ** y; // E64 Type mismatch, cannot find operator to evaluate "float64" ** "float64"
+  result := x ** y;
 end;
 
 method Pow10(n: int): float64; public; inline;
 begin
-  result := 10 ** n; // E64 Type mismatch, cannot find operator to evaluate "System.Int32" ** "builtin.int"
+  result := 10 ** n;
 end;
 
 method Sin(x: float64): float64; public; inline;
