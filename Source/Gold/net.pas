@@ -1,7 +1,10 @@
 ﻿// based on the golang sources
 namespace net;
 uses
-  {$IF ECHOES}
+  {$IF ISLAND}
+  RemObjects.Elements.System,
+  {$ELSEIF ECHOES}
+  System.Net,
   System.Net.Sockets,
   {$ENDIF}
   System.Linq,
@@ -12,7 +15,9 @@ type
   public
     method probe;
     begin
-
+      {$IF ISLAND}
+      // TODO
+      {$ELSEIF ECHOES}
       var a := System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
       for i: Integer := 0 to a.Length -1 do begin
         if a[i].AddressFamily = :System.Net.Sockets.AddressFamily.InterNetworkV6 then
@@ -20,6 +25,7 @@ type
         if a[i].AddressFamily = :System.Net.Sockets.AddressFamily.InterNetwork then
           ipv4Enabled := true;
       end;
+      {$ENDIF}
     end;
   end;
   [AliasSemantics]
@@ -319,6 +325,9 @@ type
 
   method LookupIP(host: string): tuple of (Slice<IP>, builtin.error);
   begin
+    {$IF ISLAND}
+    // TODO
+    {$ELSEIF ECHOES}
     try
       var h := System.Net.DNS.GetHostEntry(host);
       if h.AddressList.Length = 0 then exit (nil, new DNSError('Empty address list', host, nil, false, false));
@@ -327,6 +336,7 @@ type
       on e: Exception do
         exit (nil, new DNSError(e.Message, host, nil, false, false));
     end;
+    {$ENDIF}
   end;
 type
 Listener = public interface
@@ -381,7 +391,7 @@ type
 
     method Addr: Addr;
     begin
-      var lAddr := System.Net.IPEndPoint(fSock.LocalEndPoint);
+      var lAddr := IPEndPoint(fSock.LocalEndPoint);
 
       exit new TCPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
     end;
@@ -473,7 +483,7 @@ type
 
     method LocalAddr: Addr;
     begin
-      var lAddr := System.Net.IPEndPoint(fSock.LocalEndPoint);
+      var lAddr := IPEndPoint(fSock.LocalEndPoint);
       if fSock.SocketType = SocketType.Stream then
       exit new TCPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
       exit new UDPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
@@ -481,7 +491,7 @@ type
 
     method RemoteAddr: Addr;
     begin
-      var lAddr := System.Net.IPEndPoint(fSock.RemoteEndPoint);
+      var lAddr := IPEndPoint(fSock.RemoteEndPoint);
 
       if fSock.SocketType = SocketType.Stream then
         exit new TCPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
@@ -496,19 +506,26 @@ type
 
     method SetReadDeadline(tt: time.Time): builtin.error;
     begin
+      {$IF ISLAND}
+      // TODO
+      {$ELSEIF ECHOES}
       if tt = nil then
         fSock.ReceiveTimeout := 0
       else
         fSock.ReceiveTimeout := tt.Nanosecond() / 1000;
-
+      {$ENDIF}
     end;
 
     method SetWriteDeadline(t: time.Time): builtin.error;
     begin
+      {$IF ISLAND}
+      // TODO
+      {$ELSEIF ECHOES}
       if t = nil then
         fSock.SendTimeout := 0
       else
         fSock.SendTimeout := t.Nanosecond() / 1000;
+      {$ENDIF}
     end;
 
     method Close: builtin.error;
@@ -529,10 +546,14 @@ type
     method ReadFrom(b: Slice<byte>): tuple of  (int, Addr, builtin.error);
     begin
       try
-        var ep: System.Net.EndPoint;
+        var ep: EndPoint;
+        {$IF ISLAND}
+        var n := 0; // TODO
+        {$ELSEIF ECHOES}
         var n := fSock.Receivefrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
+        {$ENDIF}
         var a: Addr;
-        var lAddr := System.Net.IPEndPoint(ep);
+        var lAddr := IPEndPoint(ep);
         if fSock.SocketType = SocketType.Stream then
           a := new TCPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
         a := new UDPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
@@ -546,10 +567,14 @@ type
     method ReadFromUDP(b: Slice<byte>): tuple of  (int, Reference<UDPAddr>, builtin.error);
     begin
       try
-        var ep: System.Net.EndPoint;
+        var ep: EndPoint;
+        {$IF ISLAND}
+        var n := 0; // TODO
+        {$ELSEIF ECHOES}
         var n := fSock.Receivefrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
+        {$ENDIF}
         var a: UDPAddr;
-        var lAddr := System.Net.IPEndPoint(ep);
+        var lAddr := IPEndPoint(ep);
         a := new UDPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
 
         exit (n, a, nil);
@@ -562,10 +587,14 @@ type
     method ReadFromIP(b: Slice<byte>): tuple of  (int, Reference<IPAddr>, builtin.error);
     begin
       try
-        var ep: System.Net.EndPoint;
+        var ep: EndPoint;
+        {$IF ISLAND}
+        var n := 0; // TODO
+        {$ELSEIF ECHOES}
         var n := fSock.Receivefrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
+        {$ENDIF}
         var a: IPAddr;
-        var lAddr := System.Net.IPEndPoint(ep);
+        var lAddr := IPEndPoint(ep);
         a := new IPAddr(IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
 
         exit (n, a, nil);
@@ -577,7 +606,11 @@ type
     method SetReadBuffer(bytes: int):  builtin.error;
     begin
       try
+        {$IF ISLAND}
+        // TODO
+        {$ELSEIF ECHOES}
         fSock.ReceiveBufferSize := bytes;
+        {$ENDIF}
       except
         on e: Exception do
           exit Errors.new(e.Message);
@@ -586,7 +619,11 @@ type
     method SetWriteBuffer(bytes: int):  builtin.error;
     begin
       try
+        {$IF ISLAND}
+        // TODO
+        {$ELSEIF ECHOES}
         fSock.SendBufferSize := bytes;
+        {$ENDIF}
       except
         on e: Exception do
           exit Errors.new(e.Message);
@@ -658,10 +695,14 @@ type
     begin
       try
         var lAddr := UDPAddr(addr);
-        var rep := new System.Net.IPEndPoint(
-        new System.Net.IPAddress(lAddr.IP.Value.fArray),
+        var rep := new IPEndPoint(
+        new IPAddress(lAddr.IP.Value.fArray),
         lAddr.Port);
+        {$IF ISLAND}
+        // TODO
+        {$ELSEIF ECHOES}
         fSock.SendTo(b.fArray, b.fStart, b.fCount, SocketFlags.None, rep);
+        {$ENDIF}
         exit (b.fCount, nil);
       except
         on e: Exception do
@@ -693,6 +734,9 @@ end;
 method Listen(network, address: string): tuple of (Listener, builtin.error);
 begin
   try
+    {$IF ISLAND}
+    // TODO
+    {$ELSEIF ECHOES}
     var s: Socket;
     var p := ParseAddress(address);
     if string.IsNullOrempty(p[0]) then
@@ -701,14 +745,14 @@ begin
 
     case network of
       'tcp': begin
-          if addr.AddressList[0].AddressFamily = System.Net.Sockets.AddressFamily.InterNetworkV6 then goto ipv6;
+          if addr.AddressList[0].AddressFamily = AddressFamily.InterNetworkV6 then goto ipv6;
           goto ipv4;
         end;
       'tcp4':
       begin
         ipv4:;
         s := new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        s.Bind(new System.Net.IPEndPoint(addr.AddressList[0], p[1]));
+        s.Bind(new IPEndPoint(addr.AddressList[0], p[1]));
         s.Listen(10);
       end;
 
@@ -716,12 +760,13 @@ begin
       begin
         ipv6:;
         s := new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-        s.Bind(new System.Net.IPEndPoint(addr.AddressList[0], p[1]));
+        s.Bind(new IPEndPoint(addr.AddressList[0], p[1]));
         s.Listen(10);
       end;
     else exit (nil, Errors.new('only tcp, tcp4 and tcp6 supported'));
     end;
     exit (new TCPListener(s), nil);
+    {$ENDIF}
   except
   on e: Exception do
     exit (nil, Errors.new(e.Message));
@@ -794,15 +839,20 @@ type
 
     method DialContext(ctx: context.Context; network, address: string): tuple of (Conn, builtin.error);
     begin
+      {$IF ISLAND}
+      var p := address.Split(':');
+      if p.Length < 2 then exit (nil, Errors.new('Port missing; address/ip:port'));
+      {$ELSEIF ECHOES}
       var p := address.Split([':'], 2);
       if p.Length <> 2 then exit (nil, Errors.new('Port missing; address/ip:port'));
+      {$ENDIF}
       try
         var lPort := coalesce(Reference<Resolver>.Get(self.Resolver), net.Resolver.Default).LookupPort(ctx, network, p[1]);
         if lPort.Item2 <> nil then exit (nil, lPort.Item2);
         var lHost := coalesce(Reference<Resolver>.Get(self.Resolver), net.Resolver.Default).LookupIPAddr(ctx, p[0]);
         if lHost.Item2 <> nil then exit (Nil, lPort.Item2);
 
-        var lRep: System.Net.IPEndPoint;
+        var lRep: IPEndPoint;
         var lAF: AddressFamily;
         var lST: SocketType;
         //new Socket(
@@ -812,13 +862,13 @@ type
         case network of
           'tcp4': begin
               tcp4:;
-              lRep := new System.Net.IPEndPoint(new System.Net.IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 <> nil).Item2.IP.To4.Value.fArray), lPort[0]);
+              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 <> nil).Item2.IP.To4.Value.fArray), lPort[0]);
               lAF := AddressFamily.InterNetwork;
               lST := SocketType.Stream;
             end;
           'tcp6': begin
               tcp6:;
-              lRep := new System.Net.IPEndPoint(new System.Net.IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 = nil).Item2.IP.Value.fArray), lPort[0]);
+              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 = nil).Item2.IP.Value.fArray), lPort[0]);
               lAF := AddressFamily.InterNetworkV6;
               lST := SocketType.Stream;
             end;
@@ -828,13 +878,13 @@ type
           end;
           'udp4': begin
               udp4:;
-              lRep := new System.Net.IPEndPoint(new System.Net.IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 <> nil).Item2.IP.To4.Value.fArray), lPort[0]);
+              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 <> nil).Item2.IP.To4.Value.fArray), lPort[0]);
               lAF := AddressFamily.InterNetwork;
               lST := SocketType.Dgram;
           end;
           'ud6': begin
               udp6:;
-              lRep := new System.Net.IPEndPoint(new System.Net.IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 = nil).Item2.IP.Value.fArray), lPort[0]);
+              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 = nil).Item2.IP.Value.fArray), lPort[0]);
               lAF := AddressFamily.InterNetworkV6;
               lST := SocketType.Dgram;
           end;
@@ -883,9 +933,13 @@ type
     method LookupIPAddr(ctx: context.Context; host: string): tuple of (Slice<IPAddr>, builtin.error);
     begin
       try
+        {$IF ISLAND}
+        // TODO
+        {$ELSEIF ECHOES}
         var h := System.Net.DNS.GetHostEntry(host);
         if h.AddressList.Length = 0 then exit (nil, new DNSError('Empty address list', host, nil, false, false));
         exit (new Slice<IPAddr>(h.AddressList.Select(a -> new IPAddr(IP := new IP(a.GetAddressBytes))).ToArray), nil);
+        {$ENDIF}
       except
         on e: Exception do
           exit (nil, new DNSError(e.Message, host, nil, false, false));
