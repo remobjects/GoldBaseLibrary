@@ -95,7 +95,7 @@ type
   public
     const CacheLinePadSize = 32;
 
-    class method doinit(); private;
+    class method doinit(); assembly;
     begin
 
     end;
