@@ -15,17 +15,13 @@ type
   public
     method probe;
     begin
-      {$IF ISLAND}
-      // TODO
-      {$ELSEIF ECHOES}
-      var a := System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
+      var a := Dns.GetHostAddresses(Dns.GetHostName());
       for i: Integer := 0 to a.Length -1 do begin
-        if a[i].AddressFamily = :System.Net.Sockets.AddressFamily.InterNetworkV6 then
+        if a[i].AddressFamily = AddressFamily.InterNetworkV6 then
           ipv6Enabled := true;
-        if a[i].AddressFamily = :System.Net.Sockets.AddressFamily.InterNetwork then
+        if a[i].AddressFamily = AddressFamily.InterNetwork then
           ipv4Enabled := true;
       end;
-      {$ENDIF}
     end;
   end;
   [AliasSemantics]
@@ -325,18 +321,14 @@ type
 
   method LookupIP(host: string): tuple of (Slice<IP>, builtin.error);
   begin
-    {$IF ISLAND}
-    // TODO
-    {$ELSEIF ECHOES}
     try
-      var h := System.Net.DNS.GetHostEntry(host);
+      var h := Dns.GetHostEntry(host);
       if h.AddressList.Length = 0 then exit (nil, new DNSError('Empty address list', host, nil, false, false));
       exit (new Slice<IP>(h.AddressList.Select(a -> new IP(a.GetAddressBytes)).ToArray), nil);
     except
       on e: Exception do
         exit (nil, new DNSError(e.Message, host, nil, false, false));
     end;
-    {$ENDIF}
   end;
 type
 Listener = public interface
@@ -734,14 +726,11 @@ end;
 method Listen(network, address: string): tuple of (Listener, builtin.error);
 begin
   try
-    {$IF ISLAND}
-    // TODO
-    {$ELSEIF ECHOES}
     var s: Socket;
     var p := ParseAddress(address);
     if string.IsNullOrempty(p[0]) then
       p := ('0.0.0.0', p[1]);
-    var addr := System.Net.Dns.GetHostEntry (p[0]);
+    var addr := Dns.GetHostEntry (p[0]);
 
     case network of
       'tcp': begin
@@ -766,7 +755,6 @@ begin
     else exit (nil, Errors.new('only tcp, tcp4 and tcp6 supported'));
     end;
     exit (new TCPListener(s), nil);
-    {$ENDIF}
   except
   on e: Exception do
     exit (nil, Errors.new(e.Message));
@@ -933,13 +921,9 @@ type
     method LookupIPAddr(ctx: context.Context; host: string): tuple of (Slice<IPAddr>, builtin.error);
     begin
       try
-        {$IF ISLAND}
-        // TODO
-        {$ELSEIF ECHOES}
-        var h := System.Net.DNS.GetHostEntry(host);
+        var h := Dns.GetHostEntry(host);
         if h.AddressList.Length = 0 then exit (nil, new DNSError('Empty address list', host, nil, false, false));
         exit (new Slice<IPAddr>(h.AddressList.Select(a -> new IPAddr(IP := new IP(a.GetAddressBytes))).ToArray), nil);
-        {$ENDIF}
       except
         on e: Exception do
           exit (nil, new DNSError(e.Message, host, nil, false, false));
