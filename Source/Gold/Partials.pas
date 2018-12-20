@@ -537,4 +537,5 @@ type
   net.http.tlsHandshakeTimeoutError = public partial class(builtin.error);
   crypto.tls.timeoutError = public partial class(builtin.error);
   expvar.String = public partial class(expvar.Var);
+  time.Time = public partial class(fmt.Stringer);
 end.
