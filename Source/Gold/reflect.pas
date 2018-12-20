@@ -288,7 +288,7 @@ type
 
     method NumField: Integer;
     begin
-      raise new NotImplementedException;
+      result := fType.NumField;
     end;
 
     method NumMethod: Integer;
@@ -298,7 +298,12 @@ type
 
     method Field(i: Integer): Value;
     begin
+      {$IF ISLAND}
       raise new NotImplementedException;
+      {$ELSEIF ECHOES}
+      var lFields := TypeImpl(fType).fRealType.GetFields();
+      result := new Value(lFields[i].GetValue(fValue));
+      {$ENDIF}
     end;
 
     method CanAddr: Boolean;
@@ -599,6 +604,7 @@ type
         TypeCode.Double: result := reflect.Float64;
         TypeCode.String: result := reflect.String;
         TypeCode.Char: result := reflect.Uint16;
+        TypeCode.Object: result := reflect.Struct;
         TypeCode.Empty: result := reflect.Invalid;
       end;
       {$ENDIF}
