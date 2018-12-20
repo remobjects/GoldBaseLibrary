@@ -538,4 +538,5 @@ type
   crypto.tls.timeoutError = public partial class(builtin.error);
   expvar.String = public partial class(expvar.Var);
   time.Time = public partial class(fmt.Stringer);
+  math.rand.rngSource = public partial class(:math.rand.Source, :math.rand.Source64);
 end.

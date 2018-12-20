@@ -451,9 +451,9 @@
     <Compile Include="math\big\sqrt.go" />
     <Compile Include="math\rand\exp.go" />
     <None Include="math\rand\gen_cooked.go" />
+    <Compile Include="math\rand\a_renamed_rng.go" />
     <Compile Include="math\rand\normal.go" />
     <Compile Include="math\rand\rand.go" />
-    <Compile Include="math\rand\rng.go" />
     <Compile Include="math\rand\zipf.go" />
     <Compile Include="encoding\asn1\asn1.go" />
     <Compile Include="encoding\asn1\common.go" />
