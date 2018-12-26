@@ -499,7 +499,7 @@ type
     method SetReadDeadline(tt: time.Time): builtin.error;
     begin
       {$IF ISLAND}
-      // TODO
+      fSock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, tt.Nanosecond() / 1000);
       {$ELSEIF ECHOES}
       if tt = nil then
         fSock.ReceiveTimeout := 0
@@ -511,7 +511,7 @@ type
     method SetWriteDeadline(t: time.Time): builtin.error;
     begin
       {$IF ISLAND}
-      // TODO
+      fSock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, t.Nanosecond() / 1000);
       {$ELSEIF ECHOES}
       if t = nil then
         fSock.SendTimeout := 0
@@ -539,11 +539,7 @@ type
     begin
       try
         var ep: EndPoint;
-        {$IF ISLAND}
-        var n := 0; // TODO
-        {$ELSEIF ECHOES}
         var n := fSock.Receivefrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
-        {$ENDIF}
         var a: Addr;
         var lAddr := IPEndPoint(ep);
         if fSock.SocketType = SocketType.Stream then
@@ -560,11 +556,7 @@ type
     begin
       try
         var ep: EndPoint;
-        {$IF ISLAND}
-        var n := 0; // TODO
-        {$ELSEIF ECHOES}
         var n := fSock.Receivefrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
-        {$ENDIF}
         var a: UDPAddr;
         var lAddr := IPEndPoint(ep);
         a := new UDPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
@@ -580,11 +572,7 @@ type
     begin
       try
         var ep: EndPoint;
-        {$IF ISLAND}
-        var n := 0; // TODO
-        {$ELSEIF ECHOES}
         var n := fSock.Receivefrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
-        {$ENDIF}
         var a: IPAddr;
         var lAddr := IPEndPoint(ep);
         a := new IPAddr(IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
@@ -599,7 +587,7 @@ type
     begin
       try
         {$IF ISLAND}
-        // TODO
+        fSock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, bytes);
         {$ELSEIF ECHOES}
         fSock.ReceiveBufferSize := bytes;
         {$ENDIF}
@@ -612,7 +600,7 @@ type
     begin
       try
         {$IF ISLAND}
-        // TODO
+        fSock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendBuffer, bytes);
         {$ELSEIF ECHOES}
         fSock.SendBufferSize := bytes;
         {$ENDIF}
@@ -690,11 +678,7 @@ type
         var rep := new IPEndPoint(
         new IPAddress(lAddr.IP.Value.fArray),
         lAddr.Port);
-        {$IF ISLAND}
-        // TODO
-        {$ELSEIF ECHOES}
         fSock.SendTo(b.fArray, b.fStart, b.fCount, SocketFlags.None, rep);
-        {$ENDIF}
         exit (b.fCount, nil);
       except
         on e: Exception do
