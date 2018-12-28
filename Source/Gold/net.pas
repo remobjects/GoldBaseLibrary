@@ -749,6 +749,10 @@ type
   [ValueTypeSemantics]
   Dialer = public partial class
   public
+    constructor;
+    begin
+      self.Resolver := Resolver.Default;
+    end;
     // Timeout is the maximum amount of time a dial will wait for
     // a connect to complete. If Deadline is also set, it may fail
     // earlier.
@@ -834,34 +838,34 @@ type
         case network of
           'tcp4': begin
               tcp4:;
-              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 <> nil).Item2.IP.To4.Value.fArray), lPort[0]);
+              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4.Value <> nil).Item2.IP.To4.Value.fArray), lPort[0]);
               lAF := AddressFamily.InterNetwork;
               lST := SocketType.Stream;
             end;
           'tcp6': begin
               tcp6:;
-              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 = nil).Item2.IP.Value.fArray), lPort[0]);
+              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4.Value = nil).Item2.IP.Value.fArray), lPort[0]);
               lAF := AddressFamily.InterNetworkV6;
               lST := SocketType.Stream;
             end;
           'tcp': begin
-              if lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 <> nil) <> nil then goto tcp4;
+              if lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4.Value <> nil) <> nil then goto tcp4;
               goto tcp6;
           end;
           'udp4': begin
               udp4:;
-              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 <> nil).Item2.IP.To4.Value.fArray), lPort[0]);
+              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4.Value <> nil).Item2.IP.To4.Value.fArray), lPort[0]);
               lAF := AddressFamily.InterNetwork;
               lST := SocketType.Dgram;
           end;
           'ud6': begin
               udp6:;
-              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 = nil).Item2.IP.Value.fArray), lPort[0]);
+              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4.Value = nil).Item2.IP.Value.fArray), lPort[0]);
               lAF := AddressFamily.InterNetworkV6;
               lST := SocketType.Dgram;
           end;
           'udp': begin
-              if lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4 <> nil) <> nil then goto udp4;
+              if lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4.Value <> nil) <> nil then goto udp4;
               goto udp6;
           end;
         else
