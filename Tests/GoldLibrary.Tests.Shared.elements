@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1824FBA3-631E-4E54-9D33-4D90DD808F6D}</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>GoldLibrary.Tests.Shared</RootNamespace>
+  </PropertyGroup>
+  <Import Project="GoldLibrary.Tests.Shared.projitems" Label="Shared" />
+  <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.SharedProject.targets" />
+  <PropertyGroup>
+    <PreBuildEvent />
+  </PropertyGroup>
+</Project>
