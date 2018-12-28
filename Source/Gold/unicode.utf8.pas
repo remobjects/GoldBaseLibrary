@@ -1,7 +1,7 @@
 ﻿namespace unicode.utf8;
 
 const
-        RuneError: Char = #$FFFD;
+        RuneError: builtin.rune = #$FFFD;
         RuneSelf  = $80      ;
         MaxRune   = $10FFFF;
         UTFMax    = 4       ;
@@ -75,7 +75,7 @@ var acceptRanges: array of array of Integer :=[
 
 method DecodeRuneInString(n: builtin.string): tuple of (builtin.rune, Integer);public;
 begin
-  exit (n[0], 8);
+  exit (new builtin.rune(Value := Integer(n[0])), 8);
 end;
 
 method ValidString(n: builtin.string): Boolean;public;
@@ -137,10 +137,10 @@ begin
   exit false;
 end;
 
-method DecodeLastRuneInString(p: String): tuple of (Char, Integer); public;
+method DecodeLastRuneInString(p: String): tuple of (builtin.rune, Integer); public;
 begin
   if length(p) < 1 then exit (RuneError, 0);
-  exit (p[p.Length-1], 1);
+  exit (Integer(p[p.Length-1]), 1);
 end;
 
 method DecodeRune(p: builtin.Slice<Byte>): tuple of (builtin.rune, Integer); public;
@@ -162,7 +162,7 @@ begin
 
     var mask := Integer(x) shl 31 shr 31; // Create 0x0000 or 0xFFFF.
 
-    exit (Char((Integer(p[0]) and not mask) or (Integer(RuneError) and mask)), 1);
+    exit (((Integer(p[0]) and not mask) or (Integer(RuneError) and mask)), 1);
 
   end;
 
@@ -183,7 +183,7 @@ begin
   end;
 
   if( sz = 2) then begin
-    exit (Char((Integer(p0 and mask2) shl 6) or Integer(b1 and maskx)), 2);
+    exit (((Integer(p0 and mask2) shl 6) or Integer(b1 and maskx)), 2);
   end;
 
   var b2 := p[2];
@@ -194,7 +194,7 @@ begin
 
   if (sz = 3) then begin
 
-    exit (Char((Integer(p0 and mask3) shl 12) or (Integer(b1 and maskx)shl 6) or Integer(b2 and maskx)), 3);
+    exit (((Integer(p0 and mask3) shl 12) or (Integer(b1 and maskx)shl 6) or Integer(b2 and maskx)), 3);
   end;
 
   var b3 := p[3];
@@ -203,7 +203,7 @@ begin
     exit (RuneError, 1)
   end;
 
-  exit (Char(((Integer(p0 and mask4)shl 18) or (Integer(b1 and maskx)shl 12) or (Integer(b2 and maskx)shl 6) or Integer(b3 and maskx))), 4)
+  exit ((((Integer(p0 and mask4)shl 18) or (Integer(b1 and maskx)shl 12) or (Integer(b2 and maskx)shl 6) or Integer(b3 and maskx))), 4)
 end;
 
 method RuneCountInString(v: String): Integer; public;
@@ -270,14 +270,14 @@ method RuneStart(b: Byte): Boolean; public; begin exit (b and $C0) <> $80; end;
 // An encoding is invalid if it is incorrect UTF-8, encodes a rune that is
 // out of range, or is not the shortest possible UTF-8 encoding for the
 // value. No other validation is performed.
-method  DecodeLastRune(p: builtin.Slice<Byte>): tuple of (Char, Integer); public;
+method  DecodeLastRune(p: builtin.Slice<Byte>): tuple of (builtin.rune, Integer); public;
 begin
   var lend := p.Length;
   if lend = 0 then begin;
     exit ( RuneError, 0)
   end;
   var start := lend - 1;
-  var r := Char(p[start]);
+  var r := (p[start]);
   if r < RuneSelf then begin
     exit (r, 1);
   end;

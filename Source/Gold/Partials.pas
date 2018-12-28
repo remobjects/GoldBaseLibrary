@@ -289,11 +289,11 @@ type
   public
     class operator Implicit(c: Char): builtin.rune;
     begin
-      exit new builtin.rune(Value := c);
+      exit new builtin.rune(Value := Integer(c));
     end;
     class operator Implicit(c: Int32): builtin.rune;
     begin
-      exit new builtin.rune(Value := Char(c));
+      exit new builtin.rune(Value := c);
     end;
 
     class operator Implicit(c: builtin.rune): Int32;

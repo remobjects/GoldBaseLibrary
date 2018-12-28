@@ -617,9 +617,9 @@ type
       constructor(aVal: array of builtin.rune);
       begin
         {$IF ISLAND}
-        exit string.FromCharArray(aVal.Select(a -> a.Value).ToArray());
+        exit string.FromCharArray(aVal.Select(a -> RemObjects.Elements.System.Char(a.Value)).ToArray());
         {$ELSEIF ECHOES}
-        exit new string(aVal.Select(a -> a.Value).ToArray());
+        exit new string(aVal.Select(a -> :System.Char(a.Value)).ToArray());
         {$ENDIF}
       end;
 

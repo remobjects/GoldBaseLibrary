@@ -28,7 +28,7 @@ type
   [AliasSemantics]
   rune = public partial record
   public
-    Value: Char;
+    Value: Integer;
   end;
   string = public RemObjects.Elements.System.String;
 
