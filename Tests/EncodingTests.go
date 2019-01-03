@@ -18,16 +18,14 @@ func DoDecodeBase64() string {
 	return string(sDec)
 }
 
-var LittleEndian encoding.binary.littleEndian
-
-func BinaryRead() float64 {
+func DoBinaryRead() float64 {
 	var pi float64
 	b := []byte{0x18, 0x2d, 0x44, 0x54, 0xfb, 0x21, 0x09, 0x40}
 	buf := bytes.NewReader(b)
-	err := binary.Read(buf, LittleEndian, &pi)
+	err := binary.Read(buf, binary.LittleEndian, &pi)
 	if err != nil {
 		fmt.Println("binary.Read failed:", err)
 	}
-	//fmt.Print(pi)
+	fmt.Print(pi)
 	return pi
 }

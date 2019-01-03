@@ -333,8 +333,14 @@ type
 
     method Elem: Value;
     begin
-      if fValue is builtin.Reference<Object> then
-        exit new Value(builtin.Reference<Object>.Get(builtin.Reference<Object>(fValue)), fType);
+      if fValue is builtin.Reference<Object> then begin
+        var lType := TypeImpl(fType).RealType;
+        var lRealType: PlatformType;
+        {$IF ECHOES}
+        lRealType := lType.GenericTypeArguments[0];
+        {$ENDIF}
+        exit new Value(builtin.IReference(fValue).Get, new TypeImpl(lRealType));
+      end;
       raise new NotSupportedException;
     end;
 
@@ -587,7 +593,9 @@ type
       if fRealType.IsInterface then
         exit reflect.Interface;
 
-      if fRealType.IsPointer then
+      //if fRealType.IsPointer then
+      //if fRealType is builtin.Reference<Object> then
+      if fRealType.GenericTypeArguments.Length > 0 then
         exit reflect.Ptr;
 
       case System.Type.GetTypeCode(fRealType) of
