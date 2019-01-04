@@ -14,7 +14,7 @@ type
 
     method BinaryReadTest;
     begin
-      Assert.AreEqual(TestApplication2.DoBinaryRead(), 3.141592654);
+      Assert.AreEqual(TestApplication2.DoBinaryRead(), 3.141592653589793);
     end;
   end;
 
