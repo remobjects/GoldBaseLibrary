@@ -50,6 +50,7 @@ type
   assembly
     fValue: Object;
     fType: &Type;
+    fPtr: Object;
   public
     constructor;
     begin
@@ -63,6 +64,13 @@ type
         fType := aType
       else
         fType := TypeOf(aValue);
+      fPtr := aValue;
+    end;
+
+    constructor(aValue: Object; aType: &Type; aPtr: Object);
+    begin
+      constructor(aValue, aType);
+      fPtr := aPtr;
     end;
 
     method String: String;
@@ -147,9 +155,8 @@ type
       if not CanSet or not fType.AssignableTo(TypeOf(aVal)) then
         raise new Exception('Can not set object');
 
-      builtin.Reference<Object>.Set(fValue, aVal);
+      builtin.IReference(fPtr).Set(aVal);
     end;
-
 
     method CanInterface(): Boolean;
     begin
@@ -216,7 +223,7 @@ type
       if (not CanSet) or not (Integer(Kind) in [Integer(reflect.Int)..Integer(reflect.Int64)])  then
         raise new Exception('Can not set object to integer value');
 
-      builtin.Reference<Object>.Set(fValue, aVal);
+      builtin.IReference(fValue).Set(aVal);
     end;
 
     method &SetBool(aVal: Boolean);
@@ -224,7 +231,7 @@ type
       if (not CanSet) or (Kind ≠ reflect.Bool) then
         raise new Exception('Can not set object to bool value');
 
-      builtin.Reference<Object>.Set(fValue, aVal);
+      builtin.IReference(fValue).Set(aVal);
     end;
 
     method &SetUint(aVal: UInt64);
@@ -232,7 +239,7 @@ type
       if (not CanSet) or not (Integer(Kind) in [Integer(reflect.Uint)..Integer(reflect.Uint64)])  then
         raise new Exception('Can not set object to unsigned integer value');
 
-      builtin.Reference<Object>.Set(fValue, aVal);
+      builtin.IReference(fValue).Set(aVal);
     end;
 
     method &SetFloat(aVal: Double);
@@ -240,7 +247,7 @@ type
       if (not CanSet) or ((Kind ≠ reflect.Float32) and (Kind ≠ reflect.Float64)) then
         raise new Exception('Can not set object to float value');
 
-      builtin.Reference<Object>.Set(fValue, aVal);
+      builtin.IReference(fPtr).Set(aVal);
     end;
 
     method &SetComplex(aVal: builtin.complex128);
@@ -253,7 +260,7 @@ type
       if (not CanSet) or (Kind ≠ reflect.String) then
         raise new Exception('Can not set object to string value');
 
-      builtin.Reference<Object>.Set(fValue, aVal);
+      builtin.IReference(fValue).Set(aVal);
     end;
 
     method &Type: &Type;
@@ -339,7 +346,7 @@ type
         {$IF ECHOES}
         lRealType := lType.GenericTypeArguments[0];
         {$ENDIF}
-        exit new Value(builtin.IReference(fValue).Get, new TypeImpl(lRealType));
+        exit new Value(builtin.IReference(fValue).Get, new TypeImpl(lRealType), fValue);
       end;
       raise new NotSupportedException;
     end;

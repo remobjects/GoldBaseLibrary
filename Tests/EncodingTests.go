@@ -3,6 +3,7 @@
 import "fmt"
 import b64 "encoding/base64"
 import "encoding/binary"
+import "encoding/hex"
 
 func DoEncodeBase64() string {
 	data := "abc123!?$*&()'-=@~"
@@ -26,6 +27,29 @@ func DoBinaryRead() float64 {
 	if err != nil {
 		fmt.Println("binary.Read failed:", err)
 	}
-	fmt.Print(pi)
 	return pi
+}
+
+func DoBinaryPutUvarint(data uint64) []byte {
+	buf := make([]byte, binary.MaxVarintLen64)
+	n := binary.PutUvarint(buf, data)
+	return buf[:n]
+}
+
+func DoEncodingHexDecode() string {
+	const s = "48656c6c6f20476f7068657221"
+	decoded, err := hex.DecodeString(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return string(decoded)
+}
+
+func DoEncodingHexEncode() []byte {
+	src := []byte("Hello Gopher!")
+
+	dst := make([]byte, hex.EncodedLen(len(src)))
+	hex.Encode(dst, src)
+	return dst
 }

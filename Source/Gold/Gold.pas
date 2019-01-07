@@ -315,7 +315,10 @@ type
 
     class operator Implicit(aVal: Reference<T>): T;
     begin
-      exit aVal.Value;
+      if aVal = nil then
+        exit nil
+      else
+        exit aVal.Value;
     end;
 
     class operator Implicit(aVal: T): Reference<T>;
