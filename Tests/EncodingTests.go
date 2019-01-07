@@ -4,6 +4,8 @@ import "fmt"
 import b64 "encoding/base64"
 import "encoding/binary"
 import "encoding/hex"
+import "encoding/json"
+import "encoding/pem"
 
 func DoEncodeBase64() string {
 	data := "abc123!?$*&()'-=@~"
@@ -52,4 +54,36 @@ func DoEncodingHexEncode() []byte {
 	dst := make([]byte, hex.EncodedLen(len(src)))
 	hex.Encode(dst, src)
 	return dst
+}
+
+func DoEncodingJsonMarshal() string {
+	type ColorGroup struct {
+		ID     int
+		Name   string
+		Colors []string
+	}
+	group := ColorGroup{
+		ID:     1,
+		Name:   "Reds",
+		Colors: []string{"Crimson", "Red", "Ruby", "Maroon"},
+	}
+	b, err := json.Marshal(group)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	return string(b)
+}
+
+func DoEncodingPEMEncode() string {
+	block := &pem.Block{
+		Type: "MESSAGE",
+		Headers: map[string]string{
+			"Animal": "Gopher",
+		},
+		Bytes: []byte("test"),
+	}
+
+	lBytes := pem.EncodeToMemory(block)
+	return string(lBytes)
 }

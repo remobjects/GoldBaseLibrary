@@ -45,7 +45,14 @@ type
 
     method JsonTest;
     begin
+      //Assert.AreEqual(TestApplication2.DoEncodingJsonMarshal(), '{"ID":1,"Name":"Reds","Colors":["Crimson","Red","Ruby","Maroon"]}');
+    end;
 
+    method PemTest;
+    begin
+      var lString := TestApplication2.DoEncodingPEMEncode();
+      writeLn(lString);
+      //Assert.AreEqual(, '');
     end;
 
   end;

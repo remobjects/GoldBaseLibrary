@@ -111,9 +111,12 @@ type
   IndexOutOfRangeException = public class(Exception) end;
 {$ENDIF}
   ISlice = public interface
+    method Len: builtin.int;
+    method Less(a, b: Integer): builtin.bool;
     method Swap(a, b: Integer);
   end;
-  Slice<T> = public class(ISlice)
+  //Slice<T> = public class(ISlice)
+  Slice<T> = public class(sort.Interface)
   assembly
     fArray: array of T;
     fStart, fCount: Integer;
@@ -185,6 +188,16 @@ type
     begin
       result := new T[Length];
       &Array.Copy(fArray, fStart, result, 0, fCount);
+    end;
+
+    method Len: builtin.int;
+    begin
+      result := fArray.Length;
+    end;
+
+    method Less(a, b: Integer): builtin.bool;
+    begin
+
     end;
 
     method Swap(a, b: Integer);
