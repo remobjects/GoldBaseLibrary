@@ -474,7 +474,7 @@ type
   end;
 
   PlatformType = public {$IFDEF ECHOES}System.Type{$ELSE}RemObjects.Elements.System.Type{$ENDIF};
-  TypeImpl = class(&Type)
+  TypeImpl = public class(&Type)
   private
   assembly
     fRealType: PlatformType;

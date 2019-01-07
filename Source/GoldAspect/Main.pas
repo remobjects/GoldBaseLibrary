@@ -29,4 +29,16 @@ type
     end;
   end;
 
+  [MethodAspect('reflect.__Global', true, 'TypeOf', 0,  array of String(nil))]
+  TypeOfFixer = public partial class(Attribute, IMethodCallDecorator)
+  public
+    method ProcessMethodCall(aContext: IContext; aMethod: IMethod; aValue: ParameterizedValue): Value;
+    begin
+      if (aValue.Parameters[0].Kind = ValueKind.Nil) and (NilValue(aValue.Parameters[0]).Type <> nil) then begin
+        exit new NewValue(aContext.Services.GetType('reflect.TypeImpl'), new TypeOfValue(NilValue(aValue.Parameters[0]).Type));
+      end;
+      exit nil;
+    end;
+  end;
+
 end.
