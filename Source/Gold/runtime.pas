@@ -82,9 +82,11 @@ type
 
     class method now(): tuple of (Int64, Int32, Int64); assembly;
     begin
-      {$IF ISLAND}
+      {$IF ISLAND AND WINDOWS}
       var q := new DateTime(DateTime.UtcNow.Ticks - dtbase.Ticks);
       exit (Int64(q.Ticks / DateTime.TicksPerSecond), (q.Ticks * 100) mod 1 000 000 000, rtl.GetTickCount  * 100);
+      {$ELSEIF ISLAND AND POSIX}
+      // TODO
       {$ELSEIF ECHOES}
       var q := DateTime.UtcNow - dtbase;
       exit (Int64(q.TotalSeconds), (q.Ticks * 100) mod 1 000 000 000, System.Diagnostics.StopWatch.GetTimestamp  * 100);
