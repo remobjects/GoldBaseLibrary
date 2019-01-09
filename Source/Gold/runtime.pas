@@ -513,9 +513,12 @@ type
         exit -1;
     end;
 
-    class method Index(a, b: builtin.Slice<Byte>): Integer; begin raise new NotSupportedException;end;
+    class method &Index(a, b: builtin.Slice<Byte>): Integer; begin raise new NotSupportedException;end;
     class method IndexString(a, b: String): Integer; begin raise new NotSupportedException;end;
-    class method Cutover(nn: Integer): Integer; begin raise new NotSupportedException;end;
+    class method Cutover(nn: Integer): Integer;
+    begin
+      result :=  (nn + 16) / 8;
+    end;
   end;
 
   strings.__Global= public partial class

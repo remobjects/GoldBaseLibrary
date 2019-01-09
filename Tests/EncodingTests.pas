@@ -53,6 +53,7 @@ type
       var lString := TestApplication2.DoEncodingPEMEncode();
       writeLn(lString);
       //Assert.AreEqual(, '');
+      TestApplication2.DoDecodingPEMDecode();
     end;
 
   end;

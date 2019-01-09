@@ -352,7 +352,11 @@ type
 
   method copy<T>(dst, src: Slice<T>): Integer;
   begin
-    result := Math.Min(if dst = nil then nil else dst.Length, if src = nil then 0 else src.Length);
+    var lSrcTotal := if src = nil then 0 else src.Length;
+    var lDstTotal := 0;
+    if (dst <> nil) and (dst.Capacity-lSrcTotal ≥ 0) then
+      lDstTotal := lSrcTotal;
+    result := Math.Min(lDstTotal, lSrcTotal);
     for i: Integer := 0 to result -1 do
       dst[i] := src[i];
   end;
@@ -491,7 +495,7 @@ type
   begin
     var lStart := valueOrDefault(aStart, 0);
     var lEnd := valueOrDefault(aEnd, aSlice.Length);
-    if Integer(lEnd) > aSlice.Length then lEnd := aSlice.Length;
+    //if Integer(lEnd) > aSlice.Length then lEnd := aSlice.Length;
     if (lStart = 0) and (lEnd = aSlice.Length) then exit aSlice;
     lStart := lStart + aSlice.fStart;
     lEnd := lEnd + aSlice.fStart;
@@ -601,7 +605,7 @@ type
   operator Implicit(aVal: Slice<rune>): string; public;
   begin
   {$IF ISLAND}
-  exit string.FromCharArray(aVal.ToArray().Select(a -> a.Value).ToArray());
+  exit string.FromCharArray(aVal.ToArray().Select(a -> Char(a.Value)).ToArray());
   {$ELSEIF ECHOES}
   exit new string(aVal.ToArray());
   {$ENDIF}
@@ -633,7 +637,7 @@ type
       constructor(aVal: array of builtin.rune);
       begin
         {$IF ISLAND}
-        exit string.FromCharArray(aVal.Select(a -> RemObjects.Elements.System.Char(a.Value)).ToArray());
+        exit string.FromCharArray(aVal.Select(a -> :RemObjects.Elements.System.Char(a.Value)).ToArray());
         {$ELSEIF ECHOES}
         exit new string(aVal.Select(a -> :System.Char(a.Value)).ToArray());
         {$ENDIF}
