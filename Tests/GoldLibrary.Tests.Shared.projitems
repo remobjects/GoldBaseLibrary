@@ -14,6 +14,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)RunTests.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)EncodingTests.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)EncodingTests.go" />
+    <Compile Include="$(MSBuildThisFileDirectory)HashTests.go" />
+    <Compile Include="$(MSBuildThisFileDirectory)HashTests.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CompressTests.go" />
+    <Compile Include="$(MSBuildThisFileDirectory)CompressTests.pas" />
   </ItemGroup>
-  <ItemGroup />
 </Project>

@@ -45,7 +45,7 @@ type
 
     method JsonTest;
     begin
-      //Assert.AreEqual(TestApplication2.DoEncodingJsonMarshal(), '{"ID":1,"Name":"Reds","Colors":["Crimson","Red","Ruby","Maroon"]}');
+      //Assert.AreEqual(TestApplication2.DoEncodingJsonMarshal(), '{"ID":1,"Name":"Reds","Colors":["Crimson","Red","Ruby","Maroon"]}'); // T81705 issue
     end;
 
     method PemTest;
@@ -53,7 +53,7 @@ type
       var lString := TestApplication2.DoEncodingPEMEncode();
       writeLn(lString);
       //Assert.AreEqual(, '');
-      TestApplication2.DoDecodingPEMDecode();
+      //TestApplication2.DoDecodingPEMDecode(); // [T81690] check when issue is fixed. // T81708 too
     end;
 
   end;

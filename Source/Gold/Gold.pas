@@ -192,7 +192,7 @@ type
 
     method Len: builtin.int;
     begin
-      result := fArray.Length;
+      result := fArray.Length - fStart;
     end;
 
     method Less(a, b: Integer): builtin.bool;
@@ -214,7 +214,7 @@ type
     end;
 
     property Capacity: Integer read fArray.Length - fStart;
-    property Length: Integer read fCount;
+    property Length: Integer read fCount - fStart;
     property Item[i: Integer]: T read get_Item write set_Item; default;
 
     class method Copy(aSource, aDest: Slice<T>);
@@ -303,6 +303,9 @@ type
     end;
     method Get: Object;
     begin
+      if self = nil then
+        exit default(T);
+
       exit Object(Value);
     end;
 
@@ -323,6 +326,9 @@ type
 
     class method &Get(aVal: Reference<T>): T;
     begin
+      if aVal = nil then
+        exit default(T);
+
       exit aVal.Value;
     end;
 
@@ -352,11 +358,12 @@ type
 
   method copy<T>(dst, src: Slice<T>): Integer;
   begin
-    var lSrcTotal := if src = nil then 0 else src.Length;
+    {var lSrcTotal := if src = nil then 0 else src.Length;
     var lDstTotal := 0;
     if (dst <> nil) and (dst.Capacity-lSrcTotal ≥ 0) then
       lDstTotal := lSrcTotal;
-    result := Math.Min(lDstTotal, lSrcTotal);
+    result := Math.Min(lDstTotal, lSrcTotal);}
+    result := Math.Min(if src = nil then 0 else src.Length, if dst = nil then 0 else dst.Length);
     for i: Integer := 0 to result -1 do
       dst[i] := src[i];
   end;

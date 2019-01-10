@@ -90,7 +90,9 @@ type
   strings.stringWriter = public partial class(io.StringWriter) end;
 
   compress.zlib.reader =  public partial class(io.ReadCloser) end;
-
+  compress.gzip.reader = public partial class(io.Reader) end;
+  compress.gzip.writer = public partial class(io.Writer) end;
+  compress.flate.writer = public partial class(io.Writer) end;
 
 
   flag.durationValue = public partial record(flag.Value) end;
@@ -138,7 +140,7 @@ type
   html.template.Error = public partial class(builtin.error);
 
   bytes.Buffer = public partial class(io.Writer);
-  bytes.Reader = public partial class(io.Reader);
+  bytes.Reader = public partial class(io.Reader, compress.flate.Reader);
 
   net.url.Error = public partial class(builtin.error);
   net.url.EscapeError = public partial record(builtin.error);
