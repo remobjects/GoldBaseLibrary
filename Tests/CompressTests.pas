@@ -8,7 +8,7 @@ type
   public
     method ZLibTest;
     begin
-      //TestApplication2.DoZlibTest();
+      TestApplication2.DoZlibTest();
     end;
   end;
 

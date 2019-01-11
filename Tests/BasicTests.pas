@@ -9,6 +9,7 @@ type
     method BigInt64Test;
     begin
       Assert.AreEqual(TestApplication2.CheckAbsoluteToInternal, -9223371966579724800);
+      Assert.AreEqual(TestApplication2.DoSliceTest, true);
     end;
   end;
 
