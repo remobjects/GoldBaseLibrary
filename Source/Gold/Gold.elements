@@ -34,11 +34,13 @@
     <Mode>Island</Mode>
     <SubMode>Windows</SubMode>
     <Architecture>i386</Architecture>
+    <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Target)' == 'Island.Linux' ">
     <Mode>Island</Mode>
     <SubMode>Linux</SubMode>
     <Architecture>x86_64</Architecture>
+    <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib">
