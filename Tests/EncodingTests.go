@@ -58,6 +58,7 @@ func DoEncodingHexEncode() []byte {
 }
 
 func DoEncodingJsonMarshal() string {
+
 	type ColorGroup struct {
 		ID     int
 		Name   string
