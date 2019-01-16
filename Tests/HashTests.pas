@@ -8,7 +8,7 @@ type
   public
     method HashTest;
     begin
-      //TestApplication2.DoHashTest();
+      TestApplication2.DoHashTest();
 
     end;
   end;

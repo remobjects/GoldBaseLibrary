@@ -343,7 +343,9 @@ type
       if fValue is builtin.Reference<Object> then begin
         var lType := TypeImpl(fType).RealType;
         var lRealType: PlatformType;
-        {$IF ECHOES}
+        {$IF ISLAND}
+        lRealType := lType.GenericArguments.FirstOrDefault;
+        {$ELSEIF ECHOES}
         lRealType := lType.GenericTypeArguments[0];
         {$ENDIF}
         exit new Value(builtin.IReference(fValue).Get, new TypeImpl(lRealType), fValue);
@@ -569,14 +571,10 @@ type
     method Kind: Kind;
     begin
       {$IF ISLAND}
-      case (fRealType.Flags and IslandTypeFlags.TypeKindMask) of
-        IslandTypeFlags.Array: exit reflect.Array;
-        IslandTypeFlags.Struct: exit reflect.Struct;
-        IslandTypeFlags.Interface: exit reflect.Interface;
-      end;
+      if (fRealType.GenericArguments <> nil) and (fRealType.GenericArguments.Count > 0) then
+        exit reflect.Ptr;
 
       case fRealType.Code of
-        TypeCodes.None: result := reflect.Invalid;
         TypeCodes.Boolean: result := reflect.Bool;
         TypeCodes.Char: result := reflect.Uint16;
         TypeCodes.SByte: result := reflect.Uint8;
@@ -592,6 +590,15 @@ type
         TypeCodes.UIntPtr: result := reflect.UintPtr;
         TypeCodes.IntPtr: result := reflect.Ptr;
         TypeCodes.String: result := reflect.String;
+        TypeCodes.None: begin
+          case (fRealType.Flags and IslandTypeFlags.TypeKindMask) of
+            IslandTypeFlags.Array: exit reflect.Array;
+            IslandTypeFlags.Struct: exit reflect.Struct;
+            IslandTypeFlags.Interface: exit reflect.Interface;
+            IslandTypeFlags.Generic: exit reflect.Ptr;
+            default: exit reflect.Invalid;
+          end;
+        end;
       end;
       {$ELSEIF ECHOES}
       if fRealType.IsArray then
