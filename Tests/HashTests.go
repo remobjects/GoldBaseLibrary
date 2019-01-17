@@ -40,5 +40,6 @@ func DoHashTest() {
 		second.Write([]byte(input2))
 
 		fmt.Printf("%x\n", first.Sum(nil))
+		//fmt.Printf("%x\n", second.Sum(nil))
 		fmt.Println(bytes.Equal(first.Sum(nil), second.Sum(nil)))
 }

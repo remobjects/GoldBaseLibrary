@@ -394,7 +394,7 @@ type
     exit lNew;
   end;
 
-  method append<T>(sl: Slice<T>; elems: Object): Slice<T>;
+  {method append<T>(sl: Slice<T>; elems: Object): Slice<T>;
   begin
     if elems is Slice<T> then
       exit appendSlice(sl, elems as Slice<T>);
@@ -406,9 +406,24 @@ type
     for i: Integer := 0 to c -1 do
       lNew[i + slc] := IList<T>(elems)[i];
     exit lNew;
+  end;}
+
+  method append<T>(sl: Slice<T>; elems: Object): Slice<T>;
+  begin
+    if elems is Slice<T> then
+      exit appendSlice(sl, elems as Slice<T>);
+    var c := if elems = nil then 0 else IList<T>(elems).Count;
+    var slc := if sl = nil then 0 else sl.Length;
+    var lNew := new T[if (slc + c) <= sl.Capacity then sl.Capacity else slc + c];
+
+    for i: Integer := 0 to slc -1 do
+      lNew[i] := sl[i];
+    for i: Integer := 0 to c -1 do
+      lNew[i + slc] := IList<T>(elems)[i];
+    exit new Slice<T>(lNew, 0, slc + c);
   end;
 
-  method appendSlice<T>(sl, elems: Slice<T>): Slice<T>;
+  {method appendSlice<T>(sl, elems: Slice<T>): Slice<T>;
   begin
     var c := if elems = nil then 0 else elems.Length;
     var slc := if sl = nil then 0 else sl.Length;
@@ -418,6 +433,19 @@ type
     for i: Integer := 0 to c -1 do
       lNew[i + slc] := elems[i];
     exit lNew;
+  end;}
+
+  method appendSlice<T>(sl, elems: Slice<T>): Slice<T>;
+  begin
+    var c := if elems = nil then 0 else elems.Length;
+    var slc := if sl = nil then 0 else sl.Length;
+    var slCap := if sl = nil then 0 else sl.Capacity;
+    var lNew := new T[if (slc + c) <= slCap then slCap else slc + c];
+    for i: Integer := 0 to slc -1 do
+      lNew[i] := sl[i];
+    for i: Integer := 0 to c -1 do
+      lNew[i + slc] := elems[i];
+    exit new Slice<T>(lNew, 0, slc + c);
   end;
 
   method append(sl: Slice<byte>; elems: string): Slice<byte>;
