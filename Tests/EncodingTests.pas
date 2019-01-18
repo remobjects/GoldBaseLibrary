@@ -1,7 +1,8 @@
 ﻿namespace GoldLibrary.Tests.Shared;
 
 uses
-  RemObjects.Elements.EUnit;
+  RemObjects.Elements.EUnit,
+  RemObjects.Elements.RTL;
 
 type
   EncodingTests = public class(Test)
@@ -50,9 +51,11 @@ type
 
     method PemTest;
     begin
-      var lString := TestApplication2.DoEncodingPEMEncode();
-      writeLn(lString);
-      //Assert.AreEqual(, '');
+      var lString: RemObjects.Elements.RTL.String := TestApplication2.DoEncodingPEMEncode();
+      var lLines := lString.Split(#10, true);
+      Assert.AreEqual(lLines.Count, 4);
+      Assert.AreEqual(lLines[0], '-----BEGIN MESSAGE-----');
+      Assert.AreEqual(lLines[3], '-----END MESSAGE-----');
       //TestApplication2.DoDecodingPEMDecode(); // [T81690] check when issue is fixed. // T81708 too
     end;
 

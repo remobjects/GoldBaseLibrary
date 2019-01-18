@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func DoHashTest() {
+func DoHashTest() Boolean {
 		const (
 		input1 = "The tunneling gopher digs downwards, "
 		input2 = "unaware of what he will find."
@@ -38,8 +38,13 @@ func DoHashTest() {
 
 		first.Write([]byte(input2))
 		second.Write([]byte(input2))
+		return bytes.Equal(first.Sum(nil), second.Sum(nil))
 
-		fmt.Printf("%x\n", first.Sum(nil))
+		//fmt.Printf("%x\n", first.Sum(nil))
 		//fmt.Printf("%x\n", second.Sum(nil))
-		fmt.Println(bytes.Equal(first.Sum(nil), second.Sum(nil)))
+		//fmt.Println(bytes.Equal(first.Sum(nil), second.Sum(nil)))
+}
+
+func DoCrash() {
+	fmt.Println(true)
 }

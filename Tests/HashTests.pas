@@ -8,8 +8,7 @@ type
   public
     method HashTest;
     begin
-      TestApplication2.DoHashTest();
-
+      Assert.IsTrue(TestApplication2.DoHashTest());
     end;
   end;
 
