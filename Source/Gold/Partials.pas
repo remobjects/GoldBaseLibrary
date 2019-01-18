@@ -324,7 +324,7 @@ type
   net.http.http2requestBody = public partial class(io.ReadCloser);
 
 
-  crypto.sha256.digest = public partial class(hash.Hash, encoding.BinaryMarshaler, encoding.BinaryUnmarshaler);
+  crypto.sha256.digest = public partial class(hash.Hash, :encoding.BinaryMarshaler, :encoding.BinaryUnmarshaler);
   crypto.sha512.digest = public partial class(hash.Hash);
   crypto.sha1.digest = public partial class(hash.Hash);
   crypto.tls.tls10MAC = public partial class(crypto.tls.macFunction);
