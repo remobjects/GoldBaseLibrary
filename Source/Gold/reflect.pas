@@ -689,8 +689,17 @@ type
 
     method Elem: &Type;
     begin
-      if fRealType is builtin.Reference<Object> then
-        exit new TypeImpl(fRealType);
+      if fRealType is builtin.Reference<Object> then begin
+        var lRealType: PlatformType;
+        {$IF ISLAND}
+        lRealType := fRealType.GenericArguments.FirstOrDefault;
+        {$ELSEIF ECHOES}
+        lRealType := fRealType.GenericTypeArguments[0];
+        {$ENDIF}
+        exit new TypeImpl(lRealType);
+      end;
+      //if fRealType is builtin.Reference<Object> then
+        //exit new TypeImpl(fRealType);
     end;
 
     method Field(i: Integer): StructField;

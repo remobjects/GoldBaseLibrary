@@ -414,7 +414,8 @@ type
       exit appendSlice(sl, elems as Slice<T>);
     var c := if elems = nil then 0 else IList<T>(elems).Count;
     var slc := if sl = nil then 0 else sl.Length;
-    var lNew := new T[if (slc + c) <= sl.Capacity then sl.Capacity else slc + c];
+    var slCap := if sl = nil then 0 else sl.Capacity;
+    var lNew := new T[if (slc + c) <= slCap then slCap else slc + c];
 
     for i: Integer := 0 to slc -1 do
       lNew[i] := sl[i];

@@ -9,6 +9,7 @@ type
     method HashTest;
     begin
       Assert.IsTrue(TestApplication2.DoHashTest());
+      TestApplication2.DoCrash();
     end;
   end;
 
