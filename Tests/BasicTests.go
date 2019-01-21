@@ -50,3 +50,8 @@ func DoSliceTest() Boolean {
 
 	return true;
 }
+
+func DoCrash() Boolean {
+	fmt.Println(true)
+	return true
+}

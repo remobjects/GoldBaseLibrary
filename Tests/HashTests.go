@@ -44,7 +44,3 @@ func DoHashTest() Boolean {
 		//fmt.Printf("%x\n", second.Sum(nil))
 		//fmt.Println(bytes.Equal(first.Sum(nil), second.Sum(nil)))
 }
-
-func DoCrash() {
-	fmt.Println(true)
-}
