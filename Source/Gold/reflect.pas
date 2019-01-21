@@ -691,7 +691,6 @@ type
     begin
       if fRealType is builtin.Reference<Object> then
         exit new TypeImpl(fRealType);
-      end;
     end;
 
     method Field(i: Integer): StructField;
