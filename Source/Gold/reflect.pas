@@ -160,7 +160,8 @@ type
 
     method CanInterface(): Boolean;
     begin
-      raise new NotImplementedException;
+      result := true;
+      // TODO check, should be false for unexported struct fields or methods.
     end;
 
     method Slice(i, j: Integer): Value;
@@ -280,10 +281,12 @@ type
 
     method Len: Integer;
     begin
-      raise new NotImplementedException;
+      if fValue is sort.Interface then
+        exit sort.Interface(fValue).Len;
+      //TODO check other types?
     end;
 
-    method Index(i: Integer): Value;
+    method &Index(i: Integer): Value;
     begin
       raise new NotImplementedException;
     end;
@@ -315,7 +318,9 @@ type
 
     method CanAddr: Boolean;
     begin
-    raise new NotImplementedException;
+      result := true;
+      // TODO check when returns false
+      //raise new NotImplementedException;
     end;
 
     method Call(inn: builtin.Slice<Value>): builtin.Slice<Value>;
@@ -325,7 +330,8 @@ type
 
     method Addr: Value;
     begin
-      raise new NotImplementedException;
+      result := new builtin.Reference<Value>(fValue);
+      //raise new NotImplementedException;
     end;
 
     method MapRange() :builtin.Reference<MapIter>;
@@ -409,7 +415,8 @@ type
 
     method Get(key: String): String;
     begin
-      raise new NotImplementedException;
+      result := '';
+      //raise new NotImplementedException;
     end;
 
     method Lookup(key: String): tuple of (String, Boolean);
@@ -436,11 +443,12 @@ type
     constructor(aField: PlatformField);
     begin
       fField := aField;
+      PkgPath := '';
     end;
 
     property Name: String read fField.Name;
     property PkgPath: String read;
-    property &Type: &Type read {$IF ISLAND}new TypeImpl(fField.&Type){$ELSEIF ECHOES}new TypeImpl(fField.GetType()){$ENDIF};
+    property &Type: &Type read {$IF ISLAND}new TypeImpl(fField.&Type){$ELSEIF ECHOES}new TypeImpl(fField.FieldType){$ENDIF};
     property Tag: StructTag read;
     property Offset: UIntPtr read;
     property &Index: builtin.Slice<Integer> read;
@@ -508,10 +516,12 @@ type
 
     method Align: Integer;
     begin
+      raise new NotImplementedException;
     end;
 
     method FieldAlign: Integer;
     begin
+      raise new NotImplementedException;
     end;
 
     method &Method(i: Integer): &Method;
@@ -553,6 +563,7 @@ type
 
     method PkgPath: String;
     begin
+      raise new NotImplementedException;
     end;
 
     method Size: UIntPtr;
@@ -566,6 +577,7 @@ type
 
     method String: String;
     begin
+      raise new NotImplementedException;
     end;
 
     method Kind: Kind;
@@ -609,8 +621,14 @@ type
 
       //if fRealType.IsPointer then
       //if fRealType is builtin.Reference<Object> then
+      //if fRealType is sort.Interface then
+        //exit reflect.Slice;
+
       if fRealType.GenericTypeArguments.Length > 0 then
-        exit reflect.Ptr;
+        if fRealType.AssemblyQualifiedName.StartsWith('builtin.Slice') then
+          exit reflect.Slice
+        else
+          exit reflect.Ptr;
 
       case System.Type.GetTypeCode(fRealType) of
         TypeCode.Boolean: result := reflect.Bool;
@@ -673,18 +691,22 @@ type
 
     method Comparable: Boolean;
     begin
+      raise new NotImplementedException;
     end;
 
     method Bits: Integer;
     begin
+      raise new NotImplementedException;
     end;
 
     method ChanDir: ChanDir;
     begin
+      raise new NotImplementedException;
     end;
 
     method IsVariadic: Boolean;
     begin
+      raise new NotImplementedException;
     end;
 
     method Elem: &Type;
@@ -773,10 +795,12 @@ type
 
     method Key: &Type;
     begin
+      raise new NotImplementedException;
     end;
 
     method Len: Integer;
     begin
+      raise new NotImplementedException;
     end;
 
     method NumField: Integer;
@@ -857,7 +881,7 @@ type
 
   method PtrTo(t: &Type): &Type; public;
   begin
-    raise new NotImplementedException;
+    result := new builtin.Reference<&Type>(t);
   end;
 
   method ValueOf(i: Object): Value;public;
@@ -879,7 +903,8 @@ type
 
   method Swapper(aslice: Object): Action<Integer, Integer>; public;
   begin
-    exit new Action<Integer, Integer>(builtin.ISlice(aslice).Swap);
+    //exit new Action<Integer, Integer>(builtin.ISlice(aslice).Swap);
+    exit new Action<Integer, Integer>(sort.Interface(aslice).Swap);
   end;
 
   method MakeMap(t: &Type): Value; public;

@@ -46,7 +46,7 @@ type
 
     method JsonTest;
     begin
-      //Assert.AreEqual(TestApplication2.DoEncodingJsonMarshal(), '{"ID":1,"Name":"Reds","Colors":["Crimson","Red","Ruby","Maroon"]}'); // T81705 issue, T81774
+      Assert.AreEqual(TestApplication2.DoEncodingJsonMarshal(), '{"ID":1,"Name":"Reds","Colors":["Crimson","Red","Ruby","Maroon"]}'); // T81705 issue, T81774
     end;
 
     method PemTest;
@@ -56,7 +56,7 @@ type
       Assert.AreEqual(lLines.Count, 4);
       Assert.AreEqual(lLines[0], '-----BEGIN MESSAGE-----');
       Assert.AreEqual(lLines[3], '-----END MESSAGE-----');
-      TestApplication2.DoDecodingPEMDecode(); // [T81690] check when issue is fixed. // T81708 too
+      //TestApplication2.DoDecodingPEMDecode(); // [T81690] check when issue is fixed. // T81708 too
     end;
 
   end;

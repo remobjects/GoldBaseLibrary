@@ -524,6 +524,8 @@ type
 
   method Slice<T>(aSlice: Slice<T>; aStart, aEnd: nullable Integer): Slice<T>; public;
   begin
+    if aSlice = nil then
+      exit nil;
     var lStart := valueOrDefault(aStart, 0);
     var lEnd := valueOrDefault(aEnd, aSlice.Length);
     //if Integer(lEnd) > aSlice.Length then lEnd := aSlice.Length;
