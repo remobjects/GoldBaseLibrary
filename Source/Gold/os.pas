@@ -111,11 +111,14 @@ type
   end;
   __Global = public partial class
   public
-    {$IF ISLAND}
-    {$WARNING TODO FIX}
-    class property Stdin: File := new File(fs := nil); lazy;
-    class property Stderr: File := new File(fs := nil); lazy;
-    class property Stdout: File := new File(fs := nil); lazy;
+    {$IF ISLAND AND WINDOWS}
+    class property Stdin: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_INPUT_HANDLE), FileAccess.Read)); lazy;
+    class property Stderr: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_ERROR_HANDLE), FileAccess.Write)); lazy;
+    class property Stdout: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_OUTPUT_HANDLE), FileAccess.Write)); lazy;
+    {$ELSEIF ISLAND AND POSIX}
+    class property Stdin: File := new File(fs := new FileStream(rtl.fdopen(rtl.STDIN_FILENO, "r"), FileAccess.Read)); lazy;
+    class property Stderr: File := new File(fs := new FileStream(rtl.fdopen(rtl.STDERR_FILENO, "w"), FileAccess.Write)); lazy;
+    class property Stdout: File := new File(fs := new FileStream(rtl.fdopen(rtl.STDOUT_FILENO, "w"), FileAccess.Write)); lazy;
     {$ELSEIF ECHOES}
     class property Stdin: File := new File(fs := Console.OpenStandardInput); lazy;
     class property Stderr: File := new File(fs := Console.OpenStandardError); lazy;
