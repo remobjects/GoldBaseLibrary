@@ -111,12 +111,10 @@ type
   IndexOutOfRangeException = public class(Exception) end;
 {$ENDIF}
   ISlice = public interface
-    method Len: builtin.int;
-    method Less(a, b: Integer): builtin.bool;
-    method Swap(a, b: Integer);
+    method getAtIndex(i: Integer): Object;
   end;
   //Slice<T> = public class(ISlice)
-  Slice<T> = public class(sort.Interface)
+  Slice<T> = public class(sort.Interface, ISlice)
   assembly
     fArray: array of T;
     fStart, fCount: Integer;
@@ -182,6 +180,11 @@ type
     constructor(aSize: Integer);
     begin
       constructor(aSize, aSize);
+    end;
+
+    method getAtIndex(i: Integer): Object;
+    begin
+      result := get_Item(i);
     end;
 
     method ToArray: array of T;

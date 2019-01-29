@@ -29,7 +29,7 @@ const
   Float64: Kind = Kind(14);
   Complex64: Kind = Kind(15);
   Complex128: Kind = Kind(16);
-  Array: Kind = Kind(17);
+  &Array: Kind = Kind(17);
   Chan: Kind = Kind(18);
   Func: Kind = Kind(19);
   &Interface: Kind = Kind(20);
@@ -288,7 +288,18 @@ type
 
     method &Index(i: Integer): Value;
     begin
-      raise new NotImplementedException;
+      var lKind := Kind;
+      if (lKind <> &Array) and (lKind <> reflect.Slice) and (lKind <> reflect.String) then
+        raise new Exception("Wrong type, need array, slice or string");
+
+      var lValue := if fValue is builtin.Reference<Object> then builtin.Reference<Object>.Get(builtin.Reference<Object>(fValue)) else fValue;
+      case lKind of
+        reflect.Slice:
+          result := new Value(builtin.ISlice(lValue).getAtIndex(i));
+
+        reflect.String:
+          result := new Value(builtin.string(lValue)[i]);
+      end;
     end;
 
     method SetMapIndex(key: Value; val: Value);
@@ -720,8 +731,6 @@ type
         {$ENDIF}
         exit new TypeImpl(lRealType);
       end;
-      //if fRealType is builtin.Reference<Object> then
-        //exit new TypeImpl(fRealType);
     end;
 
     method Field(i: Integer): StructField;
