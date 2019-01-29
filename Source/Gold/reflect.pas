@@ -428,11 +428,14 @@ type
     begin
       result := '';
       //raise new NotImplementedException;
+      // TODO
     end;
 
     method Lookup(key: String): tuple of (String, Boolean);
     begin
-      raise new NotImplementedException;
+      //raise new NotImplementedException;
+      result := ('', false);
+      // TODO
     end;
   end;
 
@@ -519,6 +522,16 @@ type
 
   public
     property RealType: PlatformType read fRealType;
+
+    class operator Equal(a, b: TypeImpl): Boolean;
+    begin
+      result := a.fRealType = b.fRealType;
+    end;
+
+    class operator NotEqual(a, b: TypeImpl): Boolean;
+    begin
+      result := a.fRealType <> a.fRealType;
+    end;
 
     constructor(aType: PlatformType);
     begin
