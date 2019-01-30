@@ -125,7 +125,7 @@ type
 
     method CanSet: Boolean;
     begin
-      result := fValue is builtin.Reference<Object>;
+      result := CanAddr;
     end;
 
     method Recv(): tuple of (Value, Boolean);
@@ -154,6 +154,14 @@ type
     begin
       if not CanSet or not fType.AssignableTo(TypeOf(aVal)) then
         raise new Exception('Can not set object');
+
+      {if aVal is reflect.Value then begin
+        if not CanSet or not fType.AssignableTo(aVal.RealType) then
+          raise new Exception('Can not set object');
+      end
+      else
+        if not CanSet or not fType.AssignableTo(aVal.RealType) then
+          raise new Exception('Can not set object');}
 
       builtin.IReference(fPtr).Set(aVal);
     end;
@@ -323,7 +331,7 @@ type
       raise new NotImplementedException;
       {$ELSEIF ECHOES}
       var lFields := TypeImpl(fType).fRealType.GetFields();
-      result := new Value(lFields[i].GetValue(fValue));
+      result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType));
       {$ENDIF}
     end;
 
@@ -521,17 +529,19 @@ type
     end;
 
   public
+
+    class operator Equal(a, b: &Type): Boolean;
+    begin
+      if (a is TypeImpl) and (b is TypeImpl) then exit (TypeImpl(a).fRealType = TypeImpl(b).fRealType);
+      exit Object.ReferenceEquals(a, b);
+    end;
+
+    class operator NotEqual(a, b: &Type): Boolean;
+    begin
+      exit not (a = b);
+    end;
+
     property RealType: PlatformType read fRealType;
-
-    class operator Equal(a, b: TypeImpl): Boolean;
-    begin
-      result := a.fRealType = b.fRealType;
-    end;
-
-    class operator NotEqual(a, b: TypeImpl): Boolean;
-    begin
-      result := a.fRealType <> a.fRealType;
-    end;
 
     constructor(aType: PlatformType);
     begin
