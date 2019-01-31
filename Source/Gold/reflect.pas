@@ -1,5 +1,10 @@
 ﻿namespace reflect;
 
+{$IF ECHOES}
+uses
+  System.Reflection, System.Linq;
+{$ENDIF}
+
 type
   Kind = public type builtin.uint;
   ChanDir = public type builtin.int;
@@ -45,12 +50,15 @@ const
   BothDor: ChanDir = ChanDir(Integer(RecvDir) + Integer(SendDir));
 
 type
+  PlatformExtendedType = {$IF ISLAND}RemObjects.Elements.System.MemberInfo{$ELSEIF ECHOES}System.Reflection.MemberInfo{$ENDIF};
+
   Value = public class
   private
   assembly
     fValue: Object;
     fType: &Type;
     fPtr: Object;
+    fExtended: PlatformExtendedType; // basically for struct fields
   public
     constructor;
     begin
@@ -67,10 +75,11 @@ type
       fPtr := aValue;
     end;
 
-    constructor(aValue: Object; aType: &Type; aPtr: Object);
+    constructor(aValue: Object; aType: &Type; aPtr: Object; aExtendedInfo: PlatformExtendedType := nil);
     begin
       constructor(aValue, aType);
       fPtr := aPtr;
+      fExtended := aExtendedInfo;
     end;
 
     method String: String;
@@ -152,18 +161,24 @@ type
 
     method &Set(aVal: Object);
     begin
-      if not CanSet or not fType.AssignableTo(TypeOf(aVal)) then
+      var lValue := if aVal is reflect.Value then reflect.Value(aVal).fValue else aVal;
+      if not CanSet or not fType.AssignableTo(TypeOf(lValue)) then
         raise new Exception('Can not set object');
 
-      {if aVal is reflect.Value then begin
-        if not CanSet or not fType.AssignableTo(aVal.RealType) then
-          raise new Exception('Can not set object');
+      if fExtended <> nil then begin // struct field
+        {$IF ISLAND}
+        raise new NotImplementedException();
+        {$ELSEIF ECHOES}
+        (fExtended as FieldInfo).SetValue(builtin.IReference(fPtr).Get, lValue);
+        {$ENDIF}
       end
       else
-        if not CanSet or not fType.AssignableTo(aVal.RealType) then
-          raise new Exception('Can not set object');}
+        builtin.IReference(fPtr).Set(lValue);
 
-      builtin.IReference(fPtr).Set(aVal);
+      {if not CanSet or not fType.AssignableTo(TypeOf(aVal)) then
+        raise new Exception('Can not set object');}
+
+      //builtin.IReference(fPtr).Set(aVal);
     end;
 
     method CanInterface(): Boolean;
@@ -330,8 +345,8 @@ type
       {$IF ISLAND}
       raise new NotImplementedException;
       {$ELSEIF ECHOES}
-      var lFields := TypeImpl(fType).fRealType.GetFields();
-      result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType));
+      var lFields := System.Reflection.TypeInfo(TypeImpl(fType).fRealType).DeclaredFields.ToArray();
+      result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), fPtr, lFields[i]);
       {$ENDIF}
     end;
 
@@ -432,11 +447,18 @@ type
   public
     Value: String;
 
+    constructor(aValue: String);
+    begin
+      Value := aValue;
+      writeLn('Value!!!!!!!!!!');
+      writeLn(Value);
+      writeLn('-----------');
+    end;
+
     method Get(key: String): String;
     begin
-      result := '';
-      //raise new NotImplementedException;
-      // TODO
+      var lResult := Lookup(key);
+      result := lResult[0];
     end;
 
     method Lookup(key: String): tuple of (String, Boolean);
@@ -466,6 +488,18 @@ type
     begin
       fField := aField;
       PkgPath := '';
+      var lTag := '';
+      {$IF ISLAND}
+      raise NotImplementedException;
+      {$ELSEIF ECHOES}
+      var lAttrs := aField.GetCustomAttributes(true);
+      if lAttrs.Length > 0 then
+        lTag := lAttrs[0].ToString;
+      var lOthers := aField.CustomAttributes.ToArray;
+      if lOthers.Length > 0 then
+        lTag := lOthers[0].ToString;
+      {$ENDIF}
+      Tag := new StructTag(lTag);
     end;
 
     property Name: String read fField.Name;
@@ -765,7 +799,7 @@ type
       if i ≥ lFields.Count then
         raise new IndexOutOfRangeException('Index out of range');
       {$ELSEIF ECHOES}
-      var lFields := fRealType.GetFields();
+      var lFields := System.Reflection.TypeInfo(fRealType).DeclaredFields.ToArray();
       if i ≥ lFields.Length then
         raise new IndexOutOfRangeException('Index out of range');
       {$ENDIF}
@@ -790,7 +824,7 @@ type
       {$IF ISLAND}
       lField := fRealType.Fields.Where(a->a.Name = aname).FirstOrDefault;
       {$ELSEIF ECHOES}
-      lField := System.Array.Find(fRealType.GetFields, a->a.Name = aname);
+      lField := System.Reflection.TypeInfo(fRealType).DeclaredFields.Where(a->a.Name = aname).FirstOrDefault;
       {$ENDIF}
       exit(new StructFieldImpl(lField), lField ≠ nil);
     end;
@@ -801,7 +835,7 @@ type
       {$IF ISLAND}
       lField := fRealType.Fields.Where(match).FirstOrDefault;
       {$ELSEIF ECHOES}
-      lField := System.Array.Find(fRealType.GetFields, (a) -> match(a.Name));
+      lField := TypeInfo(fRealType).DeclaredFields.Where((a) -> match(a.Name)).FirstOrDefault;
       {$ENDIF}
       exit(new StructFieldImpl(lField), lField ≠ nil);
     end;
@@ -842,7 +876,7 @@ type
       {$IF ISLAND}
       result := fRealType.Fields.Count;
       {$ELSEIF ECHOES}
-      result := fRealType.GetFields().Length;
+      result := System.Reflection.TypeInfo(fRealType).DeclaredFields.ToArray().Length;
       {$ENDIF}
     end;
 
@@ -868,7 +902,7 @@ type
       result := lMethod.Arguments.Count;
       {$ELSEIF ECHOES}
       var lMethod := fRealType.GetMethod('Invoke');
-      result := lMethod.ReturnType.GetFields.Length;
+      result := System.Reflection.TypeInfo(lMethod.ReturnType).DeclaredFields.ToArray().Length;
       {$ENDIF}
     end;
 
