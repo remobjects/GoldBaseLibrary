@@ -142,7 +142,6 @@ type
       raise new NotImplementedException();
     end;
 
-
     method MapIndex(key: Value): tuple of (Value);
     begin
       raise new NotImplementedException();
@@ -153,32 +152,9 @@ type
       raise new NotImplementedException;
     end;
 
-
     method MapKeys: builtin.Slice<Value>;
     begin
       raise new NotImplementedException();
-    end;
-
-    method &Set(aVal: Object);
-    begin
-      var lValue := if aVal is reflect.Value then reflect.Value(aVal).fValue else aVal;
-      if not CanSet or not fType.AssignableTo(TypeOf(lValue)) then
-        raise new Exception('Can not set object');
-
-      if fExtended <> nil then begin // struct field
-        {$IF ISLAND}
-        raise new NotImplementedException();
-        {$ELSEIF ECHOES}
-        (fExtended as FieldInfo).SetValue(builtin.IReference(fPtr).Get, lValue);
-        {$ENDIF}
-      end
-      else
-        builtin.IReference(fPtr).Set(lValue);
-
-      {if not CanSet or not fType.AssignableTo(TypeOf(aVal)) then
-        raise new Exception('Can not set object');}
-
-      //builtin.IReference(fPtr).Set(aVal);
     end;
 
     method CanInterface(): Boolean;
@@ -235,6 +211,28 @@ type
     method Cap: Integer;
     begin
       raise new NotImplementedException;
+    end;
+
+    method &Set(aVal: Object);
+    begin
+      var lValue := if aVal is reflect.Value then reflect.Value(aVal).fValue else aVal;
+      if not CanSet or not fType.AssignableTo(TypeOf(lValue)) then
+        raise new Exception('Can not set object');
+
+      if fExtended <> nil then begin // struct field
+        {$IF ISLAND}
+        raise new NotImplementedException();
+        {$ELSEIF ECHOES}
+        (fExtended as FieldInfo).SetValue(builtin.IReference(fPtr).Get, lValue);
+        {$ENDIF}
+      end
+      else
+        builtin.IReference(fPtr).Set(lValue);
+
+      {if not CanSet or not fType.AssignableTo(TypeOf(aVal)) then
+        raise new Exception('Can not set object');}
+
+      //builtin.IReference(fPtr).Set(aVal);
     end;
 
     method SetBytes(aval: builtin.Slice<Byte>);
@@ -450,9 +448,8 @@ type
     constructor(aValue: String);
     begin
       Value := aValue;
-      writeLn('Value!!!!!!!!!!');
-      writeLn(Value);
-      writeLn('-----------');
+      writeLn('Created:');
+      writeLn(aValue);
     end;
 
     method Get(key: String): String;
@@ -463,9 +460,14 @@ type
 
     method Lookup(key: String): tuple of (String, Boolean);
     begin
-      //raise new NotImplementedException;
-      result := ('', false);
-      // TODO
+      var lPos := Value.IndexOf(key + ':');
+      writeLn(lPos);
+      if lPos ≥ 0 then begin
+        var lResult := Value.Substring(lPos + key.Length + 1).Trim(['"', '''', ' ']);
+        exit (lResult, true);
+      end
+      else
+        result := ('', false);
     end;
   end;
 
@@ -493,11 +495,10 @@ type
       raise NotImplementedException;
       {$ELSEIF ECHOES}
       var lAttrs := aField.GetCustomAttributes(true);
-      if lAttrs.Length > 0 then
-        lTag := lAttrs[0].ToString;
-      var lOthers := aField.CustomAttributes.ToArray;
-      if lOthers.Length > 0 then
-        lTag := lOthers[0].ToString;
+      if lAttrs.Length > 0 then begin
+        if lAttrs[0] is builtin.TagAttribute then
+          lTag := (lAttrs[0] as builtin.TagAttribute).Tag;
+      end;
       {$ENDIF}
       Tag := new StructTag(lTag);
     end;
@@ -573,6 +574,24 @@ type
     class operator NotEqual(a, b: &Type): Boolean;
     begin
       exit not (a = b);
+    end;
+
+    class operator Equal(a: &Type; b: TypeImpl): Boolean;
+    begin
+      if (a is TypeImpl) then exit (TypeImpl(a).fRealType = b.fRealType);
+      exit Object.ReferenceEquals(a, b);
+    end;
+
+    class operator Equal(a: TypeImpl; b: &Type): Boolean;
+    begin
+      if (b is TypeImpl) then exit (a.fRealType = TypeImpl(b).fRealType);
+      exit Object.ReferenceEquals(a, b);
+    end;
+
+    class operator Equal(a: TypeImpl; b: TypeImpl): Boolean;
+    begin
+      exit (a.fRealType = b.fRealType);
+      exit Object.ReferenceEquals(a, b);
     end;
 
     property RealType: PlatformType read fRealType;

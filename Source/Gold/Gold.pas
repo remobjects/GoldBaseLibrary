@@ -695,8 +695,6 @@ type
     end;
   end;
 
-
-
   builtin.int32 = public partial record
   public
     operator implicit(aVal: builtin.int32): nullable Integer;
@@ -705,6 +703,18 @@ type
     end;
   end;
 
+  [AttributeUsage(AttributeTargets.Field)]
+  TagAttribute = public class(Attribute)
+  private
+    fTag: string;
+  public
+    constructor(aTag: string);
+    begin
+      fTag := aTag;
+    end;
+
+    property Tag: string read fTag;
+  end;
 
   crypto.internal.subtle.__Global = public partial class
   public
