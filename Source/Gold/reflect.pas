@@ -565,35 +565,6 @@ type
 
   public
 
-    class operator Equal(a, b: &Type): Boolean;
-    begin
-      if (a is TypeImpl) and (b is TypeImpl) then exit (TypeImpl(a).fRealType = TypeImpl(b).fRealType);
-      exit Object.ReferenceEquals(a, b);
-    end;
-
-    class operator NotEqual(a, b: &Type): Boolean;
-    begin
-      exit not (a = b);
-    end;
-
-    class operator Equal(a: &Type; b: TypeImpl): Boolean;
-    begin
-      if (a is TypeImpl) then exit (TypeImpl(a).fRealType = b.fRealType);
-      exit Object.ReferenceEquals(a, b);
-    end;
-
-    class operator Equal(a: TypeImpl; b: &Type): Boolean;
-    begin
-      if (b is TypeImpl) then exit (a.fRealType = TypeImpl(b).fRealType);
-      exit Object.ReferenceEquals(a, b);
-    end;
-
-    class operator Equal(a: TypeImpl; b: TypeImpl): Boolean;
-    begin
-      exit (a.fRealType = b.fRealType);
-      exit Object.ReferenceEquals(a, b);
-    end;
-
     property RealType: PlatformType read fRealType;
 
     constructor(aType: PlatformType);
@@ -1011,5 +982,36 @@ type
   begin
     raise new NotImplementedException;
   end;
+
+
+  operator Equal(a, b: &Type): Boolean; public;
+  begin
+    if (a is TypeImpl) and (b is TypeImpl) then exit (TypeImpl(a).fRealType = TypeImpl(b).fRealType);
+    exit Object.ReferenceEquals(a, b);
+  end;
+
+  operator NotEqual(a, b: &Type): Boolean;public;
+  begin
+    exit not (a = b);
+  end;
+
+  operator Equal(a: &Type; b: TypeImpl): Boolean;public;
+  begin
+    if (a is TypeImpl) then exit (TypeImpl(a).fRealType = b.fRealType);
+    exit Object.ReferenceEquals(a, b);
+  end;
+
+  operator Equal(a: TypeImpl; b: &Type): Boolean;public;
+  begin
+    if (b is TypeImpl) then exit (a.fRealType = TypeImpl(b).fRealType);
+    exit Object.ReferenceEquals(a, b);
+  end;
+
+  operator Equal(a: TypeImpl; b: TypeImpl): Boolean;public;
+  begin
+    exit (a.fRealType = b.fRealType);
+    exit Object.ReferenceEquals(a, b);
+  end;
+
 
 end.
