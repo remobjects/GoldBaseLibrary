@@ -448,8 +448,6 @@ type
     constructor(aValue: String);
     begin
       Value := aValue;
-      writeLn('Created:');
-      writeLn(aValue);
     end;
 
     method Get(key: String): String;
@@ -461,7 +459,6 @@ type
     method Lookup(key: String): tuple of (String, Boolean);
     begin
       var lPos := Value.IndexOf(key + ':');
-      writeLn(lPos);
       if lPos ≥ 0 then begin
         var lResult := Value.Substring(lPos + key.Length + 1).Trim(['"', '''', ' ']);
         exit (lResult, true);
@@ -931,7 +928,10 @@ type
     {$IFDEF ISLAND}
     exit new Value(TypeImpl(aType).RealType.Instantiate());
     {$ELSE}
-    exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType));
+    if TypeImpl(aType).fRealType = System.Type.GetType('System.String') then
+      exit new Value(System.String.Empty) // String .net does not have a constructor with no arguments.
+    else
+      exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType));
     {$ENDIF}
   end;
 
@@ -975,6 +975,9 @@ type
 
   method MakeSlice(t: &Type; len, cap: Integer): Value;
   begin
+    {var lType := TypeImpl(t).fRealType;
+    var lSlice := new builtin.Slice<lType>(len, cap);
+    result := new Value(lSlice);}
     raise new NotImplementedException;
   end;
 
@@ -997,6 +1000,12 @@ type
 
   operator Equal(a: &Type; b: TypeImpl): Boolean;public;
   begin
+    if not assigned(a) and not assigned(b) then
+      exit true;
+
+    if not assigned(a) or not assigned(b) then
+      exit false;
+
     if (a is TypeImpl) then exit (TypeImpl(a).fRealType = b.fRealType);
     exit Object.ReferenceEquals(a, b);
   end;

@@ -91,9 +91,9 @@ end;
 method EncodeRune(p: builtin.Slice<Byte>; r: builtin.rune): Integer; public;
 begin
   {$IFDEF ECHOES}
-  var z := System.Text.Encoding.UTF8.GetBytes(r.ToString());
+  var z := System.Text.Encoding.UTF8.GetBytes(chr(r));
   {$ELSE}
-  var z := Encoding.UTF8.GetBytes(r.ToString());
+  var z := Encoding.UTF8.GetBytes(chr(r));
   {$ENDIF}
   if z.Length > p.Length then exit -1;
   for i: Integer := 0 to z.Length -1 do
