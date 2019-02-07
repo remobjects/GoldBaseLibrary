@@ -35,7 +35,8 @@ const
   MinInt8   = -1  shl  7; public;
   MaxInt16  = 1 shl 15 - 1; public;
   MinInt16  = -1  shl  15; public;
-  MaxInt32  = 1 shl 31 - 1; public;
+  //MaxInt32  = 1 shl 31 - 1; public;
+  MaxInt32 = 2147483647; public;
   MinInt32  = -1  shl  31; public;
   MaxInt64  = 1 shl 63 - 1; public;
   MinInt64  = -1  shl  63; public;

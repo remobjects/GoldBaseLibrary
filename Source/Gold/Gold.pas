@@ -112,6 +112,12 @@ type
 {$ENDIF}
   ISlice = public interface
     method getAtIndex(i: Integer): Object;
+    method setAtIndex(i: Integer; aValue: Object);
+    method getCap: Integer;
+    method setCap: Integer;
+    method getLen: Integer;
+    method setLen: Integer;
+    method setFrom(aSrc: ISlice);
   end;
   //Slice<T> = public class(ISlice)
   Slice<T> = public class(sort.Interface, ISlice)
@@ -185,6 +191,39 @@ type
     method getAtIndex(i: Integer): Object;
     begin
       result := get_Item(i);
+    end;
+
+    method setAtIndex(i: Integer; aValue: Object);
+    begin
+      set_Item(i, T(aValue));
+    end;
+
+    method getCap: Integer;
+    begin
+      result := Capacity;
+    end;
+
+    method setCap: Integer;
+    begin
+
+    end;
+
+    method setLen: Integer;
+    begin
+
+    end;
+
+    method getLen: Integer;
+    begin
+      result := Length;
+    end;
+
+    method setFrom(aSrc: builtin.ISlice);
+    begin
+      fArray := new T[aSrc.getCap];
+      fStart := 0;
+      //fStart := aSrc.fStart;
+      fCount := aSrc.getLen;
     end;
 
     method ToArray: array of T;

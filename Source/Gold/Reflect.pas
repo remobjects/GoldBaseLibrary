@@ -213,26 +213,50 @@ type
       raise new NotImplementedException;
     end;
 
-    method &Set(aVal: Object);
+    method &Set(aVal: Value);
     begin
-      var lValue := if aVal is reflect.Value then reflect.Value(aVal).fValue else aVal;
-      if not CanSet or not fType.AssignableTo(TypeOf(lValue)) then
-        raise new Exception('Can not set object');
+      var lValue := aVal.fValue;
+
+      if TypeImpl(aVal.fType).RealType <> TypeImpl(self.fType).RealType then
+        if not CanSet or not fType.AssignableTo(TypeOf(lValue)) then
+          raise new Exception('Can not set object');
 
       if fExtended <> nil then begin // struct field
         {$IF ISLAND}
         raise new NotImplementedException();
         {$ELSEIF ECHOES}
+        {var lType2 := TypeImpl(aVal.fType).RealType;
+        var lFieldValue2 := lType2.GetField('Value');
+        var lATope2 := lFieldValue2.GetValue(lValue);}
+
         (fExtended as FieldInfo).SetValue(builtin.IReference(fPtr).Get, lValue);
+
+        {var lClan := (fExtended as FieldInfo).GetValue(builtin.IReference(fPtr).Get);
+
+        if TypeImpl(self.fType).RealType.IsValueType then begin
+          var lType3 := TypeImpl(self.fType).RealType;
+          var lFieldValue3 := lType3.GetField('Value');
+          var lATope3 := lFieldValue2.GetValue(lClan);
+          if lATope3 = nil then
+            writeLn('nil');
+        end;}
         {$ENDIF}
       end
       else
         builtin.IReference(fPtr).Set(lValue);
+    end;
 
-      {if not CanSet or not fType.AssignableTo(TypeOf(aVal)) then
-        raise new Exception('Can not set object');}
-
-      //builtin.IReference(fPtr).Set(aVal);
+    method InternalSet(aValue: Object); private;
+    begin
+      if fExtended <> nil then begin // struct field
+        {$IF ISLAND}
+        raise new NotImplementedException();
+        {$ELSEIF ECHOES}
+        (fExtended as FieldInfo).SetValue(builtin.IReference(fPtr).Get, aValue);
+        {$ENDIF}
+      end
+      else
+        builtin.IReference(fPtr).Set(aValue);
     end;
 
     method SetBytes(aval: builtin.Slice<Byte>);
@@ -245,7 +269,8 @@ type
       if (not CanSet) or not (Integer(Kind) in [Integer(reflect.Int)..Integer(reflect.Int64)])  then
         raise new Exception('Can not set object to integer value');
 
-      builtin.IReference(fValue).Set(aVal);
+      //builtin.IReference(fValue).Set(aVal);
+      InternalSet(aVal);
     end;
 
     method &SetBool(aVal: Boolean);
@@ -253,7 +278,8 @@ type
       if (not CanSet) or (Kind ≠ reflect.Bool) then
         raise new Exception('Can not set object to bool value');
 
-      builtin.IReference(fValue).Set(aVal);
+      //builtin.IReference(fValue).Set(aVal);
+      InternalSet(aVal);
     end;
 
     method &SetUint(aVal: UInt64);
@@ -261,7 +287,8 @@ type
       if (not CanSet) or not (Integer(Kind) in [Integer(reflect.Uint)..Integer(reflect.Uint64)])  then
         raise new Exception('Can not set object to unsigned integer value');
 
-      builtin.IReference(fValue).Set(aVal);
+      //builtin.IReference(fValue).Set(aVal);
+      InternalSet(aVal);
     end;
 
     method &SetFloat(aVal: Double);
@@ -269,7 +296,8 @@ type
       if (not CanSet) or ((Kind ≠ reflect.Float32) and (Kind ≠ reflect.Float64)) then
         raise new Exception('Can not set object to float value');
 
-      builtin.IReference(fPtr).Set(aVal);
+      //builtin.IReference(fPtr).Set(aVal);
+      InternalSet(aVal);
     end;
 
     method &SetComplex(aVal: builtin.complex128);
@@ -282,7 +310,8 @@ type
       if (not CanSet) or (Kind ≠ reflect.String) then
         raise new Exception('Can not set object to string value');
 
-      builtin.IReference(fValue).Set(aVal);
+      //builtin.IReference(fValue).Set(aVal);
+      InternalSet(aVal);
     end;
 
     method &Type: &Type;
@@ -335,7 +364,7 @@ type
 
     method NumMethod: Integer;
     begin
-      raise new NotImplementedException;
+      result := fType.NumMethod;
     end;
 
     method Field(i: Integer): Value;
@@ -344,7 +373,8 @@ type
       raise new NotImplementedException;
       {$ELSEIF ECHOES}
       var lFields := System.Reflection.TypeInfo(TypeImpl(fType).fRealType).DeclaredFields.ToArray();
-      result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), fPtr, lFields[i]);
+      //result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), fPtr, lFields[i]);
+      result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), new builtin.Reference<Object>(fValue), lFields[i]);
       {$ENDIF}
     end;
 
@@ -968,24 +998,65 @@ type
     raise new NotImplementedException;
   end;
 
+  method InternalGetValue(aVal: Value): Object;
+  begin
+    var lType := TypeImpl(aVal.fType).RealType;
+    if lType.IsValueType then begin
+      var lFieldValue := lType.GetField('Value');
+      var lValue: Object;
+      if aVal.fExtended <> nil then begin
+        lValue := (aVal.fExtended as FieldInfo).GetValue(if aVal.fPtr is builtin.IReference then builtin.IReference(aVal.fPtr).Get else aVal.fPtr);
+      end
+      else
+        lValue := aVal.fValue;
+      exit lFieldValue.GetValue(lValue);
+    end
+    else
+      exit aVal;
+  end;
+
   method Copy(dst: Value; src: Value): Integer;
   begin
+    {$IF ISLAND}
     raise new NotImplementedException;
+    {$ELSEIF ECHOES}
+    var lDst := InternalGetValue(dst);
+    var lSrc := InternalGetValue(src);
+    if (lDst = nil) or (lSrc = nil) then
+      writeLn('Nil value...');
+    {$ENDIF}
+
+    {var lType2 := TypeImpl(src.fType).RealType;
+    var lFieldValue2 := lType2.GetField('Value');
+    var lATope2 := lFieldValue2.GetValue(src.fValue);
+
+    var lType := TypeImpl(dst.fType).RealType;
+    var lFieldValue := lType.GetField('Value');
+    var lATope := lFieldValue.GetValue(dst.fValue);
+    if dst.fValue is builtin.ISlice then
+      writeLn('yesss');}
+  end;
+
+  method InstantiateSlice(aType: PlatformType; aCount: Integer): Object; private;
+  begin
+    if aType.IsValueType and (aType.GetConstructors().Count = 2) and (aType.GetFields().count = 1) then begin
+      exit Activator.CreateInstance(aType, [InstantiateSlice(aType.GetFields()[0].FieldType, aCount)]);
+    end;
+    //assert TypeOf(ISlice).AssignableTo(aMemberType)
+    exit Activator.CreateInstance(aType, [aCount]);
+    //exit Activator.CreateInstance((aMemberType as FieldInfo).FieldType, [aCount]);
   end;
 
   method MakeSlice(t: &Type; len, cap: Integer): Value;
   begin
-    {var lType := TypeImpl(t).fRealType;
-    var lSlice := new builtin.Slice<lType>(len, cap);
-    result := new Value(lSlice);}
-    raise new NotImplementedException;
+    //result := new Value(new builtin.Slice<Object>(len, cap), new TypeImpl(TypeImpl(t).fRealType));
+    result := new Value(InstantiateSlice(TypeImpl(t).fRealType, cap), new TypeImpl(TypeImpl(t).fRealType));
   end;
 
   method MakeFunc(typ: &Type; fn: delegate(args: builtin.Slice<Value>): builtin.Slice<Value>): Value;
   begin
     raise new NotImplementedException;
   end;
-
 
   operator Equal(a, b: &Type): Boolean; public;
   begin
