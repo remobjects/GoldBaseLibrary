@@ -88,7 +88,7 @@
     <Compile Include="Gold.pas"></Compile>
     <Compile Include="Properties\AssemblyInfo.pas" />
     <Compile Include="Gold.Channels.Echoes.pas" />
-    <Compile Include="reflect.pas"></Compile>
+    <Compile Include="Reflect.pas"></Compile>
     <Compile Include="Aliases.pas" />
     <Compile Include="Partials.pas" />
     <Compile Include="database\sql\convert.go">
@@ -117,9 +117,9 @@
     <Compile Include="io\multi.go" />
     <Compile Include="io\pipe.go" />
     <Compile Include="sync.atomic.pas" />
-    <Compile Include="unicode.utf8.pas" />
-    <Compile Include="runtime.pas" />
-    <Compile Include="sort.pas" />
+    <Compile Include="Unicode.UTF-8.pas" />
+    <Compile Include="Runtime.pas" />
+    <Compile Include="Sort.pas" />
     <Compile Include="strconv\atob.go" />
     <Compile Include="strconv\atof.go" />
     <Compile Include="strconv\atoi.go" />
@@ -130,9 +130,9 @@
     <Compile Include="strconv\isprint.go" />
     <Compile Include="strconv\itoa.go" />
     <Compile Include="strconv\quote.go" />
-    <Compile Include="sync.pas" />
+    <Compile Include="Sync.pas" />
     <Compile Include="os.cs" />
-    <Compile Include="math.pas" />
+    <Compile Include="Math.pas" />
     <Compile Include="os.pas" />
     <Compile Include="math\bits\bits.go" />
     <Compile Include="math\bits\bits_tables.go" />
@@ -512,7 +512,7 @@
     <Compile Include="golang_org\x\text\transform\transform.go" />
     <Compile Include="golang_org\x\text\secure\bidirule\bidirule.go" />
     <Compile Include="syscall\net.go" />
-    <Compile Include="net.pas" />
+    <Compile Include="Net.pas" />
     <Compile Include="encoding\hex\hex.go" />
     <Compile Include="golang_org\x\crypto\cryptobyte\asn1.go" />
     <Compile Include="golang_org\x\crypto\cryptobyte\builder.go" />

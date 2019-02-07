@@ -1,4 +1,5 @@
 ﻿namespace runtime;
+
 {$IFDEF ECHOES}
 uses
   System.IO, System.Text;

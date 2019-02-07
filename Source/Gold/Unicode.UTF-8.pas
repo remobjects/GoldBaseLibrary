@@ -1,48 +1,48 @@
 ﻿namespace unicode.utf8;
 
 const
-        RuneError: builtin.rune = #$FFFD;
-        RuneSelf  = $80      ;
-        MaxRune   = $10FFFF;
-        UTFMax    = 4       ;
-        surrogateMin = $D800;
+  RuneError: builtin.rune = #$FFFD;
+  RuneSelf  = $80      ;
+  MaxRune   = $10FFFF;
+  UTFMax    = 4       ;
+  surrogateMin = $D800;
 
-        surrogateMax = $DFFF;
+  surrogateMax = $DFFF;
 
 
-        t1 = $00; // 0000 0000
-        tx = $80; // 1000 0000
-        t2 = $C0; // 1100 0000
-        t3 = $E0; // 1110 0000
-        t4 = $F0; // 1111 0000
-        t5 = $F8; // 1111 1000
+  t1 = $00; // 0000 0000
+  tx = $80; // 1000 0000
+  t2 = $C0; // 1100 0000
+  t3 = $E0; // 1110 0000
+  t4 = $F0; // 1111 0000
+  t5 = $F8; // 1111 1000
 
-        maskx = $3F; // 0011 1111
-        mask2 = $1F; // 0001 1111
-        mask3 = $0F; // 0000 1111
-        mask4 = $07; // 0000 0111
+  maskx = $3F; // 0011 1111
+  mask2 = $1F; // 0001 1111
+  mask3 = $0F; // 0000 1111
+  mask4 = $07; // 0000 0111
 
-        rune1Max = 1 shl 7 - 1;
-        rune2Max = 1 shl 11 - 1;
-        rune3Max = 1 shl 16 - 1;
+  rune1Max = 1 shl 7 - 1;
+  rune2Max = 1 shl 11 - 1;
+  rune3Max = 1 shl 16 - 1;
 
-        // The default lowest and highest continuation byte.
-        locb = $80; // 1000 0000
-        hicb = $BF; // 1011 1111
+  // The default lowest and highest continuation byte.
+  locb = $80; // 1000 0000
+  hicb = $BF; // 1011 1111
 
-        // These names of these constants are chosen to give nice alignment in the
-        // table below. The first nibble is an index into acceptRanges or F for
-        // special one-byte cases. The second nibble is the Rune length or the
-        // Status for the special one-byte case.
-        xx = $F1; // invalid: size 1
-        &as = $F0; // ASCII: size 1
-        s1 = $02; // accept 0, size 2
-        s2 = $13; // accept 1, size 3
-        s3 = $03; // accept 0, size 3
-        s4 = $23; // accept 2, size 3
-        s5 = $34; // accept 3, size 4
-        s6 = $04; // accept 0, size 4
-        s7 = $44; // accept 4, size 4
+  // These names of these constants are chosen to give nice alignment in the
+  // table below. The first nibble is an index into acceptRanges or F for
+  // special one-byte cases. The second nibble is the Rune length or the
+  // Status for the special one-byte case.
+  xx = $F1; // invalid: size 1
+  &as = $F0; // ASCII: size 1
+  s1 = $02; // accept 0, size 2
+  s2 = $13; // accept 1, size 3
+  s3 = $03; // accept 0, size 3
+  s4 = $23; // accept 2, size 3
+  s5 = $34; // accept 3, size 4
+  s6 = $04; // accept 0, size 4
+  s7 = $44; // accept 4, size 4
 
 var first: array of builtin.uint8 := [
   //   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
@@ -66,12 +66,12 @@ var first: array of builtin.uint8 := [
 ];
 
 var acceptRanges: array of array of Integer :=[
-  [locb, hicb],
-  [$A0, hicb],
-  [locb, $9F],
-  [$90, hicb],
-  [locb, $8F]
-];
+      [locb, hicb],
+      [$A0, hicb],
+      [locb, $9F],
+      [$90, hicb],
+      [locb, $8F]
+    ];
 
 method DecodeRuneInString(n: builtin.string): tuple of (builtin.rune, Integer);public;
 begin
@@ -111,7 +111,6 @@ begin
   //if r ≤ rune4Max then exit 4;
   exit -1;
 end;
-
 
 method FullRune(p: builtin.Slice<Byte>): Boolean;
 begin

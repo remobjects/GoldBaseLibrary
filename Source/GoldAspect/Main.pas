@@ -1,6 +1,5 @@
 ﻿namespace GoldAspect;
 
-
 uses
   System.Linq,
   RemObjects.Elements.Cirrus.*;

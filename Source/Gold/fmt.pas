@@ -1,10 +1,6 @@
 ﻿namespace fmt;
-uses
-  fmt
-{$IFDEF CLR}
-  , System.Linq
-{$ENDIF}
-  ;
+
+uses fmt {$IFDEF CLR}, System.Linq {$ENDIF};
 
 method Errorf(fmt: String; params x: array of Object): builtin.error; public;
 begin

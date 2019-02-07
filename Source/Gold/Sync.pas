@@ -1,4 +1,5 @@
 ﻿namespace sync;
+
 type
   Locker = public interface
     method Lock();
