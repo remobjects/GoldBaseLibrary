@@ -1,0 +1,26 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# RemObjects Fire
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Gold", "Gold.elements", "{1589467E-2C45-4FD0-B0BA-F09FBAEC2E2B}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "GoldAspect", "..\GoldAspect\GoldAspect.elements", "{631D3965-3D71-4DFD-9864-EBF841EA6192}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AnyCPU = Debug|AnyCPU
+		Release|AnyCPU = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1589467E-2C45-4FD0-B0BA-F09FBAEC2E2B}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{1589467E-2C45-4FD0-B0BA-F09FBAEC2E2B}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{1589467E-2C45-4FD0-B0BA-F09FBAEC2E2B}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{1589467E-2C45-4FD0-B0BA-F09FBAEC2E2B}.Release|AnyCPU.Build.0 = Release|AnyCPU
+		{631D3965-3D71-4DFD-9864-EBF841EA6192}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{631D3965-3D71-4DFD-9864-EBF841EA6192}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{631D3965-3D71-4DFD-9864-EBF841EA6192}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{631D3965-3D71-4DFD-9864-EBF841EA6192}.Release|AnyCPU.Build.0 = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

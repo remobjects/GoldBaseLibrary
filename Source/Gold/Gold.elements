@@ -4,7 +4,7 @@
     <ProductVersion>3.5</ProductVersion>
     <ProjectGuid>{1589467E-2C45-4FD0-B0BA-F09FBAEC2E2B}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>Gold</AssemblyName>
+    <AssemblyName>Go</AssemblyName>
     <SuppressWarnings>H0;W63;W3;H10;H11;H7;H8;H6;H14;H16</SuppressWarnings>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <AllowUnsafeCode>True</AllowUnsafeCode>
