@@ -924,7 +924,10 @@ type
       result := lMethod.Arguments.Count;
       {$ELSEIF ECHOES}
       var lMethod := fRealType.GetMethod('Invoke');
-      result := System.Reflection.TypeInfo(lMethod.ReturnType).DeclaredFields.ToArray().Length;
+      if System.Reflection.TypeInfo(lMethod.ReturnType).IsGenericType and (System.Reflection.TypeInfo(lMethod.ReturnType).FullName.StartsWith('System.Tuple')) then
+        result := System.Reflection.TypeInfo(lMethod.ReturnType).DeclaredFields.ToArray().Length
+      else
+        result := 1;
       {$ENDIF}
     end;
 
@@ -940,10 +943,17 @@ type
       result := new TypeImpl(lParameters[i].Type);
       {$ELSEIF ECHOES}
       var lMethod := fRealType.GetMethod('Invoke');
-      var lParameters := lMethod.GetParameters;
-      if lParameters.Length ≤ i then
+      var lTotal := 1;
+      if System.Reflection.TypeInfo(lMethod.ReturnType).IsGenericType and (System.Reflection.TypeInfo(lMethod.ReturnType).FullName.StartsWith('System.Tuple')) then
+        lTotal := System.Reflection.TypeInfo(lMethod.ReturnType).DeclaredFields.ToArray().Length;
+
+      if lTotal < i then
         raise new IndexOutOfRangeException('Index out of range');
-      result := new TypeImpl(lParameters[i].ParameterType);
+
+      if lTotal > 1 then
+        result := new TypeImpl(System.Reflection.TypeInfo(lMethod.ReturnType).DeclaredFields.ToArray()[i].FieldType)
+      else
+        result := new TypeImpl(System.Reflection.TypeInfo(lMethod.ReturnType));
       {$ENDIF}
     end;
   end;
