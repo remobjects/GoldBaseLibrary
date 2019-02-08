@@ -270,7 +270,10 @@ type
         raise new Exception('Can not set object to integer value');
 
       //builtin.IReference(fValue).Set(aVal);
-      InternalSet(aVal);
+      if (aVal ≥ :math.MinInt32) and (aVal ≤ :math.MaxInt32) then // .net runtime fails if a Int64 value try to set in a Int32 field, even if fit.
+        InternalSet(Integer(aVal))
+      else
+        InternalSet(aVal);
     end;
 
     method &SetBool(aVal: Boolean);
@@ -662,7 +665,7 @@ type
 
     method String: String;
     begin
-      raise new NotImplementedException;
+      result := fRealType.Name;
     end;
 
     method Kind: Kind;
@@ -708,6 +711,8 @@ type
       //if fRealType is builtin.Reference<Object> then
       //if fRealType is sort.Interface then
         //exit reflect.Slice;
+      if fRealType.BaseType = TypeOf(System.MulticastDelegate) then
+        exit reflect.Func;
 
       if fRealType.GenericTypeArguments.Length > 0 then
         if fRealType.AssemblyQualifiedName.StartsWith('builtin.Slice') then
@@ -1020,10 +1025,13 @@ type
     {$IF ISLAND}
     raise new NotImplementedException;
     {$ELSEIF ECHOES}
-    var lDst := InternalGetValue(dst);
-    var lSrc := InternalGetValue(src);
-    if (lDst = nil) or (lSrc = nil) then
-      writeLn('Nil value...');
+    // TODO check kind
+    var lDst := builtin.ISlice(InternalGetValue(dst));
+    var lSrc := builtin.ISlice(InternalGetValue(src));
+
+    result := Math.Min(if lSrc = nil then 0 else lSrc.getLen, if lDst = nil then 0 else lDst.getLen);
+    for i: Integer := 0 to result -1 do
+      lDst.setAtIndex(i, lSrc.getAtIndex(i));
     {$ENDIF}
 
     {var lType2 := TypeImpl(src.fType).RealType;

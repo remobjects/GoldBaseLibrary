@@ -9,6 +9,13 @@ type
     method HtmlUnescapeStringTest;
     begin
       Assert.AreEqual(TestApplication2.DoHtmlUnescapeStringTest(), """Fran & Freddie's Diner"" <tasty@example.com>");
+      Assert.AreEqual(TestApplication2.DoHtmlEscapeStringTest("&"), "&amp;");
+      Assert.AreEqual(TestApplication2.DoHtmlEscapeStringTest("&<ok"), "&amp;&lt;ok");
+    end;
+
+    method HtmlTemplateTest;
+    begin
+      TestApplication2.DoHtmlTemplatesTest();
     end;
   end;
 

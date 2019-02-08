@@ -118,5 +118,6 @@ if err != nil {
 	log.Fatal(err)
 }
 
-fmt.Printf("Got a %T, with remaining data: %q", pub, rest)
+return string(rest) == "and some more"
+//fmt.Printf("Got a %T, with remaining data: %q", pub, rest)
 }
