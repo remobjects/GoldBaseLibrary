@@ -9,6 +9,7 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <AllowUnsafeCode>True</AllowUnsafeCode>
     <TargetFramework>.NETFramework4.5</TargetFramework>
+    <GenerateDebugInfo>True</GenerateDebugInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
