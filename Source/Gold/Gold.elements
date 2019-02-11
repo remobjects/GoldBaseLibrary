@@ -43,6 +43,13 @@
     <Architecture>x86_64</Architecture>
     <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.Darwin.macOS' ">
+    <Mode>Island</Mode>
+    <SubMode>Darwin</SubMode>
+    <SDK>macOS</SDK>
+    <DefineConstants>POSIX</DefineConstants>
+    <OutputType>StaticLibrary</OutputType>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib">
       <Target>Echoes</Target>
@@ -76,6 +83,21 @@
     </Reference>
     <Reference Include="Island">
       <Target>Island.Linux</Target>
+    </Reference>
+    <Reference Include="rtl">
+      <Target>Island.Darwin.macOS</Target>
+    </Reference>
+    <Reference Include="Foundation">
+      <Target>Island.Darwin.macOS</Target>
+    </Reference>
+    <Reference Include="CoreFoundation">
+      <Target>Island.Darwin.macOS</Target>
+    </Reference>
+    <Reference Include="gc">
+      <Target>Island.Darwin.macOS</Target>
+    </Reference>
+    <Reference Include="Island">
+      <Target>Island.Darwin.macOS</Target>
     </Reference>
     <ProjectReference Include="GoldAspect">
       <HintPath>..\GoldAspect\Bin\Debug\GoldAspect.dll</HintPath>
