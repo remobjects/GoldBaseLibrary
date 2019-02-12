@@ -51,6 +51,39 @@ type
     constructor();
     begin
     end;
+    {$IFDEF ECHOES}
+    class operator implicit(aVal:  System.Collections.Generic.Dictionary<K, V>): Map<K, V>;
+    begin
+      result := new Map<K, V>;
+      for each el in aVal do
+        result.fDict.Add(el.Key, el.Value);
+    end;
+
+    class operator implicit(aVal: Map<K, V>):  System.Collections.Generic.Dictionary<K, V>;
+    begin
+      result := new System.Collections.Generic.Dictionary<K, V>;
+
+      for each el in aVal.fDict do
+        result.Add(el.Key, el.Value);
+    end;
+    {$ELSEIF ISLAND}
+    class operator implicit(aVal:  Dictionary<K, V>): Map<K, V>;
+    begin
+      result := new Map<K, V>;
+      for each el in aVal do
+        result.fDict.Add(el.Key, el.Value);
+    end;
+
+    class operator implicit(aVal: Map<K, V>):  Dictionary<K, V>;
+    begin
+      result := new Dictionary<K, V>;
+
+      for each el in aVal.fDict do
+        result.Add(el.Key, el.Value);
+    end;
+    {$ELSE}
+    {$ERROR NOT SUPPORTED}
+    {$ENDIF}
 
     constructor(aKeys: array of K; aValues: array of V);
     begin
