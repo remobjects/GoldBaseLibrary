@@ -50,7 +50,7 @@ namespace go.path
 			#if ECHOES
 			return new builtin.Slice<String>(s.Split(new[] {go.os.PathListSeparator}, StringSplitOptions.RemoveEmptyEntries));
 			#else
-			return new builtin.Slice<String>(s.Split(os.PathListSeparator, true));
+			return new builtin.Slice<String>(s.Split(go.os.PathListSeparator, true));
 			#endif
 		}
 
@@ -162,7 +162,7 @@ namespace go.os {
 				}
 				#else
 				if (new RemObjects.Elements.System.File(file).Exists()) return (file, null);
-				foreach (var el in os.Getenv("PATH").Split(Path.DirectorySeparatorChar)) {
+				foreach (var el in go.os.Getenv("PATH").Split(Path.DirectorySeparatorChar)) {
 					var p = RemObjects.Elements.System.Path.Combine(el, file);
 					if (new RemObjects.Elements.System.File(p).Exists()) return (p, null);
 				}

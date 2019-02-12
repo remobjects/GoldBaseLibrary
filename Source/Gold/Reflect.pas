@@ -522,7 +522,7 @@ type
       PkgPath := '';
       var lTag := '';
       {$IF ISLAND}
-      raise NotImplementedException;
+      raise new NotImplementedException();
       {$ELSEIF ECHOES}
       var lAttrs := aField.GetCustomAttributes(true);
       if lAttrs.Length > 0 then begin
@@ -672,31 +672,31 @@ type
     begin
       {$IF ISLAND}
       if (fRealType.GenericArguments <> nil) and (fRealType.GenericArguments.Count > 0) then
-        exit reflect.Ptr;
+        exit go.reflect.Ptr;
 
       case fRealType.Code of
-        TypeCodes.Boolean: result := reflect.Bool;
-        TypeCodes.Char: result := reflect.Uint16;
-        TypeCodes.SByte: result := reflect.Uint8;
-        TypeCodes.Byte: result := reflect.Int8;
-        TypeCodes.Int16: result := reflect.Int16;
-        TypeCodes.UInt16: result := reflect.Uint16;
-        TypeCodes.Int32: result := reflect.Int32;
-        TypeCodes.UInt32: result := reflect.Uint32;
-        TypeCodes.Int64: result := reflect.Int64;
-        TypeCodes.UInt64: result := reflect.Uint64;
-        TypeCodes.Single: result := reflect.Float32;
-        TypeCodes.Double: result := reflect.Float64;
-        TypeCodes.UIntPtr: result := reflect.UintPtr;
-        TypeCodes.IntPtr: result := reflect.Ptr;
-        TypeCodes.String: result := reflect.String;
+        TypeCodes.Boolean: result := go.reflect.Bool;
+        TypeCodes.Char: result := go.reflect.Uint16;
+        TypeCodes.SByte: result := go.reflect.Uint8;
+        TypeCodes.Byte: result := go.reflect.Int8;
+        TypeCodes.Int16: result := go.reflect.Int16;
+        TypeCodes.UInt16: result := go.reflect.Uint16;
+        TypeCodes.Int32: result := go.reflect.Int32;
+        TypeCodes.UInt32: result := go.reflect.Uint32;
+        TypeCodes.Int64: result := go.reflect.Int64;
+        TypeCodes.UInt64: result := go.reflect.Uint64;
+        TypeCodes.Single: result := go.reflect.Float32;
+        TypeCodes.Double: result := go.reflect.Float64;
+        TypeCodes.UIntPtr: result := go.reflect.UintPtr;
+        TypeCodes.IntPtr: result := go.reflect.Ptr;
+        TypeCodes.String: result := go.reflect.String;
         TypeCodes.None: begin
           case (fRealType.Flags and IslandTypeFlags.TypeKindMask) of
-            IslandTypeFlags.Array: exit reflect.Array;
-            IslandTypeFlags.Struct: exit reflect.Struct;
-            IslandTypeFlags.Interface: exit reflect.Interface;
-            IslandTypeFlags.Generic: exit reflect.Ptr;
-            default: exit reflect.Invalid;
+            IslandTypeFlags.Array: exit go.reflect.Array;
+            IslandTypeFlags.Struct: exit go.reflect.Struct;
+            IslandTypeFlags.Interface: exit go.reflect.Interface;
+            IslandTypeFlags.Generic: exit go.reflect.Ptr;
+            default: exit go.reflect.Invalid;
           end;
         end;
       end;
@@ -1017,7 +1017,11 @@ type
   begin
     var lType := TypeImpl(aVal.fType).RealType;
     if lType.IsValueType then begin
+      {$IF ECHOES}
       var lFieldValue := lType.GetField('Value');
+      {$ELSE}
+      var lFieldValue := lType.Fields.FirstOrDefault(a -> a.Name = 'Value');
+      {$ENDIF}
       var lValue: Object;
       if aVal.fExtended <> nil then begin
         lValue := (aVal.fExtended as FieldInfo).GetValue(if aVal.fPtr is go.builtin.IReference then go.builtin.IReference(aVal.fPtr).Get else aVal.fPtr);
@@ -1057,12 +1061,17 @@ type
 
   method InstantiateSlice(aType: PlatformType; aCount: Integer): Object; private;
   begin
+    {$IF ISLAND}
+    result := nil;
+    // TODO
+    {$ELSEIF ECHOES}
     if aType.IsValueType and (aType.GetConstructors().Count = 2) and (aType.GetFields().Count = 1) then begin
       exit Activator.CreateInstance(aType, [InstantiateSlice(aType.GetFields()[0].FieldType, aCount)]);
     end;
     //assert TypeOf(ISlice).AssignableTo(aMemberType)
     exit Activator.CreateInstance(aType, [aCount]);
     //exit Activator.CreateInstance((aMemberType as FieldInfo).FieldType, [aCount]);
+    {$ENDIF}
   end;
 
   method MakeSlice(t: &Type; len, cap: Integer): Value;
