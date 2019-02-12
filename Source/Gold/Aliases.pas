@@ -1,4 +1,4 @@
-﻿namespace builtin;
+﻿namespace go.builtin;
 
 type
   int = public RemObjects.Elements.System.Int32;
@@ -34,12 +34,12 @@ type
 
   method print(params x: array of Object);
   begin
-    fmt.Print(x);
+    go.fmt.Print(x);
   end;
 
   method println(params x: array of Object);
   begin
-    fmt.Println(x);
+    go.fmt.Println(x);
   end;
 
 end.

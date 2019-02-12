@@ -1,4 +1,4 @@
-﻿namespace runtime;
+﻿namespace go.runtime;
 
 {$IFDEF ECHOES}
 uses
@@ -9,12 +9,12 @@ type
   [ValueTypeSemantics]
   Frame = public partial class
   public
-    PC: builtin.uintptr;
-    Func: builtin.Reference<Func>;
+    PC: go.builtin.uintptr;
+    Func: go.builtin.Reference<Func>;
     &Function: String;
     File: String;
     Line: Integer;
-    Entry: builtin.uintptr;
+    Entry: go.builtin.uintptr;
   end;
   [ValueTypeSemantics]
   Frames = public partial class
@@ -29,17 +29,17 @@ type
 
   end;
 
-method Callers(&skip: Integer; pc: builtin.Slice<builtin.uintptr>): Integer;
+method Callers(&skip: Integer; pc: go.builtin.Slice<go.builtin.uintptr>): Integer;
 begin
   exit 0;
 end;
 
-method CallersFrames(acallers: builtin.Slice<builtin.uintptr>): builtin.Reference<Frames>;
+method CallersFrames(acallers: go.builtin.Slice<go.builtin.uintptr>): go.builtin.Reference<Frames>;
 begin
-  exit new builtin.Reference<Frames>(new Frames);
+  exit new go.builtin.Reference<Frames>(new Frames);
 end;
 
-method Stack(buf: builtin.Slice<Byte>; all: Boolean): Integer; public;
+method Stack(buf: go.builtin.Slice<Byte>; all: Boolean): Integer; public;
 begin
   exit 0;
 end;
@@ -52,9 +52,9 @@ begin
   raise new NotImplementedException;
 end;
 
-method StartTrace: builtin.error;
+method StartTrace: go.builtin.error;
 begin
-  exit Errors.new('Not supported');
+  exit go.Errors.new('Not supported');
 end;
 
 method StopTrace;
@@ -62,7 +62,7 @@ begin
   raise new NotImplementedException;
 end;
 
-method ReadTrace: builtin.Slice<Byte>;
+method ReadTrace: go.builtin.Slice<Byte>;
 begin
   raise new NotImplementedException;
 end;
@@ -73,7 +73,7 @@ begin
 end;
 
 type
-  builtin.__Global = public partial class
+  go.builtin.__Global = public partial class
   private
     {$IFDEF ISLAND}
     class var dtbase : DateTime := new DateTime(1970, 1, 1, 0, 0, 0, 0);
@@ -97,7 +97,7 @@ type
   end;
 
 type
-  runtime.trace.__Global = public partial class
+  go.runtime.trace.__Global = public partial class
   public
     class method userTaskCreate(id, parentID: UInt64; taskType: String);
     begin
@@ -121,7 +121,7 @@ type
       raise new NotImplementedException;
     end;
   end;
-  &unsafe.__Global = public partial class
+  Go.&unsafe.__Global = public partial class
   public
     class method Sizeof<T>(o: T): Integer; inline;
     begin
@@ -131,7 +131,7 @@ type
 
 
   [AliasSemantics]
-  syscall.Errno = public record(builtin.error)
+  go.syscall.Errno = public record(go.builtin.error)
   public
     Value: UIntPtr;
 
@@ -147,7 +147,7 @@ type
 
 
   [AliasSemantics]
-  runtime.Error = public record(builtin.error)
+  go.runtime.Error = public record(go.builtin.error)
   public
     Value: String;
 
@@ -162,14 +162,14 @@ type
   end;
 
   [ValueTypeSemantics]
-  syscall.SysProcAttr = public class
+  go.syscall.SysProcAttr = public class
   public
     HideWindow: Boolean;
     CmdLine: String; // used if non-empty, else the windows command line is built by escaping the arguments passed to StartProcess
     CreationFlags: UInt32;
   end;
 
-  internal.testlog.__Global = public partial class
+  go.internal.testlog.__Global = public partial class
   public
     class method Getenv(s: String); empty;
     class method Open(s: String); empty;
@@ -178,7 +178,7 @@ type
   end;
 
 
-  syscall.__Global = public partial class
+  go.syscall.__Global = public partial class
   public
 
     class method Getenv(sn: String): tuple of (String, Boolean);
@@ -189,12 +189,12 @@ type
       exit (s, true);
     end;
 
-    class method Unsetenv(s: String): builtin.error;
+    class method Unsetenv(s: String): go.builtin.error;
     begin
       Environment.SetEnvironmentVariable(s, nil);
     end;
 
-    class method Clearenv: builtin.error;
+    class method Clearenv: go.builtin.error;
     begin
       {$IF ISLAND}
       for each el in Environment.GetEnvironmentVariables() do
@@ -205,7 +205,7 @@ type
       {$ENDIF}
     end;
 
-    class method Environ: builtin.Slice<String>;
+    class method Environ: go.builtin.Slice<String>;
     begin
       {$IF ISLAND}
       var lRes := new List<String>;
@@ -216,7 +216,7 @@ type
       for each el: System.Collections.DictionaryEntry in Environment.GetEnvironmentVariables() do
         lRes.Add(el.Key.ToString() +'='+el.Value);
       {$ENDIF}
-      exit new builtin.Slice<String>(lRes.ToArray);
+      exit new go.builtin.Slice<String>(lRes.ToArray);
     end;
 
     class method &Exit(i: Integer);
@@ -262,13 +262,13 @@ type
       {$ENDIF}
     end;
 
-  class method Getgroups: tuple of (builtin.Slice<Integer>, builtin.error);
+  class method Getgroups: tuple of (go.builtin.Slice<Integer>, go.builtin.error);
   begin
-    exit (new builtin.Slice<Integer>, Errors.New('Not supported'));
+    exit (new go.builtin.Slice<Integer>, go.Errors.New('Not supported'));
   end;
 
     class var
-      ENOENT : syscall.Errno := new syscall.Errno(1); readonly;
+      ENOENT : go.syscall.Errno := new go.syscall.Errno(1); readonly;
     const
       O_RDONLY   = $00000;
       O_WRONLY   = $00001;
@@ -284,10 +284,10 @@ type
       O_CLOEXEC  = $80000;
 
 
-    class var  ENOTDIR :syscall.Errno := new syscall.Errno(2); readonly;
+    class var  ENOTDIR :go.syscall.Errno := new go.syscall.Errno(2); readonly;
 
 
-    class method Setenv(key: String; value: String): builtin.error;
+    class method Setenv(key: String; value: String): go.builtin.error;
     begin
       var lRes := true;
       if defined('ISLAND') then
@@ -303,7 +303,7 @@ type
     end;
   end;
 
-  ExceptionError = public class(builtin.error)
+  ExceptionError = public class(go.builtin.error)
   public
     constructor(err: Exception);
     begin
@@ -313,24 +313,24 @@ type
     property Exception: Exception; readonly;
   end;
 
-  time.__Global = public class
+  go.time.__Global = public class
   assembly
-    class var zoneSources: builtin.Slice<String> := GetZoneSources();
+    class var zoneSources: go.builtin.Slice<String> := GetZoneSources();
 
-    class method GetZoneSources:builtin.Slice<String>;
+    class method GetZoneSources:go.builtin.Slice<String>;
     begin
-      exit new builtin.Slice<String>(["/usr/share/zoneinfo/",
+      exit new go.builtin.Slice<String>(["/usr/share/zoneinfo/",
       "/usr/share/lib/zoneinfo/",
       "/usr/lib/locale/TZ/"]);
     end;
 
     class method initLocal;
     begin
-      var (tz, ok) := syscall.Getenv("TZ");
+      var (tz, ok) := go.syscall.Getenv("TZ");
       if (not ok) then begin
-        var (z, err) := loadLocation("localtime", new builtin.Slice<String>(["/etc/"]));
+        var (z, err) := loadLocation("localtime", new go.builtin.Slice<String>(["/etc/"]));
         if err = nil then begin
-          localLoc := builtin.Reference<time.Location>.Get(z);
+          localLoc := go.builtin.Reference<go.time.Location>.Get(z);
           localLoc.name := "Local";
           exit;
         end;
@@ -339,7 +339,7 @@ type
          var (z, err) := loadLocation(tz, zoneSources);
 
         if err = nil  then begin
-          localLoc := builtin.Reference<time.Location>.Get(z);
+          localLoc := go.builtin.Reference<go.time.Location>.Get(z);
           exit;
         end;
       end;
@@ -348,7 +348,7 @@ type
       localLoc.name := "UTC";
     end;
 
-    class method open(name: String): tuple of (Stream, builtin.error);
+    class method open(name: String): tuple of (Stream, go.builtin.error);
     begin
       try
         exit (new FileStream(name, FileMode.Open, FileAccess.Read), nil);
@@ -363,7 +363,7 @@ type
       fs.Close;
     end;
 
-    class method preadn(fd: Stream; buff: builtin.Slice<Byte>; off: Integer): builtin.error;
+    class method preadn(fd: Stream; buff: go.builtin.Slice<Byte>; off: Integer): go.builtin.error;
     begin
       if off < 0 then
         fd.Position := fd.Length + off
@@ -374,17 +374,17 @@ type
     end;
 
 
-    class method read(fd: Stream; buff: builtin.Slice<Byte>): tuple of (Integer, builtin.error);
+    class method read(fd: Stream; buff: go.builtin.Slice<Byte>): tuple of (Integer, go.builtin.error);
     begin
       exit (fd.Read(buff.fArray, buff.fStart, buff.Length), nil);
     end;
   public
-    class method startTimer(t: builtin.Reference<time.runtimeTimer>);
+    class method startTimer(t: go.builtin.Reference<go.time.runtimeTimer>);
     begin
       raise new NotImplementedException;
     end;
 
-    class method stopTimer(t: builtin.Reference<time.runtimeTimer>): Boolean;
+    class method stopTimer(t: go.builtin.Reference<go.time.runtimeTimer>): Boolean;
     begin
       raise new NotImplementedException;
     end;
@@ -394,7 +394,7 @@ type
       exit DateTime.Now.Ticks * 100;
     end;
 
-    class method Sleep(x: time.Duration);
+    class method Sleep(x: go.time.Duration);
     begin
       {$IF ISLAND}
       Thread.Sleep(x.Nanoseconds / 1000000);
@@ -404,13 +404,13 @@ type
     end;
   end;
 
-  internal.bytealg.__Global = public partial class
+  go.internal.bytealg.__Global = public partial class
   public
 
-    class method Equal(a, b: builtin.Slice<Byte>): Boolean;
+    class method Equal(a, b: go.builtin.Slice<Byte>): Boolean;
     begin
-      if a = nil then a := new builtin.Slice<Byte>;
-      if b = nil then b := new builtin.Slice<Byte>;
+      if a = nil then a := new go.builtin.Slice<Byte>;
+      if b = nil then b := new go.builtin.Slice<Byte>;
       if a.Length <> b.Length then exit false;
 
       for i: Integer := 0 to a.Length -1 do
@@ -420,19 +420,19 @@ type
   end;
 
 
-  bytes.__Global = public partial class
+  go.bytes.__Global = public partial class
   public
-    class method IndexByte(b: builtin.Slice<Byte>; c: Byte): Integer;
+    class method IndexByte(b: go.builtin.Slice<Byte>; c: Byte): Integer;
     begin
       for i: Integer := 0 to b.Length -1 do
         if b[i] = c then exit i;
       exit -1;
     end;
 
-    class method Equal(a, b: builtin.Slice<Byte>): Boolean;
+    class method Equal(a, b: go.builtin.Slice<Byte>): Boolean;
     begin
-      if a = nil then a := new builtin.Slice<Byte>;
-      if b = nil then b := new builtin.Slice<Byte>;
+      if a = nil then a := new go.builtin.Slice<Byte>;
+      if b = nil then b := new go.builtin.Slice<Byte>;
       if a.Length <> b.Length then exit false;
 
       for i: Integer := 0 to a.Length -1 do
@@ -440,10 +440,10 @@ type
       exit true;
     end;
 
-    class method Compare(a,b: builtin.Slice<Byte>) :Integer;
+    class method Compare(a,b: go.builtin.Slice<Byte>) :Integer;
     begin
-      if a = nil then a := new builtin.Slice<Byte>;
-      if b = nil then b := new builtin.Slice<Byte>;
+      if a = nil then a := new go.builtin.Slice<Byte>;
+      if b = nil then b := new go.builtin.Slice<Byte>;
       for i: Integer := 0 to Math.Min(a.Length, b.Length) -1 do begin
         if a[i] < b[i] then exit -1;
         if a[i] > b[i] then exit 1;
@@ -458,7 +458,7 @@ type
 
   end;
 
-  path.filepath.__Global = public partial class
+  go.path.filepath.__Global = public partial class
   public
     class method volumeNameLen(s: String): Integer;
     begin
@@ -481,16 +481,16 @@ type
 
   end;
 
-  internal.bytealg.__Global = public partial class
+  go.internal.bytealg.__Global = public partial class
   public
     const MaxBruteForce = 0;
     const MaxLen = Int32.MaxValue;
 
-    class method Compare(a, b: builtin.Slice<Byte>): Integer;
+    class method Compare(a, b: go.builtin.Slice<Byte>): Integer;
     begin
-      exit bytes.Compare(a, b);
+      exit go.bytes.Compare(a, b);
     end;
-    class method Count(b: builtin.Slice<Byte>; c: Byte): Integer;
+    class method Count(b: go.builtin.Slice<Byte>; c: Byte): Integer;
     begin
       for i: Integer := 0 to b.Length -1 do
         if b[i] = c then inc(resulT);
@@ -502,7 +502,7 @@ type
         if b[i] = Char(c) then inc(resulT);
     end;
 
-    class method IndexByte(b: builtin.Slice<Byte>; c: Byte): Integer;
+    class method IndexByte(b: go.builtin.Slice<Byte>; c: Byte): Integer;
     begin
       for i: Integer := 0 to b.Length -1 do
         if b[i] = c then exit i;
@@ -516,7 +516,7 @@ type
         exit -1;
     end;
 
-    class method &Index(a, b: builtin.Slice<Byte>): Integer; begin raise new NotSupportedException;end;
+    class method &Index(a, b: go.builtin.Slice<Byte>): Integer; begin raise new NotSupportedException;end;
     class method IndexString(a, b: String): Integer; begin raise new NotSupportedException;end;
     class method Cutover(nn: Integer): Integer;
     begin
@@ -524,7 +524,7 @@ type
     end;
   end;
 
-  strings.__Global= public partial class
+  go.strings.__Global= public partial class
   public
 
     class method IndexByte(b: String; c: Byte): Integer;
@@ -536,7 +536,7 @@ type
   end;
 
   [ValueTypeSemantics]
-  strings.Builder = public class(io.Writer)
+  go.strings.Builder = public class(go.io.Writer)
   private
     fStr: StringBuilder := new StringBuilder;
   public
@@ -580,7 +580,7 @@ type
       fStr.Append(Char(b));
     end;
 
-    method Write(p: builtin.Slice<Byte>): tuple of (builtin.int, builtin.error);
+    method Write(p: go.builtin.Slice<Byte>): tuple of (go.builtin.int, go.builtin.error);
     begin
       fStr.Append(Encoding.UTF8.GetString(p.fArray, p.fStart, p.fCount));
       exit (p.fCount, nil);
@@ -593,7 +593,7 @@ type
   public
   end;
 
-  method ReadMemStats(m: builtin.Reference<MemStats>);
+  method ReadMemStats(m: go.builtin.Reference<MemStats>);
   begin
 
   end;

@@ -1,7 +1,7 @@
-﻿namespace unicode.utf8;
+﻿namespace go.unicode.utf8;
 
 const
-  RuneError: builtin.rune = #$FFFD;
+  RuneError: go.builtin.rune = #$FFFD;
   RuneSelf  = $80      ;
   MaxRune   = $10FFFF;
   UTFMax    = 4       ;
@@ -44,7 +44,7 @@ const
   s6 = $04; // accept 0, size 4
   s7 = $44; // accept 4, size 4
 
-var first: array of builtin.uint8 := [
+var first: array of go.builtin.uint8 := [
   //   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
   &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, // 0x00-0x0F
   &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, &as, // 0x10-0x1F
@@ -73,22 +73,22 @@ var acceptRanges: array of array of Integer :=[
       [locb, $8F]
     ];
 
-method DecodeRuneInString(n: builtin.string): tuple of (builtin.rune, Integer);public;
+method DecodeRuneInString(n: go.builtin.string): tuple of (go.builtin.rune, Integer);public;
 begin
-  exit (new builtin.rune(Value := Integer(n[0])), 8);
+  exit (new go.builtin.rune(Value := Integer(n[0])), 8);
 end;
 
-method ValidString(n: builtin.string): Boolean;public;
+method ValidString(n: go.builtin.string): Boolean;public;
 begin
   exit true;
 end;
 
-method ValidRune(r: builtin.rune): Boolean; public;
+method ValidRune(r: go.builtin.rune): Boolean; public;
 begin
   exit Integer(r) in [0..$D800, $DFFF..$10FFFF];
 end;
 
-method EncodeRune(p: builtin.Slice<Byte>; r: builtin.rune): Integer; public;
+method EncodeRune(p:go. builtin.Slice<Byte>; r: go.builtin.rune): Integer; public;
 begin
   {$IFDEF ECHOES}
   var z := System.Text.Encoding.UTF8.GetBytes(chr(r));
@@ -101,7 +101,7 @@ begin
   exit z.Length;
 end;
 
-method RuneLen(r: builtin.rune): Integer;
+method RuneLen(r: go.builtin.rune): Integer;
 begin
   if r < 0 then exit -1;
   if r ≤ rune1Max then exit 1;
@@ -112,7 +112,7 @@ begin
   exit -1;
 end;
 
-method FullRune(p: builtin.Slice<Byte>): Boolean;
+method FullRune(p: go.builtin.Slice<Byte>): Boolean;
 begin
   var n := p.Length;
   if n = 0 then begin
@@ -136,13 +136,13 @@ begin
   exit false;
 end;
 
-method DecodeLastRuneInString(p: String): tuple of (builtin.rune, Integer); public;
+method DecodeLastRuneInString(p: String): tuple of (go.builtin.rune, Integer); public;
 begin
   if length(p) < 1 then exit (RuneError, 0);
   exit (Integer(p[p.Length-1]), 1);
 end;
 
-method DecodeRune(p: builtin.Slice<Byte>): tuple of (builtin.rune, Integer); public;
+method DecodeRune(p: go.builtin.Slice<Byte>): tuple of (go.builtin.rune, Integer); public;
 // Based on the UTf8 code from Go/unicode/utf8
 begin
   var n := p.Length;
@@ -213,7 +213,7 @@ end;
 
 // RuneCount returns the number of runes in p. Erroneous and short
 // encodings are treated as single runes of width 1 byte.
-method RuneCount(p: builtin.Slice<Byte>): Integer;
+method RuneCount(p: go.builtin.Slice<Byte>): Integer;
 begin
   var np := p.Length;
   var n: Integer;
@@ -269,7 +269,7 @@ method RuneStart(b: Byte): Boolean; public; begin exit (b and $C0) <> $80; end;
 // An encoding is invalid if it is incorrect UTF-8, encodes a rune that is
 // out of range, or is not the shortest possible UTF-8 encoding for the
 // value. No other validation is performed.
-method  DecodeLastRune(p: builtin.Slice<Byte>): tuple of (builtin.rune, Integer); public;
+method  DecodeLastRune(p: go.builtin.Slice<Byte>): tuple of (go.builtin.rune, Integer); public;
 begin
   var lend := p.Length;
   if lend = 0 then begin;
@@ -298,14 +298,14 @@ begin
   if start < 0 then begin
     start := 0
   end;
-  var (rq, size) := DecodeRune(builtin.Slice(p, start, lend));
+  var (rq, size) := DecodeRune(go.builtin.Slice(p, start, lend));
   if start+size <> lend then begin
     exit (RuneError, 1);
   end;
   exit (rq, size);
 end;
 
-method Valid(p: builtin.Slice<Byte>): Boolean; public;
+method Valid(p: go.builtin.Slice<Byte>): Boolean; public;
 begin
   var n := p.Length;
   var i := 0;

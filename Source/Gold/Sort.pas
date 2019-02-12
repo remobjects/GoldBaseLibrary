@@ -1,3 +1,3 @@
-﻿namespace sort;
+﻿namespace go.sort;
 
 end.

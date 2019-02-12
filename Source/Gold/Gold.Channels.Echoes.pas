@@ -1,4 +1,4 @@
-﻿namespace builtin;
+﻿namespace go.builtin;
 {$IFDEF ECHOES}
 uses
   System.Threading.Tasks,

@@ -1,7 +1,7 @@
-﻿namespace builtin;
+﻿namespace go.builtin;
 
 uses
-  builtin
+  go.builtin
 {$IFDEF ECHOES}  , System.Linq, System.Collections.Generic{$ENDIF}
 
   ;
@@ -153,7 +153,7 @@ type
     method setFrom(aSrc: ISlice);
   end;
   //Slice<T> = public class(ISlice)
-  Slice<T> = public class(sort.Interface, ISlice)
+  Slice<T> = public class(go.sort.Interface, ISlice)
   assembly
     fArray: array of T;
     fStart, fCount: Integer;
@@ -251,7 +251,7 @@ type
       result := Length;
     end;
 
-    method setFrom(aSrc: builtin.ISlice);
+    method setFrom(aSrc: go.builtin.ISlice);
     begin
       fArray := new T[aSrc.getCap];
       fStart := 0;
@@ -265,12 +265,12 @@ type
       &Array.Copy(fArray, fStart, result, 0, fCount);
     end;
 
-    method Len: builtin.int;
+    method Len: go.builtin.int;
     begin
       result := fCount;
     end;
 
-    method Less(a, b: Integer): builtin.bool;
+    method Less(a, b: Integer): go.builtin.bool;
     begin
 
     end;
@@ -677,9 +677,9 @@ type
     exit new Slice<Char>(aVal.ToArray);
   end;
 
-  operator implicit(aVal: string): Slice<builtin.rune>; public;
+  operator implicit(aVal: string): Slice<go.builtin.rune>; public;
   begin
-    exit new Slice<builtin.rune>(aVal.Select(a -> builtin.rune(a)).ToArray);
+    exit new Slice<go.builtin.rune>(aVal.Select(a -> go.builtin.rune(a)).ToArray);
   end;
 
   operator implicit(aVal: byte): string; public;
@@ -727,10 +727,10 @@ type
     exit new Slice<byte>(System.Text.Encoding.UTF8.GetBytes(aVal));
     {$ENDIF}
   end;
-  operator Explicit(aVal: string): net.http.htmlSig; public;
+  operator Explicit(aVal: string): go.net.http.htmlSig; public;
   begin
-    var q: builtin.Slice<byte> := (aVal as builtin.Slice<byte>);
-    exit new net.http.htmlSig(Value := q);
+    var q: go.builtin.Slice<byte> := (aVal as go.builtin.Slice<byte>);
+    exit new go.net.http.htmlSig(Value := q);
   end;
 
   extension method ISequence<T>.GoldIterate: sequence of tuple of (Integer, T); iterator; public;
@@ -742,7 +742,7 @@ type
   type
     System.StrExt = public extension class(string)
     public
-      constructor(aVal: array of builtin.rune);
+      constructor(aVal: array of go.builtin.rune);
       begin
         {$IF ISLAND}
         exit string.FromCharArray(aVal.Select(a -> :RemObjects.Elements.System.Char(a.Value)).ToArray());
@@ -751,15 +751,15 @@ type
         {$ENDIF}
       end;
 
-     method GoldIterate: sequence of tuple of (Integer, builtin.rune); iterator; public;
+     method GoldIterate: sequence of tuple of (Integer, go.builtin.rune); iterator; public;
       begin
         for each el in self index n do
-          yield (n, builtin.rune(el));
+          yield (n, go.builtin.rune(el));
       end;
     end;
 
 type
-  IntExtension = extension class(Integer, fmt.Stringer)
+  IntExtension = extension class(Integer, go.fmt.Stringer)
   public
     method String: string;
     begin
@@ -767,9 +767,9 @@ type
     end;
   end;
 
-  builtin.int32 = public partial record
+  go.builtin.int32 = public partial record
   public
-    operator implicit(aVal: builtin.int32): nullable Integer;
+    operator implicit(aVal: go.builtin.int32): nullable Integer;
     begin
       exit Integer(aVal);
     end;
@@ -788,9 +788,9 @@ type
     property Tag: string read fTag;
   end;
 
-  crypto.internal.subtle.__Global = public partial class
+  go.crypto.internal.subtle.__Global = public partial class
   public
-    class method InexactOverlap(x, y: builtin.Slice<byte>): Boolean;
+    class method InexactOverlap(x, y: go.builtin.Slice<byte>): Boolean;
     begin
       if x.fArray <> y.fArray then exit false;
       if x.fStart > y.fStart + y.fCount then exit false;

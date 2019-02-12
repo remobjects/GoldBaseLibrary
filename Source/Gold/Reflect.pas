@@ -1,4 +1,4 @@
-﻿namespace reflect;
+﻿namespace go.reflect;
 
 {$IF ECHOES}
 uses
@@ -6,8 +6,8 @@ uses
 {$ENDIF}
 
 type
-  Kind = public type builtin.uint;
-  ChanDir = public type builtin.int;
+  Kind = public type go.builtin.uint;
+  ChanDir = public type go.builtin.int;
   [ValueTypeSemantics]
   MapIter = public class
   public
@@ -84,41 +84,41 @@ type
 
     method String: String;
     begin
-      exit (if fValue is builtin.Reference<Object> then builtin.Reference<Object>.Get(builtin.Reference<Object>(fValue)) else fValue).ToString;
+      exit (if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue).ToString;
     end;
 
     method Int: Int64;
     begin
-      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToInt64(if fValue is builtin.Reference<Object> then builtin.Reference<Object>.Get(builtin.Reference<Object>(fValue)) else fValue);
+      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToInt64(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
     end;
     method Uint: UInt64;
     begin
-      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToUInt64(if fValue is builtin.Reference<Object> then builtin.Reference<Object>.Get(builtin.Reference<Object>(fValue)) else fValue);
+      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToUInt64(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
     end;
     method Float: Double;
     begin
-      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToDouble(if fValue is builtin.Reference<Object> then builtin.Reference<Object>.Get(builtin.Reference<Object>(fValue)) else fValue);
+      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToDouble(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
     end;
 
     method IsNil: Boolean;
     begin
       case fType.Kind of
-        Chan, Func, Map, reflect.Interface, UnsafePointer, __Global.Slice: // missing &Interface Kind(20) --> &Interface
-          exit (if fValue is builtin.Reference<Object> then builtin.Reference<Object>.Get(builtin.Reference<Object>(fValue)) else fValue) = nil;
+        Chan, Func, Map, go.reflect.Interface, UnsafePointer, __Global.Slice: // missing &Interface Kind(20) --> &Interface
+          exit (if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue) = nil;
 
         else
           raise new Exception('Wrong value type');
       end;
     end;
 
-    method Complex: builtin.complex128;
+    method Complex: go.builtin.complex128;
     begin
-      exit builtin.complex128(if fValue is builtin.Reference<Object> then builtin.Reference<Object>.Get(builtin.Reference<Object>(fValue)) else fValue);
+      exit go.builtin.complex128(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
     end;
 
     method Bool: Boolean;
     begin
-      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToBoolean(if fValue is builtin.Reference<Object> then builtin.Reference<Object>.Get(builtin.Reference<Object>(fValue)) else fValue);
+      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToBoolean(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
     end;
 
     method Convert(aTo: &Type): Value;
@@ -128,7 +128,7 @@ type
 
     method IsValid: Boolean;
     begin
-      var lValue := if fValue is builtin.Reference<Object> then builtin.Reference<Object>.Get(builtin.Reference<Object>(fValue)) else fValue;
+      var lValue := if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue;
       result := lValue ≠ Zero(fType);
     end;
 
@@ -147,12 +147,12 @@ type
       raise new NotImplementedException();
     end;
 
-    method MapIter: builtin.Reference<MapIter>;
+    method MapIter: go.builtin.Reference<MapIter>;
     begin
       raise new NotImplementedException;
     end;
 
-    method MapKeys: builtin.Slice<Value>;
+    method MapKeys: go.builtin.Slice<Value>;
     begin
       raise new NotImplementedException();
     end;
@@ -193,7 +193,7 @@ type
       raise new NotImplementedException;
     end;
 
-    method FieldByIndex(idx: builtin.Slice<Integer>): Value;
+    method FieldByIndex(idx: go.builtin.Slice<Integer>): Value;
     begin
       raise new NotImplementedException;
     end;
@@ -229,7 +229,7 @@ type
         var lFieldValue2 := lType2.GetField('Value');
         var lATope2 := lFieldValue2.GetValue(lValue);}
 
-        (fExtended as FieldInfo).SetValue(builtin.IReference(fPtr).Get, lValue);
+        (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, lValue);
 
         {var lClan := (fExtended as FieldInfo).GetValue(builtin.IReference(fPtr).Get);
 
@@ -243,7 +243,7 @@ type
         {$ENDIF}
       end
       else
-        builtin.IReference(fPtr).Set(lValue);
+        go.builtin.IReference(fPtr).Set(lValue);
     end;
 
     method InternalSet(aValue: Object); private;
@@ -252,25 +252,25 @@ type
         {$IF ISLAND}
         raise new NotImplementedException();
         {$ELSEIF ECHOES}
-        (fExtended as FieldInfo).SetValue(builtin.IReference(fPtr).Get, aValue);
+        (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, aValue);
         {$ENDIF}
       end
       else
-        builtin.IReference(fPtr).Set(aValue);
+        go.builtin.IReference(fPtr).Set(aValue);
     end;
 
-    method SetBytes(aval: builtin.Slice<Byte>);
+    method SetBytes(aval: go.builtin.Slice<Byte>);
     begin
       raise new NotImplementedException;
     end;
 
     method &SetInt(aVal: Int64);
     begin
-      if (not CanSet) or not (Integer(Kind) in [Integer(reflect.Int)..Integer(reflect.Int64)])  then
+      if (not CanSet) or not (Integer(Kind) in [Integer(go.reflect.Int)..Integer(go.reflect.Int64)])  then
         raise new Exception('Can not set object to integer value');
 
       //builtin.IReference(fValue).Set(aVal);
-      if (aVal ≥ :math.MinInt32) and (aVal ≤ :math.MaxInt32) then // .net runtime fails if a Int64 value try to set in a Int32 field, even if fit.
+      if (aVal ≥ :go.math.MinInt32) and (aVal ≤ :go.math.MaxInt32) then // .net runtime fails if a Int64 value try to set in a Int32 field, even if fit.
         InternalSet(Integer(aVal))
       else
         InternalSet(aVal);
@@ -278,7 +278,7 @@ type
 
     method &SetBool(aVal: Boolean);
     begin
-      if (not CanSet) or (Kind ≠ reflect.Bool) then
+      if (not CanSet) or (Kind ≠ go.reflect.Bool) then
         raise new Exception('Can not set object to bool value');
 
       //builtin.IReference(fValue).Set(aVal);
@@ -287,7 +287,7 @@ type
 
     method &SetUint(aVal: UInt64);
     begin
-      if (not CanSet) or not (Integer(Kind) in [Integer(reflect.Uint)..Integer(reflect.Uint64)])  then
+      if (not CanSet) or not (Integer(Kind) in [Integer(go.reflect.Uint)..Integer(go.reflect.Uint64)])  then
         raise new Exception('Can not set object to unsigned integer value');
 
       //builtin.IReference(fValue).Set(aVal);
@@ -296,21 +296,21 @@ type
 
     method &SetFloat(aVal: Double);
     begin
-      if (not CanSet) or ((Kind ≠ reflect.Float32) and (Kind ≠ reflect.Float64)) then
+      if (not CanSet) or ((Kind ≠ go.reflect.Float32) and (Kind ≠ go.reflect.Float64)) then
         raise new Exception('Can not set object to float value');
 
       //builtin.IReference(fPtr).Set(aVal);
       InternalSet(aVal);
     end;
 
-    method &SetComplex(aVal: builtin.complex128);
+    method &SetComplex(aVal: go.builtin.complex128);
     begin
       raise new NotImplementedException;
     end;
 
     method &SetString(aVal: String);
     begin
-      if (not CanSet) or (Kind ≠ reflect.String) then
+      if (not CanSet) or (Kind ≠ go.reflect.String) then
         raise new Exception('Can not set object to string value');
 
       //builtin.IReference(fValue).Set(aVal);
@@ -322,7 +322,7 @@ type
       result := fType;
     end;
 
-    method Bytes: builtin.Slice<Byte>;
+    method Bytes: go.builtin.Slice<Byte>;
     begin
       raise new NotImplementedException;
     end;
@@ -334,24 +334,24 @@ type
 
     method Len: Integer;
     begin
-      if fValue is sort.Interface then
-        exit sort.Interface(fValue).Len;
+      if fValue is go.sort.Interface then
+        exit go.sort.Interface(fValue).Len;
       //TODO check other types?
     end;
 
     method &Index(i: Integer): Value;
     begin
       var lKind := Kind;
-      if (lKind <> &Array) and (lKind <> reflect.Slice) and (lKind <> reflect.String) then
+      if (lKind <> &Array) and (lKind <> go.reflect.Slice) and (lKind <> go.reflect.String) then
         raise new Exception("Wrong type, need array, slice or string");
 
-      var lValue := if fValue is builtin.Reference<Object> then builtin.Reference<Object>.Get(builtin.Reference<Object>(fValue)) else fValue;
+      var lValue := if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue;
       case lKind of
-        reflect.Slice:
-          result := new Value(builtin.ISlice(lValue).getAtIndex(i));
+        go.reflect.Slice:
+          result := new Value(go.builtin.ISlice(lValue).getAtIndex(i));
 
-        reflect.String:
-          result := new Value(builtin.string(lValue)[i]);
+        go.reflect.String:
+          result := new Value(go.builtin.string(lValue)[i]);
       end;
     end;
 
@@ -377,7 +377,7 @@ type
       {$ELSEIF ECHOES}
       var lFields := System.Reflection.TypeInfo(TypeImpl(fType).fRealType).DeclaredFields.ToArray();
       //result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), fPtr, lFields[i]);
-      result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), new builtin.Reference<Object>(fValue), lFields[i]);
+      result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), new go.builtin.Reference<Object>(fValue), lFields[i]);
       {$ENDIF}
     end;
 
@@ -388,18 +388,18 @@ type
       //raise new NotImplementedException;
     end;
 
-    method Call(inn: builtin.Slice<Value>): builtin.Slice<Value>;
+    method Call(inn: go.builtin.Slice<Value>): go.builtin.Slice<Value>;
     begin
       raise new NotImplementedException;
     end;
 
     method Addr: Value;
     begin
-      result := new builtin.Reference<Value>(fValue);
+      result := new go.builtin.Reference<Value>(fValue);
       //raise new NotImplementedException;
     end;
 
-    method MapRange() :builtin.Reference<MapIter>;
+    method MapRange() :go.builtin.Reference<MapIter>;
     begin
       raise new NotImplementedException;
     end;
@@ -411,7 +411,7 @@ type
 
     method Elem: Value;
     begin
-      if fValue is builtin.Reference<Object> then begin
+      if fValue is go.builtin.Reference<Object> then begin
         var lType := TypeImpl(fType).RealType;
         var lRealType: PlatformType;
         {$IF ISLAND}
@@ -419,7 +419,7 @@ type
         {$ELSEIF ECHOES}
         lRealType := lType.GenericTypeArguments[0];
         {$ENDIF}
-        exit new Value(builtin.IReference(fValue).Get, new TypeImpl(lRealType), fValue);
+        exit new Value(go.builtin.IReference(fValue).Get, new TypeImpl(lRealType), fValue);
       end;
       raise new NotSupportedException;
     end;
@@ -461,7 +461,7 @@ type
     method IsVariadic: Boolean;
     method Elem: &Type;
     method Field(i: Integer): StructField;
-    method FiedlByIndex(i: builtin.Slice<Integer>): StructField;
+    method FiedlByIndex(i: go.builtin.Slice<Integer>): StructField;
     method FieldByName(aname: String): tuple of (StructField, Boolean);
     method FieldByNameFunc(match: delegate(aName: String): Boolean): tuple of (StructField, Boolean);
     method &In(i: Integer): &Type;
@@ -507,7 +507,7 @@ type
     property &Type: &Type read;
     property Tag: StructTag read;
     property Offset: UIntPtr read;
-    property &Index: builtin.Slice<Integer> read;
+    property &Index: go.builtin.Slice<Integer> read;
     property Anonymous: Boolean read;
   end;
 
@@ -526,8 +526,8 @@ type
       {$ELSEIF ECHOES}
       var lAttrs := aField.GetCustomAttributes(true);
       if lAttrs.Length > 0 then begin
-        if lAttrs[0] is builtin.TagAttribute then
-          lTag := (lAttrs[0] as builtin.TagAttribute).Tag;
+        if lAttrs[0] is go.builtin.TagAttribute then
+          lTag := (lAttrs[0] as go.builtin.TagAttribute).Tag;
       end;
       {$ENDIF}
       Tag := new StructTag(lTag);
@@ -538,7 +538,7 @@ type
     property &Type: &Type read {$IF ISLAND}new TypeImpl(fField.&Type){$ELSEIF ECHOES}new TypeImpl(fField.FieldType){$ENDIF};
     property Tag: StructTag read;
     property Offset: UIntPtr read;
-    property &Index: builtin.Slice<Integer> read;
+    property &Index: go.builtin.Slice<Integer> read;
     property Anonymous: Boolean read;
   end;
 
@@ -585,12 +585,12 @@ type
 
     method IsInteger: Boolean;
     begin
-      result := (Integer(self.Kind) ≥ Integer(reflect.Bool)) and (Integer(self.Kind) ≤ Integer(reflect.Uint64));
+      result := (Integer(self.Kind) ≥ Integer(go.reflect.Bool)) and (Integer(self.Kind) ≤ Integer(go.reflect.Uint64));
     end;
 
     method IsFloatOrComplex: Boolean;
     begin
-      result := (Integer(self.Kind) ≥ Integer(reflect.Float32)) and (Integer(self.Kind) ≤ Integer(reflect.Complex128));
+      result := (Integer(self.Kind) ≥ Integer(go.reflect.Float32)) and (Integer(self.Kind) ≤ Integer(go.reflect.Complex128));
     end;
 
   public
@@ -702,40 +702,40 @@ type
       end;
       {$ELSEIF ECHOES}
       if fRealType.IsArray then
-        exit reflect.Array;
+        exit go.reflect.Array;
 
       if fRealType.IsInterface then
-        exit reflect.Interface;
+        exit go.reflect.Interface;
 
       //if fRealType.IsPointer then
       //if fRealType is builtin.Reference<Object> then
       //if fRealType is sort.Interface then
         //exit reflect.Slice;
       if fRealType.BaseType = TypeOf(System.MulticastDelegate) then
-        exit reflect.Func;
+        exit go.reflect.Func;
 
       if fRealType.GenericTypeArguments.Length > 0 then
         if fRealType.AssemblyQualifiedName.StartsWith('builtin.Slice') then
-          exit reflect.Slice
+          exit go.reflect.Slice
         else
-          exit reflect.Ptr;
+          exit go.reflect.Ptr;
 
       case System.Type.GetTypeCode(fRealType) of
-        TypeCode.Boolean: result := reflect.Bool;
-        TypeCode.Byte: result := reflect.Int8;
-        TypeCode.SByte: result := reflect.Uint8;
-        TypeCode.Int16: result := reflect.Int16;
-        TypeCode.UInt16: result := reflect.Uint16;
-        TypeCode.Int32: result := reflect.Int32;
-        TypeCode.UInt32: result := reflect.Uint32;
-        TypeCode.Int64: result := reflect.Int64;
-        TypeCode.UInt64: result := reflect.Uint64;
-        TypeCode.Single: result := reflect.Float32;
-        TypeCode.Double: result := reflect.Float64;
-        TypeCode.String: result := reflect.String;
-        TypeCode.Char: result := reflect.Uint16;
-        TypeCode.Object: result := reflect.Struct;
-        TypeCode.Empty: result := reflect.Invalid;
+        TypeCode.Boolean: result := go.reflect.Bool;
+        TypeCode.Byte: result := go.reflect.Int8;
+        TypeCode.SByte: result := go.reflect.Uint8;
+        TypeCode.Int16: result := go.reflect.Int16;
+        TypeCode.UInt16: result := go.reflect.Uint16;
+        TypeCode.Int32: result := go.reflect.Int32;
+        TypeCode.UInt32: result := go.reflect.Uint32;
+        TypeCode.Int64: result := go.reflect.Int64;
+        TypeCode.UInt64: result := go.reflect.Uint64;
+        TypeCode.Single: result := go.reflect.Float32;
+        TypeCode.Double: result := go.reflect.Float64;
+        TypeCode.String: result := go.reflect.String;
+        TypeCode.Char: result := go.reflect.Uint16;
+        TypeCode.Object: result := go.reflect.Struct;
+        TypeCode.Empty: result := go.reflect.Invalid;
       end;
       {$ENDIF}
     end;
@@ -770,10 +770,10 @@ type
       if (IsInteger or IsFloatOrComplex) and (TypeImpl(u).IsInteger or TypeImpl(u).IsFloatOrComplex) then
         exit(true);
 
-      if (IsInteger or (Kind = reflect.String) or (Kind = reflect.Slice)) and (u.Kind = reflect.String) then
+      if (IsInteger or (Kind = go.reflect.String) or (Kind = go.reflect.Slice)) and (u.Kind = go.reflect.String) then
         exit(true);
 
-      if (Kind = reflect.String) and (TypeImpl(u).IsInteger or (u.Kind = reflect.String) or (u.Kind = reflect.Slice)) then
+      if (Kind = go.reflect.String) and (TypeImpl(u).IsInteger or (u.Kind = go.reflect.String) or (u.Kind = go.reflect.Slice)) then
         exit(true);
 
       exit(false);
@@ -801,7 +801,7 @@ type
 
     method Elem: &Type;
     begin
-      if fRealType is builtin.Reference<Object> then begin
+      if fRealType is go.builtin.Reference<Object> then begin
         var lRealType: PlatformType;
         {$IF ISLAND}
         lRealType := fRealType.GenericArguments.FirstOrDefault;
@@ -814,7 +814,7 @@ type
 
     method Field(i: Integer): StructField;
     begin
-      if Kind ≠ reflect.Struct then
+      if Kind ≠ go.reflect.Struct then
         raise new Exception('Wrong type, it needs to be struct');
       {$IF ISLAND}
       var lFields := fRealType.Fields.ToList();
@@ -828,9 +828,9 @@ type
       result := new StructFieldImpl(lFields[i]);
     end;
 
-    method FiedlByIndex(i: builtin.Slice<Integer>): StructField;
+    method FiedlByIndex(i: go.builtin.Slice<Integer>): StructField;
     begin
-      if Kind ≠ reflect.Struct then
+      if Kind ≠ go.reflect.Struct then
         raise new Exception('Wrong type, it needs to be struct');
 
       var lType := self;
@@ -864,7 +864,7 @@ type
 
     method &In(i: Integer): &Type;
     begin
-      if Kind ≠ reflect.Func then
+      if Kind ≠ go.reflect.Func then
         raise new Exception('Wrong type, it needs to be Func');
       {$IF ISLAND}
       var lMethod := fRealType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
@@ -893,7 +893,7 @@ type
 
     method NumField: Integer;
     begin
-      if Kind ≠ reflect.Struct then
+      if Kind ≠ go.reflect.Struct then
         raise new Exception('Wrong type, it needs to be struct');
       {$IF ISLAND}
       result := fRealType.Fields.Count;
@@ -904,7 +904,7 @@ type
 
     method NumIn: Integer;
     begin
-      if Kind ≠ reflect.Func then
+      if Kind ≠ go.reflect.Func then
         raise new Exception('Wrong type, it needs to be Func');
       {$IF ISLAND}
       var lMethod := fRealType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
@@ -917,7 +917,7 @@ type
 
     method NumOut: Integer;
     begin
-      if Kind ≠ reflect.Func then
+      if Kind ≠ go.reflect.Func then
         raise new Exception('Wrong type, it needs to be Func');
       {$IF ISLAND}
       var lMethod := fRealType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
@@ -933,7 +933,7 @@ type
 
     method &Out(i: Integer): &Type;
     begin
-      if Kind ≠ reflect.Func then
+      if Kind ≠ go.reflect.Func then
         raise new Exception('Wrong type, it needs to be Func');
       {$IF ISLAND}
       var lMethod := fRealType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
@@ -965,7 +965,7 @@ type
 
   Method &New(aType: &Type): Value;public;
   begin
-    exit new Value(new builtin.Reference<Object>(Zero(aType)), aType);
+    exit new Value(new go.builtin.Reference<Object>(Zero(aType)), aType);
   end;
 
   method Zero(aType: &Type): Value;public;
@@ -982,7 +982,7 @@ type
 
   method PtrTo(t: &Type): &Type; public;
   begin
-    result := new builtin.Reference<&Type>(t);
+    result := new go.builtin.Reference<&Type>(t);
   end;
 
   method ValueOf(i: Object): Value;public;
@@ -992,7 +992,7 @@ type
 
   method Indirect(v: Value): Value;public;
   begin
-    exit new Value(new builtin.Reference<Object>(v.fValue), v.fType);
+    exit new Value(new go.builtin.Reference<Object>(v.fValue), v.fType);
   end;
 
   method TypeOf(v: Object): &Type;public;
@@ -1005,7 +1005,7 @@ type
   method Swapper(aslice: Object): Action<Integer, Integer>; public;
   begin
     //exit new Action<Integer, Integer>(builtin.ISlice(aslice).Swap);
-    exit new Action<Integer, Integer>(sort.Interface(aslice).Swap);
+    exit new Action<Integer, Integer>(go.sort.Interface(aslice).Swap);
   end;
 
   method MakeMap(t: &Type): Value; public;
@@ -1020,7 +1020,7 @@ type
       var lFieldValue := lType.GetField('Value');
       var lValue: Object;
       if aVal.fExtended <> nil then begin
-        lValue := (aVal.fExtended as FieldInfo).GetValue(if aVal.fPtr is builtin.IReference then builtin.IReference(aVal.fPtr).Get else aVal.fPtr);
+        lValue := (aVal.fExtended as FieldInfo).GetValue(if aVal.fPtr is go.builtin.IReference then go.builtin.IReference(aVal.fPtr).Get else aVal.fPtr);
       end
       else
         lValue := aVal.fValue;
@@ -1036,8 +1036,8 @@ type
     raise new NotImplementedException;
     {$ELSEIF ECHOES}
     // TODO check kind
-    var lDst := builtin.ISlice(InternalGetValue(dst));
-    var lSrc := builtin.ISlice(InternalGetValue(src));
+    var lDst := go.builtin.ISlice(InternalGetValue(dst));
+    var lSrc := go.builtin.ISlice(InternalGetValue(src));
 
     result := Math.Min(if lSrc = nil then 0 else lSrc.getLen, if lDst = nil then 0 else lDst.getLen);
     for i: Integer := 0 to result -1 do
@@ -1071,7 +1071,7 @@ type
     result := new Value(InstantiateSlice(TypeImpl(t).fRealType, cap), new TypeImpl(TypeImpl(t).fRealType));
   end;
 
-  method MakeFunc(typ: &Type; fn: delegate(args: builtin.Slice<Value>): builtin.Slice<Value>): Value;
+  method MakeFunc(typ: &Type; fn: delegate(args: go.builtin.Slice<Value>): go.builtin.Slice<Value>): Value;
   begin
     raise new NotImplementedException;
   end;

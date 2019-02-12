@@ -1,4 +1,4 @@
-﻿namespace sync;
+﻿namespace go.sync;
 
 type
   Locker = public interface

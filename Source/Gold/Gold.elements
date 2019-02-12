@@ -10,6 +10,7 @@
     <AllowUnsafeCode>True</AllowUnsafeCode>
     <TargetFramework>.NETFramework4.5</TargetFramework>
     <GenerateDebugInfo>True</GenerateDebugInfo>
+    <RootNamespace>go</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>

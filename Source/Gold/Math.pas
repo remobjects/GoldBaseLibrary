@@ -1,7 +1,7 @@
-﻿namespace math;
+﻿namespace go.math;
 
 uses
-  builtin;
+  go.builtin;
 
 type
   {$IF ECHOES}PlatformMath = System.Math;{$ENDIF}

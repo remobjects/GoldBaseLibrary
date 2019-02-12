@@ -1,6 +1,6 @@
-﻿namespace sync.atomic;
+﻿namespace go.sync.atomic;
 uses
-  builtin;
+  go.builtin;
 
 method AddInt32(var addr: int32; delta: int32): int32; public;
 begin

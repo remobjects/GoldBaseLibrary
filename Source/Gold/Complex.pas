@@ -1,4 +1,4 @@
-﻿namespace builtin;
+﻿namespace go.builtin;
 
 type
   complex128 = public record
