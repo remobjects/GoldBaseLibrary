@@ -1057,7 +1057,7 @@ type
 
   method InstantiateSlice(aType: PlatformType; aCount: Integer): Object; private;
   begin
-    if aType.IsValueType and (aType.GetConstructors().Count = 2) and (aType.GetFields().count = 1) then begin
+    if aType.IsValueType and (aType.GetConstructors().Count = 2) and (aType.GetFields().Count = 1) then begin
       exit Activator.CreateInstance(aType, [InstantiateSlice(aType.GetFields()[0].FieldType, aCount)]);
     end;
     //assert TypeOf(ISlice).AssignableTo(aMemberType)
