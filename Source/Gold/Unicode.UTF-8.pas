@@ -75,7 +75,8 @@ var acceptRanges: array of array of Integer :=[
 
 method DecodeRuneInString(n: go.builtin.string): tuple of (go.builtin.rune, Integer);public;
 begin
-  exit (new go.builtin.rune(Value := Integer(n[0])), 8);
+  // TODO, need to get complete utf8 chars, not always the first one, and return the size (not 1).
+  exit (new go.builtin.rune(Value := Integer(n[0])), 1);
 end;
 
 method ValidString(n: go.builtin.string): Boolean;public;

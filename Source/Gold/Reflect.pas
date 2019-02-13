@@ -715,7 +715,7 @@ type
         exit go.reflect.Func;
 
       if fRealType.GenericTypeArguments.Length > 0 then
-        if fRealType.AssemblyQualifiedName.StartsWith('builtin.Slice') then
+        if fRealType.AssemblyQualifiedName.StartsWith('go.builtin.Slice') then
           exit go.reflect.Slice
         else
           exit go.reflect.Ptr;
