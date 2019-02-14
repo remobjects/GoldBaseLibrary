@@ -571,6 +571,7 @@
     <Compile Include="math\cmplx\sin.go" />
     <Compile Include="math\cmplx\sqrt.go" />
     <Compile Include="math\cmplx\tan.go" />
+    <Compile Include="crypto.rand.pas" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

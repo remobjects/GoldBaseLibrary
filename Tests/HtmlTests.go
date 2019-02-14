@@ -17,23 +17,14 @@ func DoHtmlEscapeStringTest(aVal String) String {
 
 func DoHtmlTemplatesTest()
 {
-	const tpl = `
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="UTF-8">
-		<title>{{.Title}}</title>
-	</head>
-	<body>
-		{{range .Items}}<div>{{ . }}</div>{{else}}<div><strong>no rows</strong></div>{{end}}
-	</body>
-</html>`
+const tpl = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>{{.Title}}</title></head><body>{{range .Items}}<div>{{ . }}</div>{{else}}<div><strong>no rows</strong></div>{{end}}</body></html>`
 
-check := func(err error) {
-	if err != nil {
-		log.Fatal(err)
+	check := func(err error) {
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-}
-t, err := template.New("webpage").Parse(tpl)
-check(err)
+
+	t, err := template.New("webpage").Parse(tpl)
+	check(err)
 }

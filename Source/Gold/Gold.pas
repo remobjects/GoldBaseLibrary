@@ -792,10 +792,14 @@ type
   public
     class method InexactOverlap(x, y: go.builtin.Slice<byte>): Boolean;
     begin
-      if x.fArray <> y.fArray then exit false;
+      {if x.fArray <> y.fArray then exit false;
       if x.fStart > y.fStart + y.fCount then exit false;
       if y.fStart > x.fStart + x.fCount then exit false;
-      exit true;
+      exit true;}
+      {if x.fArray <> y.fArray then exit true;
+      if x.fStart > y.fStart + y.fCount then exit true;
+      if y.fStart > x.fStart + x.fCount then exit true;}
+      exit false;
     end;
   end;
 
