@@ -23,6 +23,21 @@ type
     begin
       Assert.AreEqual(TestApplication2.NewCTR(), 'some plaintext');
     end;
+
+    method NewOFB;
+    begin
+      Assert.AreEqual(TestApplication2.DoNewOFB(), 'some plaintext');
+    end;
+
+    method NewTripleDESCipher;
+    begin
+      //Assert.AreEqual(TestApplication2.DoNewTripleDESCipher(), true); // T81984
+    end;
+
+    method ECDSAVerify;
+    begin
+      //Assert.AreEqual(TestApplication2.DoECDSAVerify(), true); // T81984 seems, array inside struct
+    end;
   end;
 
 end.
