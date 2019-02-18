@@ -9,6 +9,8 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/sha256"
+	"crypto/md5"
+	"crypto/sha1"
 	"io"
 	"fmt"
 )
@@ -301,4 +303,18 @@ func DoECDSAVerify() bool {
 	valid := ecdsa.Verify(&privateKey.PublicKey, hash[:], r, s)
 	return valid
 	//fmt.Println("signature verified:", valid)
+}
+
+func DoMD5Sum() string {
+	lData := []byte("These pretzels are making me thirsty.")
+	lMD5 := md5.Sum(lData)
+	return hex.EncodeToString(lMD5[:])
+}
+
+func DoMD5New() string {
+	h := md5.New()
+	io.WriteString(h, "The fog is getting thicker!")
+	io.WriteString(h, "And Leon's getting laaarger!")
+	lMD5 := md5.Sum(nil)
+	return hex.EncodeToString(lMD5[:])
 }

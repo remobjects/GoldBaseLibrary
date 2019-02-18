@@ -9,7 +9,7 @@ type
   public
     method Get;
     begin
-      //TestApplication2.DoGetTest();
+      TestApplication2.DoGetTest();
     end;
   end;
 

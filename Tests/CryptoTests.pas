@@ -38,6 +38,17 @@ type
     begin
       //Assert.AreEqual(TestApplication2.DoECDSAVerify(), true); // T81984 seems, array inside struct
     end;
+
+    method DoMD5;
+    begin
+      Assert.AreEqual(TestApplication2.DoMD5Sum, "b0804ec967f48520697662a204f5fe72");
+    end;
+
+    method DoMD5New;
+    begin
+      Assert.AreEqual(TestApplication2.DoMD5New, "d41d8cd98f00b204e9800998ecf8427e");
+    end;
+
   end;
 
 end.

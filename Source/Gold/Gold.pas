@@ -111,14 +111,16 @@ type
       if fDict.TryGetValue(aItem,out val) then
         exit (val, true);
 
-
-
       {$IFDEF ISLAND}
       if IsVT  then
         exit (typeOf(V).Instantiate as V, false);
       {$ELSE}
       if IsVT then
         exit (Activator.CreateInstance<V>(), false);
+      {$ENDIF}
+      {$IF ECHOES}
+      if typeOf(V) = System.Type.GetType('System.String') then
+        exit(V(''), false);
       {$ENDIF}
       exit (default(V), false);
     end;
