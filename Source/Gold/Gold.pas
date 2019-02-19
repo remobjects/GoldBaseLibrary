@@ -7,6 +7,23 @@ uses
   ;
 
 type
+  VTCheck<V> = class
+  public
+    class var IsVT := false; readonly;
+
+    class constructor;
+    begin
+      var lType := typeOf(V);
+      {$IFDEF ISLAND}
+      if not lType.IsValueType and (lType.Methods.Any(a -> a.Name = '__Set')) then
+        IsVT := true;
+      {$ELSE}
+      if not lType.IsValueType and (lType.GetMethod('__Set') <> nil) then
+        IsVT := true;
+      {$ENDIF}
+    end;
+  end;
+
   [ValueTypeSemantics]
   Map<K, V> = public class
   private
@@ -23,20 +40,16 @@ type
       fDict[aItem] := aVal;
     end;
 
-    class var IsVT := false;
-
-    class constructor;
-    begin
-      var lType := typeOf(V);
-      {$IFDEF ISLAND}
-      if not lType.IsValueType and (lType.Methods.Any(a -> a.Name = '__Set')) then
-        IsVT := true;
-      {$ELSE}
-      if not lType.IsValueType and (lType.GetMethod('__Set') <> nil) then
-        IsVT := true;
-      {$ENDIF}
-    end;
   public
+    method __Set(v: Object);
+    begin
+      if (v <> nil) and (v <> self) then begin
+        fDict.Clear();
+        for each el in Map<K, V>(v):fDict do
+          fDict.Add(el.Key, el.Value);
+      end;
+    end;
+
     constructor(aArgs: array of tuple of (K, V));
     begin
       for each el in aArgs do
@@ -114,10 +127,10 @@ type
 
 
       {$IFDEF ISLAND}
-      if IsVT  then
+      if VTCheck<V>.IsVT  then
         exit (typeOf(V).Instantiate as V, false);
       {$ELSE}
-      if IsVT then
+      if VTCheck<V>.IsVT then
         exit (Activator.CreateInstance<V>(), false);
       {$ENDIF}
       exit (default(V), false);
@@ -162,10 +175,10 @@ type
     begin
       if (i < 0) or (i ≥ fCount) then raise new IndexOutOfRangeException('Index out of range');
       {$IFDEF ISLAND}
-      if IsVT and (Object(fArray[i + fStart]) = nil) then
+      if VTCheck<T>.IsVT and (Object(fArray[i + fStart]) = nil) then
         fArray[i + fStart] := typeOf(T).Instantiate as T;
       {$ELSE}
-      if IsVT and (Object(fArray[i + fStart]) = nil) then
+      if VTCheck<T>.IsVT and (Object(fArray[i + fStart]) = nil) then
         fArray[i + fStart] := Activator.CreateInstance<T>();
       {$ENDIF}
       exit fArray[i + fStart];
@@ -177,19 +190,6 @@ type
       fArray[i + fStart] := aVal;
     end;
     class var EmptyArray: array of T := [];
-    class var IsVT := false;
-
-    class constructor;
-    begin
-      var lType := typeOf(T);
-      {$IFDEF ISLAND}
-      if not lType.IsValueType and (lType.Methods.Any(a -> a.Name = '__Set')) then
-        IsVT := true;
-      {$ELSE}
-      if not lType.IsValueType and (lType.GetMethod('__Set') <> nil) then
-        IsVT := true;
-      {$ENDIF}
-    end;
   public
 
     constructor(aArray: array of T; aStart, aCount: Integer);
@@ -663,6 +663,13 @@ type
   begin
     if v is T then
       exit (T(v), true);
+    {$IFDEF ISLAND}
+    if VTCheck<T>.IsVT  then
+      exit (typeOf(T).Instantiate as T, false);
+    {$ELSE}
+    if VTCheck<T>.IsVT then
+      exit (Activator.CreateInstance<T>(), false);
+    {$ENDIF}
     exit (default(T), false); // for integers, T(V) cast would fail otherwise.
   end;
 
