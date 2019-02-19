@@ -586,11 +586,15 @@ type
 
   method Send<T>(aChannel: SendingChannel<T>; aVal: T); public;
   begin
-    aChannel.Send(aVal);
+    if aChannel ≠ nil then
+      aChannel.Send(aVal);
   end;
 
   method Receive<T>(aChannel: ReceivingChannel<T>): tuple of (T, Boolean); public;
   begin
+    if aChannel = nil then
+      exit (nil, false);
+
     exit aChannel.Receive();
   end;
 
