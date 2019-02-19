@@ -124,14 +124,16 @@ type
       if fDict.TryGetValue(aItem,out val) then
         exit (val, true);
 
-
-
       {$IFDEF ISLAND}
       if VTCheck<V>.IsVT  then
         exit (typeOf(V).Instantiate as V, false);
       {$ELSE}
       if VTCheck<V>.IsVT then
         exit (Activator.CreateInstance<V>(), false);
+      {$ENDIF}
+      {$IF ECHOES}
+      if typeOf(V) = System.Type.GetType('System.String') then
+        exit(V(''), false);
       {$ENDIF}
       exit (default(V), false);
     end;
@@ -799,10 +801,13 @@ type
   public
     class method InexactOverlap(x, y: go.builtin.Slice<byte>): Boolean;
     begin
-      if x.fArray <> y.fArray then exit false;
-      if x.fStart > y.fStart + y.fCount then exit false;
-      if y.fStart > x.fStart + x.fCount then exit false;
-      exit true;
+      if (x.Length = 0) or (y.Length = 0) or (x.fArray <> y.fArray) or ((x.fArray = y.fArray) and (x.fStart = y.fStart)) then
+        exit false;
+
+      if (x.fArray = y.fArray) and ((x.fStart ≤ (y.fStart + y.Length)) and (y.fStart ≤ (x.fStart + x.Length))) then
+        exit true
+      else
+        exit false;
     end;
   end;
 
