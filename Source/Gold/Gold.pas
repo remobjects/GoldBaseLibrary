@@ -18,7 +18,7 @@ type
       if not lType.IsValueType and (lType.Methods.Any(a -> a.Name = '__Set')) then
         IsVT := true;
       {$ELSE}
-      if not lType.IsValueType and (lType.GetMethod('__Set') <> nil) then
+      if not lType.IsValueType and (lType.GetMethods.Any(a -> a.Name = '__Set')) then
         IsVT := true;
       {$ENDIF}
     end;

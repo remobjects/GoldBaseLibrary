@@ -71,7 +71,8 @@ type
       if aType ≠ nil then
         fType := aType
       else
-        fType := TypeOf(aValue);
+        if aValue ≠ nil then
+          fType := TypeOf(aValue);
       fPtr := aValue;
     end;
 
@@ -128,6 +129,9 @@ type
 
     method IsValid: Boolean;
     begin
+      if fValue = nil then
+        exit false;
+
       var lValue := if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue;
       result := lValue ≠ Zero(fType);
     end;
