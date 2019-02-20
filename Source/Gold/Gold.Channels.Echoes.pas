@@ -307,12 +307,15 @@ type
 
   method Channel_Select(aHandles: array of IWaitMessage; aBlock: Boolean): Integer; public;
   begin
+    for j: Integer := 0 to aHandles.Count -1 do
+      if aHandles[j] = nil then
+        exit -1;
     {$IFDEF ISLAND}
     var lLock := new Monitor;
     var lWake := new ConditionalVariable;
-  {$ELSE}
+    {$ELSE}
     var lLock := new Object;
-  {$ENDIF}
+    {$ENDIF}
     var lDone := -1;
     locking lLock do begin
       for i: Integer := 0 to aHandles.Count -1 do begin
