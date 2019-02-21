@@ -185,7 +185,7 @@ type
     begin
       var s := Environment.GetEnvironmentVariable(sn);
       if s = nil then
-        exit (nil, false);
+        exit ('', false);
       exit (s, true);
     end;
 
