@@ -548,7 +548,7 @@ type
 
   method cap<T>(v: Slice<T>): Integer; public;
   begin
-    if v = nil then exit 0;
+    if v = nil then exit -1;
     exit v.Capacity;
   end;
 
