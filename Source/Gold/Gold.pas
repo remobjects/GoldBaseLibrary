@@ -603,6 +603,12 @@ type
     {$ENDIF}
   end;
 
+  method AssignArray<T>(aDest, aSource: array of T); public;
+  begin
+    for i: Integer := 0 to Math.Min(length(aDest), length(aSource)) -1 do
+      aDest[i] := aSource[i];
+  end;
+
   method Send<T>(aChannel: SendingChannel<T>; aVal: T); public;
   begin
     if aChannel ≠ nil then
