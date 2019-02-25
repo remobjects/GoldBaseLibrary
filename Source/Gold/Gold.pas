@@ -134,6 +134,9 @@ type
       {$IF ECHOES}
       if typeOf(V) = System.Type.GetType('System.String') then
         exit(V(''), false);
+      var lType := new go.reflect.TypeImpl(typeOf(V));
+      if lType.Kind = go.reflect.Slice then
+        exit (Activator.CreateInstance(lType.RealType, [0]) as V, false);
       {$ENDIF}
       exit (default(V), false);
     end;
