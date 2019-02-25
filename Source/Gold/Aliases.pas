@@ -14,11 +14,15 @@ type
   int32 = public partial record
   public
     Value: RemObjects.Elements.System.Int32;
+    constructor; empty;
+    constructor(aValue: RemObjects.Elements.System.Int32); begin Value := aValue; end;
   end;
   [AliasSemantics]
   uint32 = public partial record
   public
     Value: RemObjects.Elements.System.UInt32;
+    constructor; empty;
+    constructor(aValue: RemObjects.Elements.System.UInt32); begin Value := aValue; end;
   end;
   int64 = public RemObjects.Elements.System.Int64;
   uint64 = public RemObjects.Elements.System.UInt64;
@@ -29,6 +33,8 @@ type
   rune = public partial record
   public
     Value: Integer;
+    constructor; empty;
+    constructor(aValue: Integer); begin Value := aValue; end;
   end;
   string = public RemObjects.Elements.System.String;
 

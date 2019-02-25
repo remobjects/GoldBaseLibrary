@@ -47,6 +47,8 @@ type
   FileMode = public record
   public
     Value: UInt32;
+    constructor; empty;
+    constructor(aValue: UInt32); begin Value := aValue;end;
     method IsDir: Boolean;
     begin
       exit 0 <> (Value and ModeDir);

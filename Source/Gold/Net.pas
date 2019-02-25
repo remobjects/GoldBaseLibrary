@@ -28,6 +28,9 @@ type
   Flags = public record
   public
     Value: uint;
+
+    constructor; empty;
+    constructor(aValue: uint); begin Value := aValue;end;
   end;
 
   const
