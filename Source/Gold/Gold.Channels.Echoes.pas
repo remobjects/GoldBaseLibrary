@@ -310,14 +310,14 @@ type
     {$IFDEF ISLAND}
     var lLock := new Monitor;
     var lWake := new ConditionalVariable;
-  {$ELSE}
+    {$ELSE}
     var lLock := new Object;
-  {$ENDIF}
+    {$ENDIF}
     var lDone := -1;
     locking lLock do begin
       for i: Integer := 0 to aHandles.Count -1 do begin
         var ci := i;
-        if aHandles[i].Start(a -> begin
+        if (aHandles[i] <> nil) and aHandles[i].Start(a -> begin
           locking lLock do begin
             if lDone <> -1 then exit false;
             if not a() then exit false;
@@ -333,7 +333,8 @@ type
         end) then begin
           // start returns true if it's already done, if so, we can return that one and cancel the previous ones.
           for j: Integer := 0 to i -1 do
-            aHandles[i].Cancel;
+            if aHandles[j] <> nil then
+              aHandles[j].Cancel;
           exit i;
         end;
       end;
@@ -351,7 +352,7 @@ type
       end;
     end;
     for j: Integer := 0 to aHandles.Count -1 do
-      if j <> lDone then
+      if (aHandles[j] <> nil) and (j <> lDone) then
         aHandles[j].Cancel;
     exit lDone;
   end;
