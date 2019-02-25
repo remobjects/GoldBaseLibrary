@@ -226,6 +226,22 @@ type
       constructor(aSize, aSize);
     end;
 
+    method Assign(aOrg: array of T);
+    begin
+      if aOrg <> nil then
+        for i: Integer := 0 to aOrg. Length -1 do begin
+          self[i] := aOrg[i];
+        end;
+    end;
+
+    method Assign(aOrg: Slice<T>);
+    begin
+      if aOrg <> nil then
+      for i: Integer := 0 to aOrg. Length -1 do begin
+        self[i] := aOrg[i];
+      end;
+    end;
+
     method getAtIndex(i: Integer): Object;
     begin
       result := get_Item(i);
