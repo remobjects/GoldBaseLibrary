@@ -386,7 +386,7 @@ type
 
     class method stopTimer(t: go.builtin.Reference<go.time.runtimeTimer>): Boolean;
     begin
-      raise new NotImplementedException;
+      //raise new NotImplementedException;
     end;
 
     class method runtimeNano(): Int64;
