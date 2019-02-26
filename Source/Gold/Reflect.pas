@@ -1006,10 +1006,10 @@ type
     {$ENDIF}
   end;
 
-  method Swapper(aslice: Object): Action<Integer, Integer>; public;
+  method Swapper(aslice: Object): Action<go.builtin.int, go.builtin.int>; public;
   begin
     //exit new Action<Integer, Integer>(builtin.ISlice(aslice).Swap);
-    exit new Action<Integer, Integer>(go.sort.Interface(aslice).Swap);
+    exit new Action<go.builtin.int, go.builtin.int>(go.sort.Interface(aslice).Swap);
   end;
 
   method MakeMap(t: &Type): Value; public;

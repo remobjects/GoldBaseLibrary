@@ -137,7 +137,7 @@ type
       exit path;
     end;
 
-    method ReadAt(p: go.builtin.Slice<go.builtin.byte>; off: Int64): tuple of (go.builtin.int, go.builtin.error);
+    method ReadAt(p: go.builtin.Slice<go.builtin.byte>; off: go.builtin.int64): tuple of (go.builtin.int, go.builtin.error);
     begin
       var pp := fs.Position;
       fs.Position := off;
@@ -189,7 +189,7 @@ type
     end;
 
 
-    method Readdir(n: Integer): tuple of (go.builtin.Slice<FileInfo>, go.builtin.error);
+    method Readdir(n: go.builtin.int): tuple of (go.builtin.Slice<FileInfo>, go.builtin.error);
     begin
       if n < 0 then n := Int32.MaxValue;
       try
@@ -254,7 +254,7 @@ type
       end;
     end;
 
-    method &Seek(offset: Int64; whence: Integer): tuple of (Int64, go.builtin.error);
+    method &Seek(offset: go.builtin.int64; whence: go.builtin.int): tuple of (go.builtin.int64, go.builtin.error);
     begin
       try
         exit (fs.Seek(offset, if whence = 0 then SeekOrigin.Begin else if whence = 2 then SeekOrigin.End else SeekOrigin.Current), nil);
@@ -437,7 +437,7 @@ type
 
   FileInfo = public interface
     method Name: String;
-    method Size: Int64;
+    method Size: go.builtin.int64;
     method Mode: FileMode;
     method ModTime: go.time.Time;
     method IsDir: Boolean;
@@ -450,7 +450,7 @@ type
   public
     constructor(aFile: String); begin fFile := aFile; end;
     method Name: String; begin exit Path.GetFilename(fFile); end;
-    method Size: Int64; begin {$IF ISLAND}exit new RemObjects.Elements.System.File(fFile).Length;{$ELSEIF ECHOES}exit new System.IO.FileInfo(fFile).Length;{$ENDIF} end;
+    method Size: go.builtin.int64; begin {$IF ISLAND}exit new RemObjects.Elements.System.File(fFile).Length;{$ELSEIF ECHOES}exit new System.IO.FileInfo(fFile).Length;{$ENDIF} end;
     method Mode: FileMode;
     begin
       {$IF ISLAND}
