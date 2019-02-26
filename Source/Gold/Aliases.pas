@@ -1,8 +1,8 @@
 ﻿namespace go.builtin;
 
 type
-  int = public RemObjects.Elements.System.Int32;
-  uint = public RemObjects.Elements.System.UInt32;
+  int = public RemObjects.Elements.System.Int64;
+  uint = public RemObjects.Elements.System.UInt64;
   int8 = public RemObjects.Elements.System.SByte;
   uint8 = public RemObjects.Elements.System.Byte;
   byte = public RemObjects.Elements.System.Byte;
@@ -11,21 +11,21 @@ type
   uintptr = public RemObjects.Elements.System.NativeUInt;
   intptr = public RemObjects.Elements.System.NativeInt;
   [AliasSemantics]
-  int32 = public partial record
+  int64 = public partial record
   public
-    Value: RemObjects.Elements.System.Int32;
+    Value: RemObjects.Elements.System.Int64;
     constructor; empty;
-    constructor(aValue: RemObjects.Elements.System.Int32); begin Value := aValue; end;
+    constructor(aValue: RemObjects.Elements.System.Int64); begin Value := aValue; end;
   end;
   [AliasSemantics]
-  uint32 = public partial record
+  uint64 = public partial record
   public
-    Value: RemObjects.Elements.System.UInt32;
+    Value: RemObjects.Elements.System.UInt64;
     constructor; empty;
-    constructor(aValue: RemObjects.Elements.System.UInt32); begin Value := aValue; end;
+    constructor(aValue: RemObjects.Elements.System.UInt64); begin Value := aValue; end;
   end;
-  int64 = public RemObjects.Elements.System.Int64;
-  uint64 = public RemObjects.Elements.System.UInt64;
+  int32 = public RemObjects.Elements.System.Int32;
+  uint32 = public RemObjects.Elements.System.UInt32;
   float32 = public Single;
   float64 = public Double;
   bool = public Boolean;

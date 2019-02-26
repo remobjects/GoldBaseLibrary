@@ -2,7 +2,7 @@
 uses
   go.builtin;
 
-method AddInt32(var addr: int32; delta: int32): int32; public;
+method AddInt64(var addr: int64; delta: int64): int64; public;
 begin
   {$IFDEF ISLAND}
   exit InternalCalls.Add(var addr.Value, delta.Value);
@@ -11,7 +11,7 @@ begin
   {$ENDIF}
 end;
 
-method AddInt64(var addr: int64; delta: int64): int64; public;
+method AddInt32(var addr: int32; delta: int32): int32; public;
 begin
   {$IFDEF ISLAND}
   exit InternalCalls.Add(var addr, delta);
@@ -31,13 +31,13 @@ end;
 method AddUint64(var addr: uint64; delta: uint64): uint64; public; unsafe;
 begin
   {$IFDEF ISLAND}
-  exit InternalCalls.Add(var ^int64(@addr)^, delta);
+  exit InternalCalls.Add(var ^int(@addr)^, delta);
   {$ELSE}
-  exit System.Threading.Interlocked.Add(var ^int64(@addr)^, delta);
+  exit System.Threading.Interlocked.Add(var ^int(@addr)^, delta);
   {$ENDIF}
 end;
 
-method CompareAndSwapInt32(var addr: int32; aold, anew: int32): bool; public;
+method CompareAndSwapInt64(var addr: int64; aold, anew: int64): bool; public;
 begin
   {$IFDEF ISLAND}
   exit InternalCalls.CompareExchange(var addr.Value, anew.Value, aold.Value) = aold;
@@ -46,7 +46,7 @@ begin
   {$ENDIF}
 end;
 
-method CompareAndSwapInt64(var addr: int64; aold, anew: int64): bool; public;
+method CompareAndSwapInt32(var addr: int32; aold, anew: int32): bool; public;
 begin
   {$IFDEF ISLAND}
   exit InternalCalls.CompareExchange(var addr, anew, aold) = aold;
@@ -67,14 +67,14 @@ end;
 method CompareAndSwapUint64(var addr: uint64; aold, anew: uint64): bool; public; unsafe;
 begin
   {$IFDEF ISLAND}
-  exit InternalCalls.CompareExchange(var ^int64(@addr)^, anew, aold) = aold;
+  exit InternalCalls.CompareExchange(var ^int(@addr)^, anew, aold) = aold;
   {$ELSE}
-  exit System.Threading.Interlocked.CompareExchange(var ^int64(@addr)^, anew, aold) = aold;
+  exit System.Threading.Interlocked.CompareExchange(var ^int(@addr)^, anew, aold) = aold;
   {$ENDIF}
 end;
 
 
-method LoadInteger(var addr: Integer): Integer; public;
+method LoadInteger(var addr: int): int; public;
 begin
   {$IFDEF ISLAND}
   exit InternalCalls.VolatileRead(var addr);
@@ -83,7 +83,7 @@ begin
   {$ENDIF}
 end;
 
-method LoadInt32(var addr: int32): int32; public;
+method LoadInt64(var addr: int64): int64; public;
 begin
   {$IFDEF ISLAND}
   exit InternalCalls.VolatileRead(var addr.Value);
@@ -92,7 +92,7 @@ begin
   {$ENDIF}
 end;
 
-method LoadInt64(var addr: int64): int64; public;
+method LoadInt32(var addr: int32): int32; public;
 begin
   {$IFDEF ISLAND}
   exit InternalCalls.VolatileRead(var addr);
@@ -104,22 +104,22 @@ end;
 method LoadUint32(var addr: uint32): uint32; public;
 begin
   {$IFDEF ISLAND}
-  exit InternalCalls.VolatileRead(var addr.Value);
-  {$ELSE}
-  exit System.Threading.&Volatile.Read(var addr.Value);
-  {$ENDIF}
-end;
-
-method LoadUint64(var addr: uint64): uint64; public;
-begin
-  {$IFDEF ISLAND}
   exit InternalCalls.VolatileRead(var addr);
   {$ELSE}
   exit System.Threading.&Volatile.Read(var addr);
   {$ENDIF}
 end;
 
-method StoreInt32(var addr: int32; val: int32);
+method LoadUint64(var addr: uint64): uint64; public;
+begin
+  {$IFDEF ISLAND}
+  exit InternalCalls.VolatileRead(var addr.Value);
+  {$ELSE}
+  exit System.Threading.&Volatile.Read(var addr.Value);
+  {$ENDIF}
+end;
+
+method StoreInt64(var addr: int64; val: int64);
 begin
   {$IFDEF ISLAND}
   InternalCalls.VolatileWrite(var addr.Value, val.Value);
@@ -129,7 +129,7 @@ begin
 end;
 
 
-method StoreInteger(var addr: Integer; val: int32);
+method StoreInteger(var addr: int; val: int);
 begin
   {$IFDEF ISLAND}
   InternalCalls.VolatileWrite(var addr, val);
@@ -138,7 +138,7 @@ begin
   {$ENDIF}
 end;
 
-method StoreInt64(var addr: int64; val: int64);
+method StoreInt32(var addr: int32; val: int32);
 begin
   {$IFDEF ISLAND}
   InternalCalls.VolatileWrite(var addr, val);
@@ -150,22 +150,22 @@ end;
 method StoreUint32(var addr: uint32; val: uint32);
 begin
   {$IFDEF ISLAND}
-  InternalCalls.VolatileWrite(var addr.Value, val.Value);
-  {$ELSE}
-  System.Threading.&Volatile.Write(var addr.Value, val.Value);
-  {$ENDIF}
-end;
-
-method StoreUint64(var addr: uint64; val: uint64);
-begin
-  {$IFDEF ISLAND}
   InternalCalls.VolatileWrite(var addr, val);
   {$ELSE}
   System.Threading.&Volatile.Write(var addr, val);
   {$ENDIF}
 end;
 
-method SwapInt32(var addr: int32; anew: int32): int32; public;
+method StoreUint64(var addr: uint64; val: uint64);
+begin
+  {$IFDEF ISLAND}
+  InternalCalls.VolatileWrite(var addr.Value, val.Value);
+  {$ELSE}
+  System.Threading.&Volatile.Write(var addr.Value, val.Value);
+  {$ENDIF}
+end;
+
+method SwapInt32(var addr: int64; anew: int64): int64; public;
 begin
   {$IFDEF ISLAND}
   exit InternalCalls.Exchange(var addr.Value, anew.Value);
@@ -174,7 +174,7 @@ begin
   {$ENDIF}
 end;
 
-method SwapInt64(var addr: int64; anew: int64): int64; public;
+method SwapInt64(var addr: int32; anew: int32): int32; public;
 begin
   {$IFDEF ISLAND}
   exit InternalCalls.Exchange(var addr, anew);
@@ -195,9 +195,9 @@ end;
 method SwapUint64(var addr: uint64; anew: uint64): uint64; public; unsafe;
 begin
   {$IFDEF ISLAND}
-  exit InternalCalls.Exchange(var ^int64(@addr)^, anew);
+  exit InternalCalls.Exchange(var ^int(@addr)^, anew);
   {$ELSE}
-  exit System.Threading.Interlocked.Exchange(var ^int64(@addr)^, anew);
+  exit System.Threading.Interlocked.Exchange(var ^int(@addr)^, anew);
   {$ENDIF}
 end;
 

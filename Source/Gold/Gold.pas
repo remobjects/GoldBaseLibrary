@@ -61,6 +61,11 @@ type
       //fDict.Capacity := aCap;
     end;
 
+    constructor(aCap: go.builtin.int);
+    begin
+      //fDict.Capacity := aCap;
+    end;
+
     constructor();
     begin
     end;
@@ -215,13 +220,35 @@ type
       constructor(aArray, 0, aArray.Length);
     end;
 
-    constructor(aSize, aCap: Integer);
+    constructor(aSize, aCap: go.builtin.int);
     begin
       if aCap < aSize then aCap := aSize;
       constructor(new T[aCap], 0, aSize);
     end;
 
-    constructor(aSize: Integer);
+    constructor(aSize, aCap: Int64);
+    begin
+      if aCap < aSize then aCap := aSize;
+      constructor(new T[aCap], 0, aSize);
+    end;
+
+    constructor(aSize: go.builtin.int; aCap: int64);
+    begin
+      if aCap < aSize then aCap := aSize;
+      constructor(new T[aCap], 0, aSize);
+    end;
+    constructor(aSize: int64; aCap: go.builtin.int);
+    begin
+      if aCap < aSize then aCap := aSize;
+      constructor(new T[aCap], 0, aSize);
+    end;
+
+    constructor(aSize: go.builtin.int);
+    begin
+      constructor(aSize, aSize);
+    end;
+
+    constructor(aSize: int64);
     begin
       constructor(aSize, aSize);
     end;
@@ -291,12 +318,12 @@ type
       result := fCount;
     end;
 
-    method Less(a, b: Integer): go.builtin.bool;
+    method Less(a, b: go.builtin.int): go.builtin.bool;
     begin
 
     end;
 
-    method Swap(a, b: Integer);
+    method Swap(a, b: go.builtin.int);
     begin
       var p := self[a];
       self[a] := self[b];
@@ -802,14 +829,6 @@ type
     method String: string;
     begin
       exit self.ToString;
-    end;
-  end;
-
-  go.builtin.int32 = public partial record
-  public
-    operator implicit(aVal: go.builtin.int32): nullable Integer;
-    begin
-      exit Integer(aVal);
     end;
   end;
 

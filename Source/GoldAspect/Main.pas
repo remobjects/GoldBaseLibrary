@@ -18,12 +18,12 @@ type
       var lIsSet := ITypeDefinition(lType).AddMethod('isSet', Services.GetBaseType(1), false);
       lIsSet.ReplaceMethodBody(
         new ExitStatement(
-        new BinaryValue(new ProcValue(new TypeValue(Services.GetType('go.sync.atomic.__Global')), 'LoadInteger', [new FieldValue(lPar, lType, 'Value')]), new DataValue(0), BinaryOperator.NotEqual)
+        new BinaryValue(new ProcValue(new TypeValue(Services.GetType('go.sync.atomic.__Global')), 'LoadInt32', [new FieldValue(lPar, lType, 'Value')]), new DataValue(0), BinaryOperator.NotEqual)
         ));
       var lsetTrue := ITypeDefinition(lType).AddMethod('setTrue', nil, false);
       lsetTrue.ReplaceMethodBody(
       new StandaloneStatement(
-      new ProcValue(new TypeValue(Services.GetType('go.sync.atomic.__Global')), 'StoreInteger', [new FieldValue(lPar, lType, 'Value'), new DataValue(1)])
+      new ProcValue(new TypeValue(Services.GetType('go.sync.atomic.__Global')), 'StoreInt32', [new FieldValue(lPar, lType, 'Value'), new DataValue(1)])
       ));
     end;
   end;
