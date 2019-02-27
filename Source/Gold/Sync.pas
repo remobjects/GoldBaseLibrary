@@ -2,8 +2,8 @@
 
 type
   Locker = public interface
-    method Lock();
-    method Unlock();
+    method Lock(): RemObjects.Elements.MicroTasks.VoidResult;
+    method Unlock(): RemObjects.Elements.MicroTasks.VoidResult;
   end;
 
   [ValueTypeSemantics]
@@ -15,7 +15,7 @@ type
     fMutex: Object := new Object;
     {$ENDIF}
   public
-    method Lock();
+    method Lock(): RemObjects.Elements.MicroTasks.VoidResult;
     begin
       {$IFDEF Island}
       fMutex.Wait;
@@ -24,7 +24,7 @@ type
       {$ENDIF}
     end;
 
-    method Unlock();
+    method Unlock(): RemObjects.Elements.MicroTasks.VoidResult;
     begin
       {$IFDEF ISLAND}
       fMutex.Release;
@@ -100,22 +100,22 @@ type
     end);
   public
 
-    method Lock;
+    method Lock: RemObjects.Elements.MicroTasks.VoidResult;
     begin
       fRealLock.EnterWriteLock;
     end;
 
-    method RLock;
+    method RLock: RemObjects.Elements.MicroTasks.VoidResult;
     begin
       fRealLock.EnterReadLock;
     end;
 
-    method RUnlock;
+    method RUnlock: RemObjects.Elements.MicroTasks.VoidResult;
     begin
       fRealLock.ExitReadLock;
     end;
 
-    method Unlock;
+    method Unlock: RemObjects.Elements.MicroTasks.VoidResult;
     begin
       fRealLock.ExitWriteLock;
     end;

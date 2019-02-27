@@ -137,7 +137,7 @@ type
       exit path;
     end;
 
-    method ReadAt(p: go.builtin.Slice<go.builtin.byte>; off: go.builtin.int64): tuple of (go.builtin.int, go.builtin.error);
+    method ReadAt(p: go.builtin.Slice<go.builtin.byte>; off: go.builtin.int64): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>;
     begin
       var pp := fs.Position;
       fs.Position := off;
@@ -159,7 +159,7 @@ type
       exit (p.fCount, nil);
     end;
 
-    method Readdirnames(n: Integer): tuple of (go.builtin.Slice<String>, go.builtin.error);
+    method Readdirnames(n: Integer): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.Slice<String>, go.builtin.error)>;
     begin
       if n < 0 then n := Int32.MaxValue;
       try
@@ -189,7 +189,7 @@ type
     end;
 
 
-    method Readdir(n: go.builtin.int): tuple of (go.builtin.Slice<FileInfo>, go.builtin.error);
+    method Readdir(n: go.builtin.int): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.Slice<FileInfo>, go.builtin.error)>;
     begin
       if n < 0 then n := Int32.MaxValue;
       try
@@ -217,7 +217,7 @@ type
       end;
     end;
 
-    method Stat: tuple of (FileInfo, go.builtin.error);
+    method Stat: RemObjects.Elements.MicroTasks.Result<tuple of (FileInfo, go.builtin.error)>;
     begin
       exit (new MyFileInfo(path), nil);
     end;
@@ -229,7 +229,7 @@ type
       exit nil;
     end;
 
-    method &Read(p: go.builtin.Slice<go.builtin.byte>): tuple of (go.builtin.int, go.builtin.error);
+    method &Read(p: go.builtin.Slice<go.builtin.byte>): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>;
     begin
       try
         var b := fs.Read(p.fArray, p.fStart, p.fCount);
@@ -242,7 +242,7 @@ type
       end;
     end;
 
-    method &Write(p: go.builtin.Slice<go.builtin.byte>): tuple of (go.builtin.int, go.builtin.error);
+    method &Write(p: go.builtin.Slice<go.builtin.byte>): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>;
     begin
       try
          fs.Write(p.fArray, p.fStart, p.fCount);
@@ -264,12 +264,12 @@ type
      end;
     end;
   end;
-  method Getwd: tuple of (string, go.builtin.error); public;
+  method Getwd: RemObjects.Elements.MicroTasks.Result<tuple of (string, go.builtin.error)>; public;
   begin
     exit (Environment.CurrentDirectory, nil);
   end;
 
-  method executable(): tuple of (string, go.builtin.error); public;
+  method executable(): RemObjects.Elements.MicroTasks.Result<tuple of (string, go.builtin.error)>; public;
   begin
     {$IF ISLAND AND WINDOWS}
     var lBuffer := new Char[rtl.MAX_PATH + 1];
@@ -282,7 +282,7 @@ type
     {$ENDIF}
   end;
 
-  method Mkdir(name: string; perm :FileMode): go.builtin.error;
+  method Mkdir(name: string; perm :FileMode): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
   begin
     try
       {$IF ISLAND}
@@ -297,7 +297,7 @@ type
       end;
   end;
 
-  method Remove(s: string): go.builtin.error;
+  method Remove(s: string): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
   begin
     try
       {$IF ISLAND}
@@ -318,7 +318,7 @@ type
     end;
   end;
 
-  method fixRootDirectory(s: string): string;
+  method fixRootDirectory(s: string): RemObjects.Elements.MicroTasks.Result<string>;
   begin
     if defined('WINDOWS') or (defined('ECHOES') and (Environment.OSVersion.Platform = PlatformID.Win32NT)) then begin
       if s.Length <3 then
@@ -327,7 +327,7 @@ type
     exit s;
   end;
 
-  method &Create(name: string): tuple of (File, go.builtin.error); public;
+  method &Create(name: string): RemObjects.Elements.MicroTasks.Result<tuple of (File, go.builtin.error)>; public;
 begin
   try
   {$IF ISLAND}
@@ -342,13 +342,13 @@ begin
 end;
 
 
-method NewFile(fd: uint64; name: string): File;public;
+method NewFile(fd: uint64; name: string): RemObjects.Elements.MicroTasks.Result<File>;public;
 begin
   raise new NotSupportedException;
 end;
 
 
-method &Open(name: string): tuple of (File, go.builtin.error);public;
+method &Open(name: string): RemObjects.Elements.MicroTasks.Result<tuple of (File, go.builtin.error)>;public;
 begin
   try
     {$IF ISLAND}
@@ -362,7 +362,7 @@ begin
    end;
 end;
 
-method &OpenFile(name: string; aFlags: Integer; perm: FileMode): tuple of (File, go.builtin.error);public;
+method &OpenFile(name: string; aFlags: Integer; perm: FileMode): RemObjects.Elements.MicroTasks.Result<tuple of (File, go.builtin.error)>;public;
 begin
   try
     {$IF ISLAND}
@@ -385,7 +385,7 @@ begin
       exit (nil, go.errors.New(e.Message));
   end;
 end;
-method hostname: tuple of (string, go.builtin.error);
+method hostname: RemObjects.Elements.MicroTasks.Result<tuple of (string, go.builtin.error)>;
 begin
   {$IF ISLAND}
   raise new NotImplementedException;
@@ -396,7 +396,7 @@ end;
 
 var Args:  go.builtin.Slice<String> := new go.builtin.Slice<String>({$IF ISLAND}''{raise new NotImplementedException}{$ELSEIF ECHOES}Environment.GetCommandLineArgs{$ENDIF});
 
-method &Exit(i: Integer);
+method &Exit(i: Integer): RemObjects.Elements.MicroTasks.VoidResult;
 begin
   {$IF ISLAND}
   raise new NotImplementedException;
@@ -405,7 +405,7 @@ begin
   {$ENDIF}
 end;
 
-method lstatNolog(fn: string): tuple of(FileInfo, go.builtin.error);
+method lstatNolog(fn: string): RemObjects.Elements.MicroTasks.Result<tuple of(FileInfo, go.builtin.error)>;
 begin
   {$IF ISLAND}
   var lFile := new RemObjects.Elements.System.File(fn);
@@ -419,7 +419,7 @@ begin
   exit (nil, go.errors.New('Not found '+fn));
 end;
 
-method statNolog(fn: string): tuple of (FileInfo, go.builtin.error);
+method statNolog(fn: string): RemObjects.Elements.MicroTasks.Result<tuple of (FileInfo, go.builtin.error)>;
 begin
   {$IF ISLAND}
   var lFile := new RemObjects.Elements.System.File(fn);
@@ -436,12 +436,12 @@ end;
 type
 
   FileInfo = public interface
-    method Name: String;
-    method Size: go.builtin.int64;
-    method Mode: FileMode;
-    method ModTime: go.time.Time;
-    method IsDir: Boolean;
-    method Sys: Object;
+    method Name: RemObjects.Elements.MicroTasks.Result<String>;
+    method Size: RemObjects.Elements.MicroTasks.Result<go.builtin.int64>;
+    method Mode: RemObjects.Elements.MicroTasks.Result<FileMode>;
+    method ModTime: RemObjects.Elements.MicroTasks.Result<go.time.Time>;
+    method IsDir: RemObjects.Elements.MicroTasks.Result<Boolean>;
+    method Sys: RemObjects.Elements.MicroTasks.Result<Object>;
   end;
 
   MyFileInfo = class(FileInfo)
@@ -449,9 +449,9 @@ type
     fFile: String;
   public
     constructor(aFile: String); begin fFile := aFile; end;
-    method Name: String; begin exit Path.GetFilename(fFile); end;
-    method Size: go.builtin.int64; begin {$IF ISLAND}exit new RemObjects.Elements.System.File(fFile).Length;{$ELSEIF ECHOES}exit new System.IO.FileInfo(fFile).Length;{$ENDIF} end;
-    method Mode: FileMode;
+    method Name: RemObjects.Elements.MicroTasks.Result<String>; begin exit Path.GetFilename(fFile); end;
+    method Size: RemObjects.Elements.MicroTasks.Result<go.builtin.int64>; begin {$IF ISLAND}exit new RemObjects.Elements.System.File(fFile).Length;{$ELSEIF ECHOES}exit new System.IO.FileInfo(fFile).Length;{$ENDIF} end;
+    method Mode: RemObjects.Elements.MicroTasks.Result<FileMode>;
     begin
       {$IF ISLAND}
       raise new NotImplementedException;
@@ -462,7 +462,7 @@ type
         result.Value := result.Value or Integer(ModeDir);
       {$ENDIF}
     end;
-    method ModTime: go.time.Time;
+    method ModTime: RemObjects.Elements.MicroTasks.Result<go.time.Time>;
     begin
       {$IF ISLAND}
       raise new NotImplementedException;
@@ -471,8 +471,8 @@ type
       exit go.time.Date(lLast.Year, lLast.Month, lLast.Day, lLast.Hour, lLast.Minute, lLast.Second, lLast.Millisecond * 1000000, go.time.UTC);
       {$ENDIF}
     end;
-    method IsDir: Boolean; begin {$IF ISLAND}exit new Folder(fFile).Exists;{$ELSEIF ECHOES}exit FileAttributes.Directory in System.IO.File.GetAttributes(fFile);{$ENDIF} end;
-    method Sys: Object; begin exit fFile; end;
+    method IsDir: RemObjects.Elements.MicroTasks.Result<Boolean>; begin {$IF ISLAND}exit new Folder(fFile).Exists;{$ELSEIF ECHOES}exit FileAttributes.Directory in System.IO.File.GetAttributes(fFile);{$ENDIF} end;
+    method Sys: RemObjects.Elements.MicroTasks.Result<Object>; begin exit fFile; end;
   end;
 
   [ValueTypeSemantics]
@@ -481,15 +481,15 @@ type
   var PathSeparator: Char := {$IF ISLAND}Path.DirectorySeparatorChar{$ELSEIF ECHOES}System.IO.Path.DirectorySeparatorChar{$ENDIF}; readonly; public;
   var PathListSeparator:  Char := {$IF ISLAND}Path.ListSeparator{$ELSEIF ECHOES}System.IO.Path.PathSeparator{$ENDIF}; readonly;public;
 
-  method IsPathSeparator(c: Char): Boolean; begin exit c = PathSeparator; end;
-  method Readlink(name: string): tuple of (string, builtin.error);
+  method IsPathSeparator(c: Char): RemObjects.Elements.MicroTasks.Result<Boolean>; begin exit c = PathSeparator; end;
+  method Readlink(name: string): RemObjects.Elements.MicroTasks.Result<tuple of (string, builtin.error)>;
   begin
     exit (nil, go.Errors.New('Not supported'));
   end;
 type
   DiscardWriter = class(go.io.Writer)
   public
-    method &Write(p: go.builtin.Slice<go.builtin.byte>): tuple of (go.builtin.int, go.builtin.error);
+    method &Write(p: go.builtin.Slice<go.builtin.byte>): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>;
     begin
       exit (p.Length, nil);
     end;
@@ -503,12 +503,12 @@ type
       fReader := aReader;
     end;
 
-    method &Read(p: go.builtin.Slice<go.builtin.byte>): tuple of (go.builtin.int, go.builtin.error);
+    method &Read(p: go.builtin.Slice<go.builtin.byte>): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>;
     begin
       exit fReader.Read(p);
     end;
 
-    method Close: go.builtin.error;
+    method Close: RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       exit nil;
     end;
@@ -519,7 +519,7 @@ type
   public
     class var Discard: go.io.Writer := new DiscardWriter;
 
-    class method TempFile(dir, pattern: String): tuple of (go.builtin.Reference<go.os.File>, go.builtin.error);
+    class method TempFile(dir, pattern: String): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.Reference<go.os.File>, go.builtin.error)>;
     begin
       {$IF ISLAND}
       // TODO
@@ -530,12 +530,12 @@ type
       {$ENDIF}
     end;
 
-    class method NopCloser(r: go.io.Reader): go.io.ReadCloser;
+    class method NopCloser(r: go.io.Reader): RemObjects.Elements.MicroTasks.Result<go.io.ReadCloser>;
     begin
       exit new MyNopCloser(r);
     end;
 
-    class method ReadFile(fn: String): tuple of (go.builtin.Slice<Byte>, go.builtin.error);
+    class method ReadFile(fn: String): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.Slice<Byte>, go.builtin.error)>;
     begin
       var res := Open(fn);
       if res.Item2 <> nil then exit (nil, res.Item2);
@@ -546,7 +546,7 @@ type
       end;
     end;
 
-    class method ReadAll(r: go.io.Reader): tuple of (go.builtin.Slice<Byte>, go.builtin.error);
+    class method ReadAll(r: go.io.Reader): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.Slice<Byte>, go.builtin.error)>;
     begin
       var ms := new MemoryStream;
       var b := new go.builtin.Slice<Byte>(512);
@@ -566,7 +566,7 @@ public
   &Old: String;
   &New: String;
   Err: go.builtin.error;
-  method Error(): String;
+  method Error(): RemObjects.Elements.MicroTasks.Result<String>;
   begin
     exit Op + " " + &Old + " " + &New + ": " + &Err.Error()
   end;
@@ -577,7 +577,7 @@ Process= public partial class
 public
   Process: ProcessType;
   property Pid: Integer read Process.Id;
-  method Kill: go.builtin.error;
+  method Kill:RemObjects.Elements.MicroTasks.Result< go.builtin.error>;
   begin
     try
       {$IF ISLAND}
@@ -592,7 +592,7 @@ public
     end;
   end;
 
-  method Release: go.builtin.error;
+  method Release: RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
   begin
     {$IF ISLAND}
     // TODO
@@ -602,12 +602,12 @@ public
     exit nil;
   end;
 
-  method Signal: go.builtin.error;
+  method Signal: RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
   begin
     exit go.errors.New('Not supported');
   end;
 
-  method Wait: tuple of (go.builtin.Reference<ProcessState>, go.builtin.error);
+  method Wait: RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.Reference<ProcessState>, go.builtin.error)>;
   begin
     try
       {$IF ISLAND}
@@ -630,7 +630,7 @@ public
   Env: go.builtin.Slice<String>;
 end;
 
-method IntStartProcess(name: string; argv: go.builtin.Slice<string>; attr: go.builtin.Reference<ProcAttr>): tuple of (Reference<Process>, go.builtin.error);
+method IntStartProcess(name: string; argv: go.builtin.Slice<string>; attr: go.builtin.Reference<ProcAttr>): RemObjects.Elements.MicroTasks.Result<tuple of (Reference<Process>, go.builtin.error)>;
 begin
   {$IF ISLAND}
   // TODO
@@ -676,12 +676,12 @@ begin
   {$ENDIF}
 end;
 
-method StartProcess(name: string; argv: go.builtin.Slice<string>; attr: builtin.Reference<ProcAttr>): tuple of (Reference<Process>, go.builtin.error);
+method StartProcess(name: string; argv: go.builtin.Slice<string>; attr: builtin.Reference<ProcAttr>): RemObjects.Elements.MicroTasks.Result<tuple of (Reference<Process>, go.builtin.error)>;
 begin
   exit IntStartProcess(name, argv, attr);
 end;
 
-method FindProcess(pid: Integer): tuple of (go.builtin.Reference<Process>, go.builtin.error);
+method FindProcess(pid: Integer): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.Reference<Process>, go.builtin.error)>;
 begin
   try
     {$IF ISLAND}

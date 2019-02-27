@@ -371,8 +371,8 @@ type
     end;
   end;
 
-  error = public interface
-    method Error: string;
+  go. interface
+    method Error: RemObjects.Elements.MicroTasks.&Result<string>;
   end;
 
 

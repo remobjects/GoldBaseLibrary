@@ -104,9 +104,9 @@ end;
 
 type
   Stringer = public interface
-    method String(): builtin.string;
+    method String(): RemObjects.Elements.MicroTasks.Result<builtin.string>;
   end;
   GoStringer = public interface
-    method GoString(): builtin.string;
+    method GoString(): RemObjects.Elements.MicroTasks.Result<builtin.string>;
   end;
 end.

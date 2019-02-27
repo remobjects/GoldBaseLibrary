@@ -58,23 +58,23 @@ type
     method writeBuffers(v: Reference<Buffers>): tuple of (int64, go.builtin.error);
   end;
   Error = public partial interface (go.builtin.error)
-    method Timeout(): Boolean;
-    method Temporary(): Boolean;
+    method Timeout(): RemObjects.Elements.MicroTasks.Result<Boolean>;
+    method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>;
   end;
 
   temporary = interface
-    method Temporary(): Boolean;
+    method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>;
  end;
 
   timeout = interface
-    method Timeout(): Boolean;
+    method Timeout(): RemObjects.Elements.MicroTasks.Result<Boolean>;
   end;
 
 
 type
   Addr = public interface
-    method Network(): string;
-    method String(): string;
+    method Network(): RemObjects.Elements.MicroTasks.Result<string>;
+    method String(): RemObjects.Elements.MicroTasks.Result<string>;
   end;
 
   [ValueTypeSemantics]
@@ -83,8 +83,8 @@ type
     IP: IP;
     Zone: string; // IPv6 scoped addressing zone; added in Go 1.1
 
-    method Network: string; begin exit 'ip'; end;
-    method String: string; begin exit IP.String(); end;
+    method Network: RemObjects.Elements.MicroTasks.Result<string>; begin exit 'ip'; end;
+    method String: RemObjects.Elements.MicroTasks.Result<string>; begin exit IP.String(); end;
   end;
 
   [ValueTypeSemantics]
@@ -94,8 +94,8 @@ type
     Port: Integer;
     Zone: string; // IPv6 scoped addressing zone; added in Go 1.1
 
-    method Network: string; begin exit 'tcp'; end;
-    method String: string; begin exit IP.String()+':'+Port; end;
+    method Network: RemObjects.Elements.MicroTasks.Result<string>; begin exit 'tcp'; end;
+    method String: RemObjects.Elements.MicroTasks.Result<string>; begin exit IP.String()+':'+Port; end;
   end;
   [ValueTypeSemantics]
   UDPAddr = public class(Addr)
@@ -104,8 +104,8 @@ type
     Port: Integer;
     Zone: string; // IPv6 scoped addressing zone; added in Go 1.1
 
-    method Network: string; begin exit 'udp'; end;
-    method String: string; begin exit IP.String()+':'+Port; end;
+    method Network: RemObjects.Elements.MicroTasks.Result<string>; begin exit 'udp'; end;
+    method String: RemObjects.Elements.MicroTasks.Result<string>; begin exit IP.String()+':'+Port; end;
   end;
   [ValueTypeSemantics]
   UnixAddr = public class(Addr)
@@ -132,8 +132,8 @@ type
       end;
       exit s;
     end;
-    method Temporary(): Boolean; empty;
-    method Timeout(): Boolean; empty;
+    method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
+    method Timeout(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
   end;
   [AliasSemantics]
   UnknownNetworkError = public partial record(go.net.Error, go.builtin.error)
@@ -143,8 +143,8 @@ type
     Value: string;
     method Error: string; begin exit 'unknown network '+Value; end;
 
-    method Temporary(): Boolean; empty;
-    method Timeout(): Boolean; empty;
+    method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
+    method Timeout(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
   end;
 
   [AliasSemantics]
@@ -155,8 +155,8 @@ type
     Err: go.builtin.error;
     method Error: string; begin exit 'error reading DNS config: '+Err.Error(); end;
 
-    method Temporary(): Boolean; empty;
-    method Timeout(): Boolean; empty;
+    method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
+    method Timeout(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
   end;
   [ValueTypeSemantics]
   ParseError = public partial class(go.builtin.error)
@@ -178,10 +178,10 @@ type
     IsTimeout: Boolean;
     IsTemporary: Boolean;
 
-    method Temporary(): Boolean; begin exit IsTemporary; end;
-    method Timeout(): Boolean; begin exit IsTimeout; end;
+    method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>; begin exit IsTemporary; end;
+    method Timeout(): RemObjects.Elements.MicroTasks.Result<Boolean>; begin exit IsTimeout; end;
 
-    method Error: string;
+    method Error: RemObjects.Elements.MicroTasks.Result<string>;
     begin
       var s := "lookup " + Name;
       if Server <> "" then begin
@@ -199,10 +199,10 @@ type
     constructor; begin end;
     constructor(aValue: string); begin Value := aValue; end;
     Value: string;
-    method Error: string; begin exit Value; end;
+    method Error: RemObjects.Elements.MicroTasks.Result<string>; begin exit Value; end;
 
-    method Temporary(): Boolean; empty;
-    method Timeout(): Boolean; empty;
+    method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
+    method Timeout(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
   end;
 
 
@@ -227,7 +227,7 @@ type
     Addr: Addr;
     Err: go.builtin.error;
 
-    method Error(): string;
+    method Error(): RemObjects.Elements.MicroTasks.Result<string>;
     begin
       var s := Op;
       if Net <> "" then begin
@@ -247,13 +247,13 @@ type
       s := s + ": " + Err.Error();
       exit s;
     end;
-    method Temporary(): Boolean;
+    method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>;
     begin
       if Err is temporary then
         exit (Err as temporary).Temporary;
       exit false;
     end;
-    method Timeout(): Boolean;
+    method Timeout(): RemObjects.Elements.MicroTasks.Result<Boolean>;
     begin
       if Err is timeout then
         exit (Err as timeout).Timeout;
@@ -398,22 +398,22 @@ type
     // Read reads data from the connection.
             // Read can be made to time out and return an Error with Timeout() == true
             // after a fixed time limit; see SetDeadline and SetReadDeadline.
-    method &Read(b: Slice<byte>): tuple of (int, go.builtin.error);
+    method &Read(b: Slice<byte>): RemObjects.Elements.MicroTasks.Result<tuple of (int, go.builtin.error)>;
 
             // Write writes data to the connection.
             // Write can be made to time out and return an Error with Timeout() == true
             // after a fixed time limit; see SetDeadline and SetWriteDeadline.
-    method  &Write(b: Slice<byte>): tuple of (int, go.builtin.error);
+    method  &Write(b: Slice<byte>): RemObjects.Elements.MicroTasks.Result<tuple of (int, go.builtin.error)>;
 
             // Close closes the connection.
             // Any blocked Read or Write operations will be unblocked and return errors.
-    method Close(): go.builtin.error;
+    method Close(): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
 
             // LocalAddr returns the local network address.
-    method LocalAddr(): Addr;
+    method LocalAddr(): RemObjects.Elements.MicroTasks.Result<Addr>;
 
             // RemoteAddr returns the remote network address.
-    method RemoteAddr(): Addr;
+    method RemoteAddr(): RemObjects.Elements.MicroTasks.Result<Addr>;
 
             // SetDeadline sets the read and write deadlines associated
             // with the connection. It is equivalent to calling both
@@ -430,19 +430,19 @@ type
             // the deadline after successful Read or Write calls.
             //
             // A zero value for t means I/O operations will not time out.
-    method SetDeadline(tt: go.time.Time): go.builtin.error;
+    method SetDeadline(tt: go.time.Time): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
 
             // SetReadDeadline sets the deadline for future Read calls
             // and any currently-blocked Read call.
             // A zero value for t means Read will not time out.
-    method SetReadDeadline(tt: go.time.Time): go.builtin.error;
+    method SetReadDeadline(tt: go.time.Time): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
 
             // SetWriteDeadline sets the deadline for future Write calls
             // and any currently-blocked Write call.
             // Even if write times out, it may return n > 0, indicating that
             // some of the data was successfully written.
             // A zero value for t means Write will not time out.
-    method SetWriteDeadline(t: go.time.Time): go.builtin.error;
+    method SetWriteDeadline(t: go.time.Time): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
   end;
 
 
@@ -455,7 +455,7 @@ type
       fSock := aSock;
     end;
 
-    method &Read(b: Slice<byte>): tuple of (go.builtin.int, go.builtin.error);
+    method &Read(b: Slice<byte>): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>;
     begin
       try
         exit (fSock.Receive(b.fArray, b.fStart, b.fCount, SocketFlags.None), nil);
@@ -465,7 +465,7 @@ type
       end;
     end;
 
-    method &Write(b: Slice<byte>): tuple of (go.builtin.int, go.builtin.error);
+    method &Write(b: Slice<byte>): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>;
     begin
       try
         fSock.Send(b.fArray, b.fStart, b.fCount, SocketFlags.None);
@@ -476,7 +476,7 @@ type
       end;
     end;
 
-    method LocalAddr: Addr;
+    method LocalAddr: RemObjects.Elements.MicroTasks.Result<Addr>;
     begin
       var lAddr := IPEndPoint(fSock.LocalEndPoint);
       if fSock.SocketType = SocketType.Stream then
@@ -484,7 +484,7 @@ type
       exit new UDPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
     end;
 
-    method RemoteAddr: Addr;
+    method RemoteAddr: RemObjects.Elements.MicroTasks.Result<Addr>;
     begin
       var lAddr := IPEndPoint(fSock.RemoteEndPoint);
 
@@ -493,13 +493,13 @@ type
       exit new UDPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
     end;
 
-    method SetDeadline(tt: go.time.Time): go.builtin.error;
+    method SetDeadline(tt: go.time.Time): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       SetReadDeadline(tt);
       SetWriteDeadline(tt);
     end;
 
-    method SetReadDeadline(tt: go.time.Time): go.builtin.error;
+    method SetReadDeadline(tt: go.time.Time): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       {$IF ISLAND}
       fSock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, tt.Nanosecond() / 1000);
@@ -511,7 +511,7 @@ type
       {$ENDIF}
     end;
 
-    method SetWriteDeadline(t: go.time.Time): go.builtin.error;
+    method SetWriteDeadline(t: go.time.Time): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       {$IF ISLAND}
       fSock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, t.Nanosecond() / 1000);
@@ -523,7 +523,7 @@ type
       {$ENDIF}
     end;
 
-    method Close: go.builtin.error;
+    method Close: RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       try
         fSock.Close();
@@ -534,11 +534,11 @@ type
     end;
 
 
-    method File(): tuple of (Reference<go.os.File>, go.builtin.error);
+    method File(): RemObjects.Elements.MicroTasks.Result<tuple of (Reference<go.os.File>, go.builtin.error)>;
     begin
       exit (nil, go.Errors.new('Not supported'));
     end;
-    method ReadFrom(b: Slice<byte>): tuple of  (int, Addr, go.builtin.error);
+    method ReadFrom(b: Slice<byte>): RemObjects.Elements.MicroTasks.Result<tuple of  (int, Addr, go.builtin.error)>;
     begin
       try
         var ep: EndPoint;
@@ -555,7 +555,7 @@ type
           exit (0, nil, go.Errors.new(e.Message));
       end;
     end;
-    method ReadFromUDP(b: Slice<byte>): tuple of  (int, Reference<UDPAddr>, go.builtin.error);
+    method ReadFromUDP(b: Slice<byte>): RemObjects.Elements.MicroTasks.Result<tuple of  (int, Reference<UDPAddr>, go.builtin.error)>;
     begin
       try
         var ep: EndPoint;
@@ -571,7 +571,7 @@ type
       end;
     end;
 
-    method ReadFromIP(b: Slice<byte>): tuple of  (int, Reference<IPAddr>, go.builtin.error);
+    method ReadFromIP(b: Slice<byte>): RemObjects.Elements.MicroTasks.Result<tuple of  (int, Reference<IPAddr>, go.builtin.error)>;
     begin
       try
         var ep: EndPoint;
@@ -586,7 +586,7 @@ type
           exit (0, nil, go.Errors.new(e.Message));
       end;
     end;
-    method SetReadBuffer(bytes: int):  go.builtin.error;
+    method SetReadBuffer(bytes: int):  RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       try
         {$IF ISLAND}
@@ -599,7 +599,7 @@ type
           exit go.Errors.new(e.Message);
       end;
     end;
-    method SetWriteBuffer(bytes: int):  go.builtin.error;
+    method SetWriteBuffer(bytes: int):  RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       try
         {$IF ISLAND}
@@ -612,11 +612,11 @@ type
           exit go.Errors.new(e.Message);
       end;
     end;
-    method SyscallConn(): tuple of  (go.syscall.RawConn, go.builtin.error);
+    method SyscallConn(): RemObjects.Elements.MicroTasks.Result<tuple of  (go.syscall.RawConn, go.builtin.error)>;
     begin
       exit (nil, go.Errors.new('Not supported'));
     end;
-    method CloseRead(): go.builtin.error;
+    method CloseRead(): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       try
         fSock.Shutdown(SocketShutdown.Receive);
@@ -625,7 +625,7 @@ type
         exit go.Errors.new(e.Message);
       end;
     end;
-    method CloseWrite(): go.builtin.error;
+    method CloseWrite(): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       try
         fSock.Shutdown(SocketShutdown.Send);
@@ -635,7 +635,7 @@ type
       end;
     end;
 
-    method SetKeepAlive(b: Boolean): go.builtin.error;
+    method SetKeepAlive(b: Boolean):RemObjects.Elements.MicroTasks.Result< go.builtin.error>;
     begin
       try
         fSock.SetSocketOption(SocketOptionLevel.Socket,  SocketOptionName.KeepAlive, b);
@@ -646,7 +646,7 @@ type
     end;
 
 
-    method SetNoDelay(b: Boolean):go. builtin.error;
+    method SetNoDelay(b: Boolean):RemObjects.Elements.MicroTasks.Result<go. builtin.error>;
     begin
       try
         fSock.SetSocketOption(SocketOptionLevel.Socket,  SocketOptionName.NoDelay, b);
@@ -657,7 +657,7 @@ type
     end;
 
 
-    method SetLinger(b: Integer): go.builtin.error;
+    method SetLinger(b: Integer): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       try
         fSock.SetSocketOption(SocketOptionLevel.Socket,  SocketOptionName.Linger, b);
@@ -667,14 +667,14 @@ type
       end;
     end;
 
-    method SetKeepAlivePeriod(d: go.time.Duration): go.builtin.error;
+    method SetKeepAlivePeriod(d: go.time.Duration): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       exit nil;
     end;
 
 
 
-    method &WriteTo(b: Slice<byte>; addr: Addr): tuple of (go.builtin.int, go.builtin.error);
+    method &WriteTo(b: Slice<byte>; addr: Addr): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>;
     begin
       try
         var lAddr := UDPAddr(addr);
@@ -699,7 +699,7 @@ type
     method WriteToUnix(b: Slice<byte>;addr Reference<UnixAddr>): tuple of  (int, builtin.error) ;*/
   end;
 
-method ParseAddress(s: string): tuple of (string, Integer);
+  method ParseAddress(s: string): RemObjects.Elements.MicroTasks.Result<tuple of (string, Integer)>;
 begin
   var n := s.LastIndexOf(':');
   var q := s.LastIndexOf(']');
@@ -710,7 +710,7 @@ begin
   exit (s, port);
 end;
 
-method Listen(network, address: string): tuple of (Listener, go.builtin.error);
+method Listen(network, address: string): RemObjects.Elements.MicroTasks.Result<tuple of (Listener, go.builtin.error)>;
 begin
   try
     var s: Socket;
@@ -811,12 +811,12 @@ type
     // will cause the Control function to be called with "tcp4" or "tcp6".
     Control: method(network, address: string; c: go.syscall.RawConn): go.builtin.error; // Go 1.11
 
-    method Dial(network, address: string): tuple of (Conn, go.builtin.error);
+    method Dial(network, address: string): RemObjects.Elements.MicroTasks.Result<tuple of (Conn, go.builtin.error)>;
     begin
       exit DialContext(nil, network, address);
     end;
 
-    method DialContext(ctx: go.context.Context; network, address: string): tuple of (Conn, go.builtin.error);
+    method DialContext(ctx: go.context.Context; network, address: string): RemObjects.Elements.MicroTasks.Result<tuple of (Conn, go.builtin.error)>;
     begin
       {$IF ISLAND}
       var p := address.Split(':');
@@ -884,13 +884,13 @@ type
     end;
   end;
 
-  method Dial(network, address: string): tuple of (Conn, go.builtin.error);
+  method Dial(network, address: string): RemObjects.Elements.MicroTasks.Result<tuple of (Conn, go.builtin.error)>;
   begin
     var dc := new Dialer;
     exit dc.Dial(network, address);
   end;
 
-  method DialTimeout(network, address: string; dt: go.time.Duration): tuple of (Conn, go.builtin.error);
+  method DialTimeout(network, address: string; dt: go.time.Duration): RemObjects.Elements.MicroTasks.Result<tuple of (Conn, go.builtin.error)>;
   begin
     var dc := new Dialer;
     dc.Timeout := dt;
@@ -902,14 +902,14 @@ type
   public
     PreferGo: Boolean;
     StrictErrors: Boolean;
-    method LookupPort(ctx: go.context.Context; network, service: string): tuple of (Integer, go.builtin.error);
+    method LookupPort(ctx: go.context.Context; network, service: string): RemObjects.Elements.MicroTasks.Result<tuple of (Integer, go.builtin.error)>;
     begin
       if Integer.TryParse(service, out var res) then begin
         exit (res, nil);
       end;
       exit (0, go.Errors.new('Unknown port'));
     end;
-    method LookupIPAddr(ctx: go.context.Context; host: string): tuple of (Slice<IPAddr>, go.builtin.error);
+    method LookupIPAddr(ctx: go.context.Context; host: string): RemObjects.Elements.MicroTasks.Result<tuple of (Slice<IPAddr>, go.builtin.error)>;
     begin
       try
         var h := Dns.GetHostEntry(host);
