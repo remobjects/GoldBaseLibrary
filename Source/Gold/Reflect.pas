@@ -722,7 +722,10 @@ type
         if fRealType.AssemblyQualifiedName.StartsWith('go.builtin.Slice') then
           exit go.reflect.Slice
         else
-          exit go.reflect.Ptr;
+          if fRealType.AssemblyQualifiedName.StartsWith('go.builtin.BidirectionalChannel') then
+            exit go.reflect.Map
+          else
+            exit go.reflect.Ptr;
 
       case System.Type.GetTypeCode(fRealType) of
         TypeCode.Boolean: result := go.reflect.Bool;
