@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -39,12 +39,16 @@ func bitSizeError(fn, str string, bitSize int) *NumError {
 	return &NumError{fn, str, errors.New("invalid bit size " + Itoa(bitSize))}
 }
 
-const intSize = 32 << (^uint(0) >> 63)
+//const intSize = 32 << (^uint(0) >> 63)
+// elements change
+const intSize = 64
 
 // IntSize is the size in bits of an int or uint value.
 const IntSize = intSize
 
-const maxUint64 = 1<<64 - 1
+//const maxUint64 = 1<<64 - 1
+// elements change
+const maxUint64 = 18446744073709551615
 
 // ParseUint is like ParseInt but for unsigned numbers.
 func ParseUint(s string, base int, bitSize int) (uint64, error) {
@@ -184,7 +188,9 @@ func ParseInt(s string, base int, bitSize int) (i int64, err error) {
 		bitSize = int(IntSize)
 	}
 
-	cutoff := uint64(1 << uint(bitSize-1))
+	//cutoff := uint64(1 << uint(bitSize-1))
+	// elements change
+	cutoff := uint64(1) << uint(bitSize-1)
 	if !neg && un >= cutoff {
 		return int64(cutoff - 1), rangeError(fnParseInt, s0)
 	}
