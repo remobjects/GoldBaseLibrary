@@ -338,15 +338,19 @@ type
       end
       else
         lTimer := new PlatformTimer();
+
+      var lInterval := (aTimer.when - go.time.runtimeNano()) div 1000000; // ns to ms
+      if lInterval < 0 then
+        lInterval := go.math.MaxInt32;
       {$IF ISLAND}
       // TODO
       {$ELSEIF ECHOES}
       lTimer.AutoReset := false;
+      lTimer.Interval := lInterval;
       lTimer.Elapsed += new System.Timers.ElapsedEventHandler((s, e)-> begin aTimer.f(aTimer.arg, aTimer.seq); end);
       {$ENDIF}
       fCurrentList.Add(aTimer, lTimer);
       fMutex.Unlock();
-      lTimer.Interval := aTimer.when div 1000000; // ns to ms
       lTimer.Start;
     end;
 
@@ -436,12 +440,12 @@ type
   public
     class method startTimer(t: go.builtin.Reference<go.time.runtimeTimer>);
     begin
-      //go.time.TimerPool.AddTimer(t);
+      go.time.TimerPool.AddTimer(t);
     end;
 
     class method stopTimer(t: go.builtin.Reference<go.time.runtimeTimer>): Boolean;
     begin
-      //exit go.time.TimerPool.StopTimer(t);
+      exit go.time.TimerPool.StopTimer(t);
     end;
 
     class method runtimeNano(): Int64;
