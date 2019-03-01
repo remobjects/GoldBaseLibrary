@@ -232,7 +232,7 @@ type
       constructor(new T[aCap], 0, aSize);
     end;
 
-    constructor(aSize, aCap: Int64);
+    constructor(aSize, aCap: int64);
     begin
       if aCap < aSize then aCap := aSize;
       constructor(new T[aCap], 0, aSize);
