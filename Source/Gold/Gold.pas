@@ -110,6 +110,14 @@ type
         fDict[aKeys[i]] := aValues[i];
     end;
 
+    class var fZero: Map<K, V> := new Map<K, V>();
+    class property Zero: Map<K, V> := fZero; lazy;
+
+    class operator IsNil(aVal: Map<K, V>): Boolean;
+    begin
+      result := (Object(aVal) = nil) or (Object(aVal) = fZero);
+    end;
+
     property Item[aItem: K]: V write set_Item; default;
     property Item[aItem: K]: tuple of (V, Boolean) read get_Item; default;
 
@@ -257,6 +265,14 @@ type
     constructor(aSize: int64);
     begin
       constructor(aSize, aSize);
+    end;
+
+    class var fZero: Slice<T> := new Slice<T>;
+    class property Zero: Slice<T> := fZero; lazy;
+
+    class operator IsNil(aVal: Slice<T>): Boolean;
+    begin
+      result := (Object(aVal) = nil) or (Object(aVal) = fZero);
     end;
 
     method Assign(aOrg: array of T);
