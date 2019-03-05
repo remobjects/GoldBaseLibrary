@@ -145,17 +145,7 @@ type
         exit (Activator.CreateInstance<V>(), false);
       {$ENDIF}
       {$IF ECHOES}
-      if typeOf(V) = System.Type.GetType('System.String') then
-        exit(V(''), false);
-      var lType := new go.reflect.TypeImpl(typeOf(V));
-      case lType.Kind of
-        go.reflect.Slice:
-          exit (Activator.CreateInstance(lType.RealType, [0]) as V, false);
-
-        go.reflect.Map: begin
-          exit (Activator.CreateInstance(lType.RealType, [0]) as V, false);
-        end;
-      end;
+      exit (go.reflect.Zero(new go.reflect.TypeImpl(typeOf(V))) as V, false);
       {$ENDIF}
       exit (default(V), false);
     end;
@@ -539,20 +529,6 @@ type
     exit lNew;
   end;
 
-  {method append<T>(sl: Slice<T>; elems: Object): Slice<T>;
-  begin
-    if elems is Slice<T> then
-      exit appendSlice(sl, elems as Slice<T>);
-    var c := if elems = nil then 0 else IList<T>(elems).Count;
-    var lNew := new T[(if sl = nil then 0 else sl.Length) + c];
-    var slc := if sl = nil then 0 else sl.Length;
-    for i: Integer := 0 to slc -1 do
-      lNew[i] := sl[i];
-    for i: Integer := 0 to c -1 do
-      lNew[i + slc] := IList<T>(elems)[i];
-    exit lNew;
-  end;}
-
   method append<T>(sl: Slice<T>; elems: Object): Slice<T>;
   begin
     if elems is Slice<T> then
@@ -568,18 +544,6 @@ type
       lNew[i + slc] := IList<T>(elems)[i];
     exit new Slice<T>(lNew, 0, slc + c);
   end;
-
-  {method appendSlice<T>(sl, elems: Slice<T>): Slice<T>;
-  begin
-    var c := if elems = nil then 0 else elems.Length;
-    var slc := if sl = nil then 0 else sl.Length;
-    var lNew := new T[slc + c];
-    for i: Integer := 0 to slc -1 do
-      lNew[i] := sl[i];
-    for i: Integer := 0 to c -1 do
-      lNew[i + slc] := elems[i];
-    exit lNew;
-  end;}
 
   method appendSlice<T>(sl, elems: Slice<T>): Slice<T>;
   begin
