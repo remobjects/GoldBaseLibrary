@@ -111,11 +111,24 @@ type
     end;
 
     class var fZero: Map<K, V> := new Map<K, V>();
-    class property Zero: Map<K, V> := fZero; lazy;
+    class property Zero: Map<K, V> := fZero;
 
     class operator IsNil(aVal: Map<K, V>): Boolean;
     begin
-      result := (Object(aVal) = nil) or (Object(aVal) = fZero);
+      result := (Object(aVal) = nil) or (Object(aVal) = Object(fZero));
+    end;
+
+    class operator Equal(Value1, Value2: Map<K, V>): Boolean;
+    begin
+      if ((Object(Value1) = nil) and (Object(Value2) = Object(fZero))) or ((Object(Value1) = Object(fZero)) and (Object(Value2) = nil)) then
+        exit true;
+
+      exit Object(Value1) = Object(Value2);
+    end;
+
+    class operator NotEqual(Value1, Value2: Map<K, V>): Boolean;
+    begin
+      result := not (Value1 = Value2);
     end;
 
     property Item[aItem: K]: V write set_Item; default;
@@ -179,7 +192,9 @@ type
     method setLen: Integer;
     method setFrom(aSrc: ISlice);
   end;
-  //Slice<T> = public class(ISlice)
+
+
+  [ValueTypeSemantics]
   Slice<T> = public class(go.sort.Interface, ISlice)
   assembly
     fArray: array of T;
