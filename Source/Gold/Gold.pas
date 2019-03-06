@@ -110,6 +110,14 @@ type
         fDict[aKeys[i]] := aValues[i];
     end;
 
+    class var fZero: Map<K, V> := new Map<K, V>();
+    class property Zero: Map<K, V> := fZero; lazy;
+
+    class operator IsNil(aVal: Map<K, V>): Boolean;
+    begin
+      result := (Object(aVal) = nil) or (Object(aVal) = fZero);
+    end;
+
     property Item[aItem: K]: V write set_Item; default;
     property Item[aItem: K]: tuple of (V, Boolean) read get_Item; default;
 
@@ -137,11 +145,7 @@ type
         exit (Activator.CreateInstance<V>(), false);
       {$ENDIF}
       {$IF ECHOES}
-      if typeOf(V) = System.Type.GetType('System.String') then
-        exit(V(''), false);
-      var lType := new go.reflect.TypeImpl(typeOf(V));
-      if lType.Kind = go.reflect.Slice then
-        exit (Activator.CreateInstance(lType.RealType, [0]) as V, false);
+      exit (go.reflect.Zero(new go.reflect.TypeImpl(typeOf(V))) as V, false);
       {$ENDIF}
       exit (default(V), false);
     end;
@@ -226,7 +230,7 @@ type
       constructor(new T[aCap], 0, aSize);
     end;
 
-    constructor(aSize, aCap: Int64);
+    constructor(aSize, aCap: int64);
     begin
       if aCap < aSize then aCap := aSize;
       constructor(new T[aCap], 0, aSize);
@@ -251,6 +255,14 @@ type
     constructor(aSize: int64);
     begin
       constructor(aSize, aSize);
+    end;
+
+    class var fZero: Slice<T> := new Slice<T>;
+    class property Zero: Slice<T> := fZero; lazy;
+
+    class operator IsNil(aVal: Slice<T>): Boolean;
+    begin
+      result := (Object(aVal) = nil) or (Object(aVal) = fZero);
     end;
 
     method Assign(aOrg: array of T);
@@ -517,20 +529,6 @@ type
     exit lNew;
   end;
 
-  {method append<T>(sl: Slice<T>; elems: Object): Slice<T>;
-  begin
-    if elems is Slice<T> then
-      exit appendSlice(sl, elems as Slice<T>);
-    var c := if elems = nil then 0 else IList<T>(elems).Count;
-    var lNew := new T[(if sl = nil then 0 else sl.Length) + c];
-    var slc := if sl = nil then 0 else sl.Length;
-    for i: Integer := 0 to slc -1 do
-      lNew[i] := sl[i];
-    for i: Integer := 0 to c -1 do
-      lNew[i + slc] := IList<T>(elems)[i];
-    exit lNew;
-  end;}
-
   method append<T>(sl: Slice<T>; elems: Object): Slice<T>;
   begin
     if elems is Slice<T> then
@@ -546,18 +544,6 @@ type
       lNew[i + slc] := IList<T>(elems)[i];
     exit new Slice<T>(lNew, 0, slc + c);
   end;
-
-  {method appendSlice<T>(sl, elems: Slice<T>): Slice<T>;
-  begin
-    var c := if elems = nil then 0 else elems.Length;
-    var slc := if sl = nil then 0 else sl.Length;
-    var lNew := new T[slc + c];
-    for i: Integer := 0 to slc -1 do
-      lNew[i] := sl[i];
-    for i: Integer := 0 to c -1 do
-      lNew[i + slc] := elems[i];
-    exit lNew;
-  end;}
 
   method appendSlice<T>(sl, elems: Slice<T>): Slice<T>;
   begin

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProductVersion>3.5</ProductVersion>
@@ -146,7 +146,7 @@
     <Compile Include="Sort.pas" />
     <Compile Include="strconv\atob.go" />
     <Compile Include="strconv\atof.go" />
-    <Compile Include="strconv\atoi.go" />
+    <Compile Include="strconv\atoi_elements.go" />
     <Compile Include="strconv\decimal.go" />
     <Compile Include="strconv\doc.go" />
     <Compile Include="strconv\extfloat.go" />

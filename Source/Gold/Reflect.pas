@@ -229,21 +229,7 @@ type
         {$IF ISLAND}
         raise new NotImplementedException();
         {$ELSEIF ECHOES}
-        {var lType2 := TypeImpl(aVal.fType).RealType;
-        var lFieldValue2 := lType2.GetField('Value');
-        var lATope2 := lFieldValue2.GetValue(lValue);}
-
         (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, lValue);
-
-        {var lClan := (fExtended as FieldInfo).GetValue(builtin.IReference(fPtr).Get);
-
-        if TypeImpl(self.fType).RealType.IsValueType then begin
-          var lType3 := TypeImpl(self.fType).RealType;
-          var lFieldValue3 := lType3.GetField('Value');
-          var lATope3 := lFieldValue2.GetValue(lClan);
-          if lATope3 = nil then
-            writeLn('nil');
-        end;}
         {$ENDIF}
       end
       else
@@ -722,7 +708,10 @@ type
         if fRealType.AssemblyQualifiedName.StartsWith('go.builtin.Slice') then
           exit go.reflect.Slice
         else
-          exit go.reflect.Ptr;
+          if fRealType.AssemblyQualifiedName.StartsWith('go.builtin.BidirectionalChannel') then
+            exit go.reflect.Map
+          else
+            exit go.reflect.Ptr;
 
       case System.Type.GetTypeCode(fRealType) of
         TypeCode.Boolean: result := go.reflect.Bool;
@@ -979,8 +968,13 @@ type
     {$ELSE}
     if TypeImpl(aType).fRealType = System.Type.GetType('System.String') then
       exit new Value(System.String.Empty) // String .net does not have a constructor with no arguments.
-    else
-      exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType));
+    else begin
+      var lZero := TypeImpl(aType).fRealType.GetProperty('Zero');
+      if lZero <> nil then
+        exit new Value(lZero.GetValue(nil))
+      else
+        exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType));
+    end;
     {$ENDIF}
   end;
 
@@ -1051,16 +1045,6 @@ type
     for i: Integer := 0 to result -1 do
       lDst.setAtIndex(i, lSrc.getAtIndex(i));
     {$ENDIF}
-
-    {var lType2 := TypeImpl(src.fType).RealType;
-    var lFieldValue2 := lType2.GetField('Value');
-    var lATope2 := lFieldValue2.GetValue(src.fValue);
-
-    var lType := TypeImpl(dst.fType).RealType;
-    var lFieldValue := lType.GetField('Value');
-    var lATope := lFieldValue.GetValue(dst.fValue);
-    if dst.fValue is builtin.ISlice then
-      writeLn('yesss');}
   end;
 
   method InstantiateSlice(aType: PlatformType; aCount: Integer): Object; private;

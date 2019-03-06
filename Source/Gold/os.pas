@@ -552,10 +552,17 @@ type
       var b := new go.builtin.Slice<Byte>(512);
       loop begin
         var (res, i) := r.Read(b);
-        if i <> nil then exit (nil, i);
+        if i <> nil then begin
+          ms.Write(b.fArray, 0, res);
+          if (i is go.errors.errorString) and (i.Error() = "EOF") then
+            exit (ms.ToArray(), nil)
+          else
+            exit (ms.ToArray(), i);
+        end;
         if res ≤ 0 then break;
         ms.Write(b.fArray, 0, res);
       end;
+      exit(ms.ToArray(), nil);
     end;
   end;
 
