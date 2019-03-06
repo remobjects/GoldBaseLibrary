@@ -325,17 +325,17 @@ type
       &Array.Copy(fArray, fStart, result, 0, fCount);
     end;
 
-    method Len: go.builtin.int;
+    method Len: RemObjects.Elements.MicroTasks.&Result<go.builtin.int>;
     begin
       result := fCount;
     end;
 
-    method Less(a, b: go.builtin.int): go.builtin.bool;
+    method Less(a, b: go.builtin.int): RemObjects.Elements.MicroTasks.&Result<go.builtin.bool>;
     begin
 
     end;
 
-    method Swap(a, b: go.builtin.int);
+    method Swap(a, b: go.builtin.int): RemObjects.Elements.MicroTasks.VoidResult;
     begin
       var p := self[a];
       self[a] := self[b];
@@ -383,7 +383,7 @@ type
     end;
   end;
 
-  go. interface
+  error = public interface
     method Error: RemObjects.Elements.MicroTasks.&Result<string>;
   end;
 

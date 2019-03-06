@@ -10,7 +10,7 @@ type
     class var fRandom: System.Random;
     {$ENDIF}
 
-    method &Read(p: Slice<byte>): tuple of (int, go.builtin.error);
+    method &Read(p: Slice<byte>): RemObjects.Elements.MicroTasks.&Result<tuple of (int, go.builtin.error)>;
     begin
       {$IF ISLAND}
       raise new NotImplementedException();

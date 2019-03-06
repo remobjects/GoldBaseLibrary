@@ -113,8 +113,8 @@ type
     Name: string;
     Net: string;
 
-    method Network: string; begin exit 'unix'; end;
-    method String: string; begin exit Name; end;
+    method Network: RemObjects.Elements.MicroTasks.&Result<string>; begin exit 'unix'; end;
+    method String: RemObjects.Elements.MicroTasks.&Result<string>; begin exit Name; end;
   end;
   [ValueTypeSemantics]
   AddrError = public partial class(go.net.Error, go.builtin.error)
@@ -124,7 +124,7 @@ type
     Err:  string;
     Addr: string;
 
-    method Error(): string;
+    method Error(): RemObjects.Elements.MicroTasks.&Result<string>;
     begin
       var s := self.Err;
       if self.Addr <> "" then begin
@@ -141,7 +141,7 @@ type
     constructor; begin end;
     constructor(aValue: string); begin Value := aValue; end;
     Value: string;
-    method Error: string; begin exit 'unknown network '+Value; end;
+    method Error: RemObjects.Elements.MicroTasks.&Result<string>; begin exit 'unknown network '+Value; end;
 
     method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
     method Timeout(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
@@ -153,7 +153,7 @@ type
     constructor; begin end;
     constructor(aValue: go.builtin.error); begin Err := aValue; end;
     Err: go.builtin.error;
-    method Error: string; begin exit 'error reading DNS config: '+Err.Error(); end;
+    method Error: RemObjects.Elements.MicroTasks.&Result<string>; begin exit 'error reading DNS config: '+Err.Error(); end;
 
     method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
     method Timeout(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
@@ -165,7 +165,7 @@ type
     constructor(aValue, aText: string); begin &Type := aValue; Text := aText end;
     &Type: string;
     Text: string;
-    method Error: string; begin exit "invalid " + &Type + ": " + Text; end;
+    method Error:RemObjects.Elements.MicroTasks.&Result<string>; begin exit "invalid " + &Type + ": " + Text; end;
   end;
   [ValueTypeSemantics]
   DNSError = public partial class(go.builtin.error, go.net.Error)
@@ -289,7 +289,7 @@ type
       exit (n, nil);
     end;
 
-    method &Read(p: Slice<byte>): tuple of (int,go. builtin.error);
+    method &Read(p: Slice<byte>): RemObjects.Elements.MicroTasks.&Result<tuple of (int,go. builtin.error)>;
     begin
       var n: int64 := 0;
       var err: go.builtin.error := nil;
@@ -335,9 +335,9 @@ type
   end;
 type
 Listener = public interface
-  method Accept(): tuple of (Conn, go.builtin.error);
-  method Close(): go.builtin.error;
-  method Addr: Addr;
+  method Accept(): RemObjects.Elements.MicroTasks.&Result<tuple of (Conn, go.builtin.error)>;
+  method Close(): RemObjects.Elements.MicroTasks.&Result<go.builtin.error>;
+  method Addr: RemObjects.Elements.MicroTasks.&Result<Addr>;
 end;
 
 method FileListener(f: Reference<go.os.File>): tuple of (Listener, go.builtin.error);
