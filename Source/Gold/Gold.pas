@@ -158,7 +158,9 @@ type
         exit (Activator.CreateInstance<V>(), false);
       {$ENDIF}
       {$IF ECHOES}
-      exit (go.reflect.Zero(new go.reflect.TypeImpl(typeOf(V))) as V, false);
+      var lZero := go.reflect.Zero(new go.reflect.TypeImpl(typeOf(V)));
+      if lZero.fValue <> nil then
+        exit (lZero.fValue as V, false);
       {$ENDIF}
       exit (default(V), false);
     end;
@@ -273,11 +275,11 @@ type
     end;
 
     class var fZero: Slice<T> := new Slice<T>;
-    class property Zero: Slice<T> := fZero; lazy;
+    class property Zero: Slice<T> := fZero;
 
     class operator IsNil(aVal: Slice<T>): Boolean;
     begin
-      result := (Object(aVal) = nil) or (Object(aVal) = fZero);
+      result := (Object(aVal) = nil) or (Object(aVal) = Object(fZero)) or ((aVal.fArray = EmptyArray) and (aVal.Length = 0) and (aVal.Capacity = 0));
     end;
 
     method Assign(aOrg: array of T);
