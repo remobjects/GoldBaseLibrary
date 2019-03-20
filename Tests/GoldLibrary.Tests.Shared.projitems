@@ -26,5 +26,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)HttpTests.go" />
     <Compile Include="$(MSBuildThisFileDirectory)ContainerTests.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)ContainerTests.go" />
+    <Compile Include="$(MSBuildThisFileDirectory)BufioTests.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)BufioTests.go" />
+    <Compile Include="$(MSBuildThisFileDirectory)BytesTests.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)BytesTests.go" />
   </ItemGroup>
 </Project>
