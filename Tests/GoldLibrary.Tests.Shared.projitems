@@ -24,5 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CryptoTests.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpTests.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpTests.go" />
+    <Compile Include="$(MSBuildThisFileDirectory)ContainerTests.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)ContainerTests.go" />
   </ItemGroup>
 </Project>
