@@ -17,5 +17,5 @@ func DoGetTest() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%s", robots)
+	//fmt.Printf("%s", robots)
 }

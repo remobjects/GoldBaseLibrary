@@ -575,7 +575,25 @@ type
         exit -1;
     end;
 
-    class method &Index(a, b: go.builtin.Slice<Byte>): Integer; begin raise new NotSupportedException;end;
+    class method &Index(a, b: go.builtin.Slice<Byte>): Integer;
+    begin
+      if b.Len > a.Len then
+        exit(-1);
+
+      for i: Integer := 0 to (a.Len - b.Len) do begin
+        var lFound := true;
+        for j: Integer := 0 to b.Len - 1 do begin
+          if a[i+j] ≠ b[j] then begin
+            lFound := false;
+            break;
+          end;
+        end;
+        if lFound then
+          exit i;
+      end;
+      exit -1;
+    end;
+
     class method IndexString(a, b: String): Integer; begin raise new NotSupportedException;end;
     class method Cutover(nn: Integer): Integer;
     begin
