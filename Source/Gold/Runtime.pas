@@ -542,7 +542,7 @@ type
 
   go.internal.bytealg.__Global = public partial class
   public
-    const MaxBruteForce = 0;
+    const MaxBruteForce = 64;
     const MaxLen = Int32.MaxValue;
 
     class method Compare(a, b: go.builtin.Slice<Byte>): Integer;
@@ -594,7 +594,11 @@ type
       exit -1;
     end;
 
-    class method IndexString(a, b: String): Integer; begin raise new NotSupportedException;end;
+    class method IndexString(a, b: String): Integer;
+    begin
+      exit a.IndexOf(b);
+    end;
+
     class method Cutover(nn: Integer): Integer;
     begin
       result :=  (nn + 16) / 8;
