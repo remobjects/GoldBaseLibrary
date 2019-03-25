@@ -734,6 +734,13 @@ type
     exit (default(T), false); // for integers, T(V) cast would fail otherwise.
   end;
 
+  method TypeAssertReference<T>(v: Object): tuple of (&Reference<T>, Boolean);
+  begin
+    result := TypeAssert<Reference<T>>(v);
+    if result[1] then exit;
+    if v is T then
+      exit (new Reference<T>(T(v)), true);
+  end;
 
   method panic(v: Object);
   begin
