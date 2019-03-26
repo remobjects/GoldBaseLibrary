@@ -604,7 +604,13 @@ type
 
   method len(v: string): Integer; public;
   begin
+    //exit length(v);
+    {$IF ISLAND}
     exit length(v);
+    // TODO!
+    {$ELSEIF ECHOES}
+    exit System.Text.Encoding.UTF8.GetBytes(v).Length;
+    {$ENDIF}
   end;
 
   method len<T>(v: array of T): Integer; public;
@@ -794,7 +800,14 @@ type
   {$ENDIF}
   end;
 
+  {$IF NEWSTRING}
   operator Explicit(aVal: string): Slice<byte>; public;
+  begin
+    result := new Slice<byte>(aVal.Value);
+  end;
+  {$ENDIF}
+
+  operator Explicit(aVal: PlatformString): Slice<byte>; public;
   begin
     {$IFDEF ISLAND}
     exit new Slice<byte>(Encoding.UTF8.GetBytes(aVal));
@@ -802,6 +815,7 @@ type
     exit new Slice<byte>(System.Text.Encoding.UTF8.GetBytes(aVal));
     {$ENDIF}
   end;
+
   operator Explicit(aVal: string): go.net.http.htmlSig; public;
   begin
     var q: go.builtin.Slice<byte> := (aVal as go.builtin.Slice<byte>);
