@@ -718,7 +718,7 @@ type
     var lEnd := valueOrDefault(aEnd, aSlice.Length);
     if Integer(lEnd) > aSlice.Length then lEnd := aSlice.Length;
     if (lStart = 0) and (lEnd = aSlice.Length) then exit aSlice;
-    exit aSlice.Substring(lStart, lEnd - lStart);
+    exit new string(new Slice<byte>(aSlice.Value, lStart, lEnd));
   end;
 
   method Slice<T>(aSlice: array of T; aStart, aEnd: nullable Integer): Slice<T>; public;
@@ -755,12 +755,16 @@ type
 
   operator implicit(aVal: string): Slice<Char>; public;
   begin
-    exit new Slice<Char>(aVal.ToArray);
+    // TODO
+    //exit new Slice<Char>(aVal.ToArray);
+    exit nil;
   end;
 
   operator implicit(aVal: string): Slice<go.builtin.rune>; public;
   begin
-    exit new Slice<go.builtin.rune>(aVal.Select(a -> go.builtin.rune(a)).ToArray);
+    // TODO
+    //exit new Slice<go.builtin.rune>(aVal.Select(a -> go.builtin.rune(a)).ToArray);
+    exit nil;
   end;
 
   operator implicit(aVal: byte): string; public;
@@ -816,11 +820,23 @@ type
     {$ENDIF}
   end;
 
-  operator Explicit(aVal: string): go.net.http.htmlSig; public;
+  operator Explicit(aVal: PlatformString): go.net.http.htmlSig; public;
+  begin
+    var q: go.builtin.Slice<byte> := (aVal as go.builtin.Slice<byte>);
+    {$IF ISLAND}
+    // TODO
+    result := nil;
+    {$ELSEIF ECHOES}
+    exit new go.net.http.htmlSig(Value := System.Text.Encoding.UTF8.GetBytes(aVal));
+    {$ENDIF}
+    //exit new go.net.http.htmlSig(Value := q);
+  end;
+
+  {operator Explicit(aVal: string): go.net.http.htmlSig; public;
   begin
     var q: go.builtin.Slice<byte> := (aVal as go.builtin.Slice<byte>);
     exit new go.net.http.htmlSig(Value := q);
-  end;
+  end;}
 
   extension method ISequence<T>.GoldIterate: sequence of tuple of (Integer, T); iterator; public;
   begin
@@ -843,7 +859,7 @@ type
      method GoldIterate: sequence of tuple of (Integer, go.builtin.rune); iterator; public;
       begin
         for each el in self index n do
-          yield (n, go.builtin.rune(el));
+          yield (n, go.builtin.rune(el[1]));
       end;
     end;
 

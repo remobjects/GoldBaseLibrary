@@ -5,7 +5,6 @@ uses
   ;
 
 type
-  PlatformString = {$IF ISLAND}RemObjects.Elements.System.String{$ELSEIF ECHOES}System.String{$ENDIF};
   //{$IF NEWSTRING}
   string = public partial record
   public
@@ -23,6 +22,11 @@ type
     constructor(aValue: array of Char);
     begin
       // TODO
+    end;
+
+    constructor(aValue: Slice<byte>);
+    begin
+      Value := aValue;
     end;
 
     class operator Implicit(aValue: string): PlatformString;
@@ -54,16 +58,39 @@ type
       result := not (a = b);
     end;
 
+    class operator Less(aLeft, aRight: string): Boolean;
+    begin
+      // TODO
+      result := true;
+    end;
+
+    class operator GreaterOrEqual(aLeft, aRight: string): Boolean;
+    begin
+      // TODO
+      result := true;
+    end;
+
     class operator &Add(aLeft, aRight: string): string;
     begin
       // TODO
       result := aLeft;
     end;
 
-    class operator Less(aLeft, aRight: string): Boolean;
+    class operator &Add(aLeft: string; aRight: Integer): string;
     begin
       // TODO
-      result := true;
+      result := aLeft;
+    end;
+
+    // go does not have Substring method
+    method Substring(aIndex: int32): string;
+    begin
+      result := new string(new Slice<byte>(Value, aIndex, Value.Length - 1));
+    end;
+
+    method Substring(aIndex: int32; aLen: int32): string;
+    begin
+      result := new string(new Slice<byte>(Value, aIndex, (aIndex + aLen) - 1));
     end;
 
     property Chars[aIndex: int32]: byte read begin
@@ -82,6 +109,21 @@ type
     begin
       result := '';
     end;
+
+    class method PlatformStringArrayToGoArray(aValue: array of PlatformString): array of go.builtin.string;
+    begin
+      result := new go.builtin.string[aValue.Length];
+      for i: Integer := 0 to aValue.Length - 1 do
+        result[i] := aValue[i];
+    end;
+
+    class method PlatformStringArrayToGoSlice(aValue: array of PlatformString): Slice<go.builtin.string>;
+    begin
+      result := new Slice<go.builtin.string>(aValue.Length);
+      for i: Integer := 0 to aValue.Length - 1 do
+        result[i] := aValue[i];
+    end;
+
   end;
   //{$ENDIF}
 

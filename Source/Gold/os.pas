@@ -159,7 +159,7 @@ type
       exit (p.fCount, nil);
     end;
 
-    method Readdirnames(n: Integer): tuple of (go.builtin.Slice<String>, go.builtin.error);
+    method Readdirnames(n: Integer): tuple of (go.builtin.Slice<go.builtin.string>, go.builtin.error);
     begin
       if n < 0 then n := Int32.MaxValue;
       try
@@ -181,7 +181,7 @@ type
           Array.Copy(res, r, n);
           res := r;
         end;
-        exit (new go.builtin.Slice<String>(res), nil);
+        exit (go.builtin.string.PlatformStringArrayToGoSlice(res), nil);
       except
         on e: Exception do
           exit (nil, go.Errors.New(e.Message));
@@ -277,7 +277,7 @@ type
     result := (string.FromPChar(@lBuffer[0]), nil);
     {$ELSEIF ECHOES}
     var asm :=  &System.Reflection.Assembly.GetEntryAssembly();
-    if asm = nil then exit (nil, go.Errors.New('Unknown entry assembly'));
+    if asm = nil then exit ('', go.Errors.New('Unknown entry assembly'));
     exit (asm.Location, nil);
     {$ENDIF}
   end;
@@ -394,7 +394,7 @@ begin
   {$ENDIF}
 end;
 
-var Args:  go.builtin.Slice<String> := new go.builtin.Slice<String>({$IF ISLAND}''{raise new NotImplementedException}{$ELSEIF ECHOES}Environment.GetCommandLineArgs{$ENDIF});
+var Args: go.builtin.Slice<go.builtin.string> := {$IF ISLAND}new go.builtin.Slice<String>(''){raise new NotImplementedException}{$ELSEIF ECHOES}go.builtin.string.PlatformStringArrayToGoSlice(Environment.GetCommandLineArgs){$ENDIF};
 
 method &Exit(i: Integer);
 begin
@@ -436,7 +436,7 @@ end;
 type
 
   FileInfo = public interface
-    method Name: String;
+    method Name: go.builtin.string;
     method Size: go.builtin.int64;
     method Mode: FileMode;
     method ModTime: go.time.Time;
@@ -449,7 +449,7 @@ type
     fFile: String;
   public
     constructor(aFile: String); begin fFile := aFile; end;
-    method Name: String; begin exit Path.GetFilename(fFile); end;
+    method Name: go.builtin.string; begin exit Path.GetFilename(fFile); end;
     method Size: go.builtin.int64; begin {$IF ISLAND}exit new RemObjects.Elements.System.File(fFile).Length;{$ELSEIF ECHOES}exit new System.IO.FileInfo(fFile).Length;{$ENDIF} end;
     method Mode: FileMode;
     begin
@@ -484,7 +484,7 @@ type
   method IsPathSeparator(c: Char): Boolean; begin exit c = PathSeparator; end;
   method Readlink(name: string): tuple of (string, builtin.error);
   begin
-    exit (nil, go.Errors.New('Not supported'));
+    exit ('', go.Errors.New('Not supported'));
   end;
 type
   DiscardWriter = class(go.io.Writer)
@@ -573,7 +573,7 @@ public
   &Old: String;
   &New: String;
   Err: go.builtin.error;
-  method Error(): String;
+  method Error(): go.builtin.string;
   begin
     exit Op + " " + &Old + " " + &New + ": " + &Err.Error()
   end;
@@ -634,7 +634,7 @@ ProcAttr = public class
 public
   constructor; empty;
   Dir: String;
-  Env: go.builtin.Slice<String>;
+  Env: go.builtin.Slice<go.builtin.string>;
 end;
 
 method IntStartProcess(name: string; argv: go.builtin.Slice<string>; attr: go.builtin.Reference<ProcAttr>): tuple of (Reference<Process>, go.builtin.error);

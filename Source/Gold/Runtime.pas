@@ -139,7 +139,7 @@ type
     begin
       self.Value := aValue;
     end;
-    method Error: String;
+    method Error: go.builtin.string;
     begin
       exit Value.ToString;
     end;
@@ -155,7 +155,7 @@ type
     begin
       self.Value := aValue;
     end;
-    method Error: String;
+    method Error: go.builtin.string;
     begin
       exit Value;
     end;
@@ -205,7 +205,7 @@ type
       {$ENDIF}
     end;
 
-    class method Environ: go.builtin.Slice<String>;
+    class method Environ: go.builtin.Slice<go.builtin.string>;
     begin
       {$IF ISLAND}
       var lRes := new List<String>;
@@ -216,7 +216,7 @@ type
       for each el: System.Collections.DictionaryEntry in Environment.GetEnvironmentVariables() do
         lRes.Add(el.Key.ToString() +'='+el.Value);
       {$ENDIF}
-      exit new go.builtin.Slice<String>(lRes.ToArray);
+      exit go.builtin.string.PlatformStringArrayToGoSlice(lRes.ToArray);
     end;
 
     class method &Exit(i: Integer);
@@ -309,7 +309,7 @@ type
     begin
       Exception := err;
     end;
-    method Error: String; begin exit Exception.ToString; end;
+    method Error: go.builtin.string; begin exit Exception.ToString; end;
     property Exception: Exception; readonly;
   end;
 
@@ -374,11 +374,11 @@ type
 
   go.time.__Global = public class
   assembly
-    class var zoneSources: go.builtin.Slice<String> := GetZoneSources();
+    class var zoneSources: go.builtin.Slice<go.builtin.string> := GetZoneSources();
 
-    class method GetZoneSources:go.builtin.Slice<String>;
+    class method GetZoneSources: go.builtin.Slice<go.builtin.string>;
     begin
-      exit new go.builtin.Slice<String>(["/usr/share/zoneinfo/",
+      exit new go.builtin.Slice<go.builtin.string>(["/usr/share/zoneinfo/",
       "/usr/share/lib/zoneinfo/",
       "/usr/lib/locale/TZ/"]);
     end;
@@ -387,7 +387,7 @@ type
     begin
       var (tz, ok) := go.syscall.Getenv("TZ");
       if (not ok) then begin
-        var (z, err) := loadLocation("localtime", new go.builtin.Slice<String>(["/etc/"]));
+        var (z, err) := loadLocation("localtime", new go.builtin.Slice<go.builtin.string>(["/etc/"]));
         if err = nil then begin
           localLoc := go.builtin.Reference<go.time.Location>.Get(z);
           localLoc.name := "Local";

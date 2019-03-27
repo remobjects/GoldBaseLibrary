@@ -36,6 +36,7 @@ type
     constructor; empty;
     constructor(aValue: Integer); begin Value := aValue; end;
   end;
+  PlatformString = {$IF ISLAND}RemObjects.Elements.System.String{$ELSEIF ECHOES}System.String{$ENDIF};
   //{$IF NOT NEWSTRING}
   //string = public RemObjects.Elements.System.String;
   //{$ENDIF}

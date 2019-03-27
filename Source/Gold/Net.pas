@@ -701,8 +701,8 @@ type
 
 method ParseAddress(s: string): tuple of (string, Integer);
 begin
-  var n := s.LastIndexOf(':');
-  var q := s.LastIndexOf(']');
+  var n := go.strings.LastIndex(s, ':');
+  var q := go.strings.LastIndex(s, ']');
   if n < q then n := -1;
   if( n > 0) and Integer.TryParse(s.Substring(n+1), out var port) then begin
     s := s.Substring(0, n);
