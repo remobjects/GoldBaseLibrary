@@ -6,10 +6,10 @@ uses
 
 type
   PlatformString = {$IF ISLAND}RemObjects.Elements.System.String{$ELSEIF ECHOES}System.String{$ENDIF};
-  {$IF NEWSTRING}
+  //{$IF NEWSTRING}
   string = public partial record
   public
-    Value: Slice<Byte>;
+    Value: Slice<byte>;
 
     constructor(aValue: PlatformString);
     begin
@@ -18,6 +18,11 @@ type
       {$ELSEIF ECHOES}
       Value := System.Text.Encoding.UTF8.GetBytes(aValue);
       {$ENDIF}
+    end;
+
+    constructor(aValue: array of Char);
+    begin
+      // TODO
     end;
 
     class operator Implicit(aValue: string): PlatformString;
@@ -78,7 +83,7 @@ type
       result := '';
     end;
   end;
-  {$ENDIF}
+  //{$ENDIF}
 
   operator Implicit(aVal: PlatformString): Slice<byte>; public;
   begin

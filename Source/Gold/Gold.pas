@@ -800,12 +800,12 @@ type
   {$ENDIF}
   end;
 
-  {$IF NEWSTRING}
+  //{$IF NEWSTRING}
   operator Explicit(aVal: string): Slice<byte>; public;
   begin
     result := new Slice<byte>(aVal.Value);
   end;
-  {$ENDIF}
+  //{$ENDIF}
 
   operator Explicit(aVal: PlatformString): Slice<byte>; public;
   begin
