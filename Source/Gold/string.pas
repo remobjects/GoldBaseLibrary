@@ -29,10 +29,10 @@ type
       Value := aValue;
     end;
 
-    /*constructor(aValue: array of rune);
+    constructor(aValue: array of rune);
     begin
       // TODO
-    end;*/
+    end;
 
     class operator Implicit(aValue: string): PlatformString;
     begin
