@@ -29,6 +29,11 @@ type
       Value := aValue;
     end;
 
+    /*constructor(aValue: array of rune);
+    begin
+      // TODO
+    end;*/
+
     class operator Implicit(aValue: string): PlatformString;
     begin
       {$IF ISLAND}

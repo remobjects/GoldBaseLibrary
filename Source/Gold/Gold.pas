@@ -604,13 +604,7 @@ type
 
   method len(v: string): Integer; public;
   begin
-    //exit length(v);
-    {$IF ISLAND}
-    exit length(v);
-    // TODO!
-    {$ELSEIF ECHOES}
-    exit System.Text.Encoding.UTF8.GetBytes(v).Length;
-    {$ENDIF}
+    exit v.Value.Length;
   end;
 
   method len<T>(v: array of T): Integer; public;
@@ -788,28 +782,18 @@ type
 
   operator Implicit(aVal: Slice<Char>): string; public;
   begin
-    {$IF ISLAND}
-    exit string.FromCharArray(aVal.ToArray());
-    {$ELSEIF ECHOES}
     exit new string(aVal.ToArray());
-    {$ENDIF}
   end;
 
   operator Implicit(aVal: Slice<rune>): string; public;
   begin
-  {$IF ISLAND}
-  exit string.FromCharArray(aVal.ToArray().Select(a -> Char(a.Value)).ToArray());
-  {$ELSEIF ECHOES}
-  exit new string(aVal.ToArray());
-  {$ENDIF}
+    exit new string(aVal.ToArray());
   end;
 
-  //{$IF NEWSTRING}
   operator Explicit(aVal: string): Slice<byte>; public;
   begin
     result := new Slice<byte>(aVal.Value);
   end;
-  //{$ENDIF}
 
   operator Explicit(aVal: PlatformString): Slice<byte>; public;
   begin
@@ -850,7 +834,7 @@ type
       constructor(aVal: array of go.builtin.rune);
       begin
         {$IF ISLAND}
-        exit string.FromCharArray(aVal.Select(a -> :RemObjects.Elements.System.Char(a.Value)).ToArray());
+        exit new string(aVal.Select(a -> :RemObjects.Elements.System.Char(a.Value)).ToArray());
         {$ELSEIF ECHOES}
         exit new string(aVal.Select(a -> :System.Char(a.Value)).ToArray());
         {$ENDIF}

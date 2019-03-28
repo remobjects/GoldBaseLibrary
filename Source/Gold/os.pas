@@ -269,12 +269,12 @@ type
     exit (Environment.CurrentDirectory, nil);
   end;
 
-  method executable(): tuple of (string, go.builtin.error); public;
+  method executable(): tuple of (go.builtin.string, go.builtin.error); public;
   begin
     {$IF ISLAND AND WINDOWS}
     var lBuffer := new Char[rtl.MAX_PATH + 1];
     rtl.GetModuleFileName(nil, @lBuffer[0], length(lBuffer));
-    result := (string.FromPChar(@lBuffer[0]), nil);
+    result := (new go.builtin.string(lBuffer), nil);
     {$ELSEIF ECHOES}
     var asm :=  &System.Reflection.Assembly.GetEntryAssembly();
     if asm = nil then exit ('', go.Errors.New('Unknown entry assembly'));
@@ -394,7 +394,7 @@ begin
   {$ENDIF}
 end;
 
-var Args: go.builtin.Slice<go.builtin.string> := {$IF ISLAND}new go.builtin.Slice<String>(''){raise new NotImplementedException}{$ELSEIF ECHOES}go.builtin.string.PlatformStringArrayToGoSlice(Environment.GetCommandLineArgs){$ENDIF};
+var Args: go.builtin.Slice<go.builtin.string> := {$IF ISLAND}new go.builtin.Slice<go.builtin.string>(''){raise new NotImplementedException}{$ELSEIF ECHOES}go.builtin.string.PlatformStringArrayToGoSlice(Environment.GetCommandLineArgs){$ENDIF};
 
 method &Exit(i: Integer);
 begin

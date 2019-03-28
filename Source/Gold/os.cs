@@ -162,8 +162,8 @@ namespace go.os {
 				}
 				#else
 				if (new RemObjects.Elements.System.File(file).Exists()) return (file, null);
-				foreach (var el in go.os.Getenv("PATH").Split(Path.DirectorySeparatorChar)) {
-					var p = RemObjects.Elements.System.Path.Combine(el, file);
+				foreach (var el in go.strings.Split(go.os.Getenv("PATH"), Path.DirectorySeparatorChar)) {
+					var p = RemObjects.Elements.System.Path.Combine(el[1], file);
 					if (new RemObjects.Elements.System.File(p).Exists()) return (p, null);
 				}
 				#endif
