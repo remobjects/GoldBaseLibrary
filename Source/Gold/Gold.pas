@@ -877,7 +877,7 @@ type
   private
     fTag: string;
   public
-    constructor(aTag: string);
+    constructor(aTag: PlatformString);
     begin
       fTag := aTag;
     end;
