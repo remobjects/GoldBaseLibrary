@@ -326,11 +326,11 @@ type
   begin
     try
       var h := Dns.GetHostEntry(host);
-      if h.AddressList.Length = 0 then exit (nil, new DNSError('Empty address list', host, nil, false, false));
+      if h.AddressList.Length = 0 then exit (nil, new DNSError('Empty address list', host, '', false, false));
       exit (new Slice<IP>(h.AddressList.Select(a -> new IP(a.GetAddressBytes)).ToArray), nil);
     except
       on e: Exception do
-        exit (nil, new DNSError(e.Message, host, nil, false, false));
+        exit (nil, new DNSError(e.Message, host, '', false, false));
     end;
   end;
 type
@@ -818,13 +818,8 @@ type
 
     method DialContext(ctx: go.context.Context; network, address: string): tuple of (Conn, go.builtin.error);
     begin
-      {$IF ISLAND}
-      var p := address.Split(':');
-      if p.Length < 2 then exit (nil, go.Errors.new('Port missing; address/ip:port'));
-      {$ELSEIF ECHOES}
-      var p := address.Split([':'], 2);
+      var p := go.strings.SplitN(address, ':', 2);
       if p.Length <> 2 then exit (nil, go.Errors.new('Port missing; address/ip:port'));
-      {$ENDIF}
       try
         var lPort := coalesce(Reference<Resolver>.Get(self.Resolver), go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
         if lPort.Item2 <> nil then exit (nil, lPort.Item2);
@@ -913,11 +908,11 @@ type
     begin
       try
         var h := Dns.GetHostEntry(host);
-        if h.AddressList.Length = 0 then exit (nil, new DNSError('Empty address list', host, nil, false, false));
+        if h.AddressList.Length = 0 then exit (nil, new DNSError('Empty address list', host, '', false, false));
         exit (new Slice<IPAddr>(h.AddressList.Select(a -> new IPAddr(IP := new IP(a.GetAddressBytes))).ToArray), nil);
       except
         on e: Exception do
-          exit (nil, new DNSError(e.Message, host, nil, false, false));
+          exit (nil, new DNSError(e.Message, host, '', false, false));
       end;
     end;
 

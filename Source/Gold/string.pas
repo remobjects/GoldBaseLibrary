@@ -48,6 +48,11 @@ type
       result := nil;
     end;
 
+    class operator Implicit(aValue: Char): string;
+    begin
+      result := new string([aValue]);
+    end;
+
     class operator Equal(a, b: string): Boolean;
     begin
       result := false;
@@ -59,6 +64,12 @@ type
     end;
 
     class operator Less(aLeft, aRight: string): Boolean;
+    begin
+      // TODO
+      result := true;
+    end;
+
+    class operator LessOrEqual(aLeft, aRight: string): Boolean;
     begin
       // TODO
       result := true;
@@ -91,6 +102,11 @@ type
     method Substring(aIndex: int32; aLen: int32): string;
     begin
       result := new string(new Slice<byte>(Value, aIndex, (aIndex + aLen) - 1));
+    end;
+
+    class method IsNullOrEmpty(aValue: string): Boolean; public;
+    begin
+      result := (aValue.Value = nil) or (aValue.Value.Length = 0);
     end;
 
     property Chars[aIndex: int32]: byte read begin

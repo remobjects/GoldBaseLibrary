@@ -659,13 +659,8 @@ begin
         lPSI.WorkingDirectory := p.Dir;
       if p.Env <> nil then
         for each el in p.Env do begin
-          {$IF ISLAND}
-          var n := el.Item2.Split('=');
-          if n.Length < 2 then continue;
-          {$ELSEIF ECHOES}
-          var n := el.Item2.Split(['='], 2);
+          var n := go.strings.SplitN(el.Item2, '=', 2);
           if n.Length <> 2 then continue;
-          {$ENDIF}
           lPSI.EnvironmentVariables.Add(n[0], n[1]);
         end;
     end;

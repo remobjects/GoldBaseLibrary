@@ -181,7 +181,7 @@ type
   go.syscall.__Global = public partial class
   public
 
-    class method Getenv(sn: String): tuple of (String, Boolean);
+    class method Getenv(sn: String): tuple of (go.builtin.string, Boolean);
     begin
       var s := Environment.GetEnvironmentVariable(sn);
       if s = nil then

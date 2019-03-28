@@ -153,11 +153,11 @@ namespace go.os {
 
 	namespace exec {
 		public partial class __Global {
-			public static (string, builtin.error) LookPath(String file) {
+			public static (go.builtin.string, builtin.error) LookPath(go.builtin.string file) {
 				#if ECHOES
 				if (System.IO.File.Exists(file)) return (file, null);
-				foreach (var el in go.os.Getenv("PATH").Split(System.IO.Path.PathSeparator)) {
-					var p = System.IO.Path.Combine(el, file);
+				foreach (var el in go.strings.Split(go.os.Getenv("PATH"), System.IO.Path.PathSeparator)) {
+					var p = System.IO.Path.Combine(el[1], file);
 					if (System.IO.File.Exists(p)) return (p, null);
 				}
 				#else
@@ -167,7 +167,7 @@ namespace go.os {
 					if (new RemObjects.Elements.System.File(p).Exists()) return (p, null);
 				}
 				#endif
-				return (null, go.errors.New("Could not find file"));
+				return ("", go.errors.New("Could not find file"));
 			}
 			public static Reference<Cmd> Command(string name, params go.builtin.string[] args) {
 				return new Cmd {
