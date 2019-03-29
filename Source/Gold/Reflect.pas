@@ -969,8 +969,8 @@ type
     {$IFDEF ISLAND}
     exit new Value(TypeImpl(aType).RealType.Instantiate());
     {$ELSE}
-    if TypeImpl(aType).fRealType = System.Type.GetType('System.String') then
-      exit new Value(System.String.Empty) // String .net does not have a constructor with no arguments.
+    if TypeImpl(aType).fRealType = System.Type.GetType('go.builtin.string') then
+      exit new Value(go.builtin.string.Zero) // String .net does not have a constructor with no arguments.
     else begin
       var lZero := TypeImpl(aType).fRealType.GetProperty('Zero');
       if lZero <> nil then

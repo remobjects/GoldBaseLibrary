@@ -38,7 +38,8 @@ type
 
     constructor(aValue: Slice<byte>);
     begin
-      Value := aValue;
+      Value := new Slice<byte>(aValue.Length);
+      copy(Value, aValue);
     end;
 
     constructor(aValue: array of rune);
@@ -184,6 +185,25 @@ type
       {$ENDIF}
     end;
 
+    method GetHashCode: Integer; override; public;
+    begin
+      // TODO optimize
+      {$IF ISLAND}
+      {$ELSEIF ECHOES}
+      result := System.Text.Encoding.UTF8.GetString(Value).GetHashCode();
+      {$ENDIF}
+    end;
+
+    method &Equals(obj: Object): Boolean; override; public;
+    begin
+      var lOther := string(obj);
+      if assigned(lOther) then
+        result := lOther = self;
+    end;
+
+    class var fZero: string := new string();
+    class property Zero: string := fZero; public;
+
     class method PlatformStringArrayToGoArray(aValue: array of PlatformString): array of go.builtin.string;
     begin
       result := new go.builtin.string[aValue.Length];
@@ -225,7 +245,12 @@ type
 
   operator implicit(aVal: byte): string; public;
   begin
-    exit Char(aVal).ToString();
+    exit new string([rune(aVal)]);
+  end;
+
+  operator implicit(aVal: rune): string; public;
+  begin
+    exit new string([aVal]);
   end;
 
   operator Implicit(aVal: Slice<Char>): string; public;
@@ -240,7 +265,8 @@ type
 
   operator Explicit(aVal: string): Slice<byte>; public;
   begin
-    result := new Slice<byte>(aVal.Value);
+    result := new Slice<byte>(aVal.Length);
+    copy(result, aVal.Value);
   end;
 
   operator Explicit(aVal: PlatformString): Slice<byte>; public;
