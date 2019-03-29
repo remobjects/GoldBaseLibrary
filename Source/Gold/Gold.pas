@@ -850,7 +850,7 @@ type
 type
   IntExtension = extension class(Integer, go.fmt.Stringer)
   public
-    method String: string;
+    method String: RemObjects.Elements.MicroTasks.Result<string>;
     begin
       exit self.ToString;
     end;
