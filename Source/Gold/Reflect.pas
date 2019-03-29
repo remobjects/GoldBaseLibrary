@@ -1004,10 +1004,10 @@ type
     {$ENDIF}
   end;
 
-  method Swapper(aslice: Object): Action<go.builtin.int, go.builtin.int>; public;
+  method Swapper(aslice: Object): RemObjects.Elements.MicroTasks.Result<Func<go.builtin.int, go.builtin.int, RemObjects.Elements.MicroTasks.VoidResult>>; public;
   begin
     //exit new Action<Integer, Integer>(builtin.ISlice(aslice).Swap);
-    exit new Action<go.builtin.int, go.builtin.int>(go.sort.Interface(aslice).Swap);
+    exit new Func<go.builtin.int, go.builtin.int, RemObjects.Elements.MicroTasks.VoidResult>(go.sort.Interface(aslice).Swap);
   end;
 
   method MakeMap(t: &Type): Value; public;

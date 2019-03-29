@@ -95,7 +95,7 @@ type
     Zone: string; // IPv6 scoped addressing zone; added in Go 1.1
 
     method Network: RemObjects.Elements.MicroTasks.Result<string>; begin exit 'tcp'; end;
-    method String: RemObjects.Elements.MicroTasks.Result<string>; begin exit IP.String()+':'+Port; end;
+    method String: RemObjects.Elements.MicroTasks.Result<string>; begin exit( await IP.String())+':'+Port; end;
   end;
   [ValueTypeSemantics]
   UDPAddr = public class(Addr)
@@ -105,7 +105,7 @@ type
     Zone: string; // IPv6 scoped addressing zone; added in Go 1.1
 
     method Network: RemObjects.Elements.MicroTasks.Result<string>; begin exit 'udp'; end;
-    method String: RemObjects.Elements.MicroTasks.Result<string>; begin exit IP.String()+':'+Port; end;
+    method String: RemObjects.Elements.MicroTasks.Result<string>; begin exit ( await IP.String())+':'+Port; end;
   end;
   [ValueTypeSemantics]
   UnixAddr = public class(Addr)
@@ -153,7 +153,7 @@ type
     constructor; begin end;
     constructor(aValue: go.builtin.error); begin Err := aValue; end;
     Err: go.builtin.error;
-    method Error: RemObjects.Elements.MicroTasks.&Result<string>; begin exit 'error reading DNS config: '+Err.Error(); end;
+    method Error: RemObjects.Elements.MicroTasks.&Result<string>; begin exit 'error reading DNS config: '+await Err.Error(); end;
 
     method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
     method Timeout(): RemObjects.Elements.MicroTasks.Result<Boolean>; empty;
@@ -234,7 +234,7 @@ type
         s := s + " " + Net;
       end;
       if Source <> nil then begin
-        s := s+ " " + Source.String();
+        s := s+ " " + await Source.String();
       end;
       if Addr <> nil then begin
         if Source <> nil then begin
@@ -242,9 +242,9 @@ type
         end else begin
           s :=s+ " ";
         end;
-        s := s + Addr.String();
+        s := s + await Addr.String();
       end;
-      s := s + ": " + Err.Error();
+      s := s + ": " + await Err.Error();
       exit s;
     end;
     method Temporary(): RemObjects.Elements.MicroTasks.Result<Boolean>;
@@ -271,14 +271,14 @@ type
 
 
 
-    method WriteTo(w: go.io.Writer): tuple of (int64, go.builtin.error);
+    method WriteTo(w: go.io.Writer): RemObjects.Elements.MicroTasks.&Result<tuple of (int64, go.builtin.error)>;
     begin
       var bw := buffersWriter(w);
       if bw <> nil then
         exit bw.writeBuffers(self);
       var n: int64 := 0;
       for i: Integer := 0 to Value.Length -1 do begin
-        var (c, err) := w.Write(Value[i]);
+        var (c, err) := await w.Write(Value[i]);
         n := n + c;
         if (err <> nil) then begin
           consume(n);
@@ -300,7 +300,7 @@ type
         n := n+ n0;
       end;
       if self.Value.Length = 0 then begin
-        err := go.io.EOF;
+        err := await go.io.EOF;
       end;
       exit (n, err);
     end;
@@ -342,7 +342,7 @@ end;
 
 method FileListener(f: Reference<go.os.File>): tuple of (Listener, go.builtin.error);
 begin
-  exit (nil, go.Errors.new('not supported'));
+  exit (nil, await go.Errors.new('not supported'));
 end;
 
 type
@@ -361,7 +361,7 @@ type
         exit (new IPConn(fSock.Accept()), nil);
       except
         on e: Exception do
-          exit (nil, go.Errors.new(e.Message));
+          exit (nil, await go.Errors.new(e.Message));
       end;
     end;
     method AcceptTCP: RemObjects.Elements.MicroTasks.Result<tuple of (TCPConn, go.builtin.error)>;
@@ -370,14 +370,14 @@ type
         exit (new TCPConn(fSock.Accept()), nil);
       except
         on e: Exception do
-          exit (nil, go.Errors.new(e.Message));
+          exit (nil, await go.Errors.new(e.Message));
       end;
     end;
     method Close: RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       try
         fSock.Close;
-        exit nil;
+        exit RemObjects.Elements.MicroTasks.Result<go.builtin.error>.FromResult(nil);
       except
         on e: Exception do
           exit go.Errors.new(e.Message);
@@ -461,7 +461,7 @@ type
         exit (fSock.Receive(b.fArray, b.fStart, b.fCount, SocketFlags.None), nil);
       except
         on e: Exception do
-          exit (0, go.Errors.new(e.Message));
+          exit (0, await go.Errors.new(e.Message));
       end;
     end;
 
@@ -472,7 +472,7 @@ type
         exit (b.fCount, nil);
       except
         on e: Exception do
-          exit (0, go.Errors.new(e.Message));
+          exit (0, await go.Errors.new(e.Message));
       end;
     end;
 
@@ -507,7 +507,7 @@ type
       if tt = nil then
         fSock.ReceiveTimeout := 0
       else
-        fSock.ReceiveTimeout := tt.Nanosecond() / 1000;
+        fSock.ReceiveTimeout := (await tt.Nanosecond()) / 1000;
       {$ENDIF}
     end;
 
@@ -519,7 +519,7 @@ type
       if t = nil then
         fSock.SendTimeout := 0
       else
-        fSock.SendTimeout := t.Nanosecond() / 1000;
+        fSock.SendTimeout := (await t.Nanosecond()) / 1000;
       {$ENDIF}
     end;
 
@@ -536,7 +536,7 @@ type
 
     method File(): RemObjects.Elements.MicroTasks.Result<tuple of (Reference<go.os.File>, go.builtin.error)>;
     begin
-      exit (nil, go.Errors.new('Not supported'));
+      exit (nil, await go.Errors.new('Not supported'));
     end;
     method ReadFrom(b: Slice<byte>): RemObjects.Elements.MicroTasks.Result<tuple of  (int, Addr, go.builtin.error)>;
     begin
@@ -552,7 +552,7 @@ type
         exit (n, a, nil);
       except
         on e: Exception do
-          exit (0, nil, go.Errors.new(e.Message));
+          exit (0, nil, await  go.Errors.new(e.Message));
       end;
     end;
     method ReadFromUDP(b: Slice<byte>): RemObjects.Elements.MicroTasks.Result<tuple of  (int, Reference<UDPAddr>, go.builtin.error)>;
@@ -567,7 +567,7 @@ type
         exit (n, a, nil);
       except
         on e: Exception do
-          exit (0, nil, go.Errors.new(e.Message));
+          exit (0, nil, await  go.Errors.new(e.Message));
       end;
     end;
 
@@ -583,7 +583,7 @@ type
         exit (n, a, nil);
       except
         on e: Exception do
-          exit (0, nil, go.Errors.new(e.Message));
+          exit (0, nil, await go.Errors.new(e.Message));
       end;
     end;
     method SetReadBuffer(bytes: int):  RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
@@ -614,7 +614,7 @@ type
     end;
     method SyscallConn(): RemObjects.Elements.MicroTasks.Result<tuple of  (go.syscall.RawConn, go.builtin.error)>;
     begin
-      exit (nil, go.Errors.new('Not supported'));
+      exit (nil, nil, await go.Errors.new('Not supported'));
     end;
     method CloseRead(): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
@@ -685,7 +685,7 @@ type
         exit (b.fCount, nil);
       except
         on e: Exception do
-          exit (0, go.Errors.new(e.Message));
+          exit (0, nil, await go.Errors.new(e.Message));
       end;
     end;
 
@@ -701,20 +701,20 @@ type
 
   method ParseAddress(s: string): RemObjects.Elements.MicroTasks.Result<tuple of (string, Integer)>;
 begin
-  var n := go.strings.LastIndex(s, ':');
-  var q := go.strings.LastIndex(s, ']');
+  var n := await go.strings.LastIndex(s, ':');
+  var q := await go.strings.LastIndex(s, ']');
   if n < q then n := -1;
   if( n > 0) and Integer.TryParse(s.Substring(n+1), out var port) then begin
     s := s.Substring(0, n);
   end;
-  exit (s, port);
+  exit RemObjects.Elements.MicroTasks.Result.FromResult((s, port));
 end;
 
 method Listen(network, address: string): RemObjects.Elements.MicroTasks.Result<tuple of (Listener, go.builtin.error)>;
 begin
   try
     var s: Socket;
-    var p := ParseAddress(address);
+    var p := await ParseAddress(address);
     if string.IsNullOrempty(p[0]) then
       p := ('0.0.0.0', p[1]);
     var addr := Dns.GetHostEntry (p[0]);
@@ -744,7 +744,7 @@ begin
     exit (new TCPListener(s), nil);
   except
   on e: Exception do
-    exit (nil, go.Errors.new(e.Message));
+    exit (nil, await go.Errors.new(e.Message));
   end;
 end;
 
@@ -867,14 +867,14 @@ type
               goto udp6;
           end;
         else
-          exit (nil, go.Errors.new('Unknown network'));
+          exit (nil, awaitgo.Errors.new('Unknown network'));
         end;
         var lSock := new Socket(lAF, lST, if lST = SocketType.Dgram then ProtocolType.Udp else ProtocolType.Tcp);
         lSock.Connect(lRep);
         exit (new IPConn(lSock), nil);
       except
         on e: Exception do
-          exit (nil, go.Errors.new(e.Message));
+          exit (nil, await go.Errors.new(e.Message));
       end;
     end;
   end;
