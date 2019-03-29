@@ -176,6 +176,15 @@ type
 
     property Capacity: Integer read fQueueSize -1;
 
+    class var fZero: BidirectionalChannel<T> := new BidirectionalChannel<T>();
+    class property Zero: BidirectionalChannel<T> := fZero;
+
+    class operator IsNil(aVal: BidirectionalChannel<T>): Boolean;
+    begin
+      result := (Object(aVal) = nil) or (Object(aVal) = Object(fZero));
+    end;
+
+
     method Send(aVal: T);
     begin
       var lSig := TrySend(aVal);

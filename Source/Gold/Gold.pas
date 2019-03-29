@@ -111,11 +111,24 @@ type
     end;
 
     class var fZero: Map<K, V> := new Map<K, V>();
-    class property Zero: Map<K, V> := fZero; lazy;
+    class property Zero: Map<K, V> := fZero;
 
     class operator IsNil(aVal: Map<K, V>): Boolean;
     begin
-      result := (Object(aVal) = nil) or (Object(aVal) = fZero);
+      result := (Object(aVal) = nil) or (Object(aVal) = Object(fZero));
+    end;
+
+    class operator Equal(Value1, Value2: Map<K, V>): Boolean;
+    begin
+      if ((Object(Value1) = nil) and (Object(Value2) = Object(fZero))) or ((Object(Value1) = Object(fZero)) and (Object(Value2) = nil)) then
+        exit true;
+
+      exit Object(Value1) = Object(Value2);
+    end;
+
+    class operator NotEqual(Value1, Value2: Map<K, V>): Boolean;
+    begin
+      result := not (Value1 = Value2);
     end;
 
     property Item[aItem: K]: V write set_Item; default;
@@ -145,7 +158,9 @@ type
         exit (Activator.CreateInstance<V>(), false);
       {$ENDIF}
       {$IF ECHOES}
-      exit (go.reflect.Zero(new go.reflect.TypeImpl(typeOf(V))) as V, false);
+      var lZero := go.reflect.Zero(new go.reflect.TypeImpl(typeOf(V)));
+      if lZero.fValue <> nil then
+        exit (lZero.fValue as V, false);
       {$ENDIF}
       exit (default(V), false);
     end;
@@ -179,7 +194,9 @@ type
     method setLen: Integer;
     method setFrom(aSrc: ISlice);
   end;
-  //Slice<T> = public class(ISlice)
+
+
+  [ValueTypeSemantics]
   Slice<T> = public class(go.sort.Interface, ISlice)
   assembly
     fArray: array of T;
@@ -258,11 +275,11 @@ type
     end;
 
     class var fZero: Slice<T> := new Slice<T>;
-    class property Zero: Slice<T> := fZero; lazy;
+    class property Zero: Slice<T> := fZero;
 
     class operator IsNil(aVal: Slice<T>): Boolean;
     begin
-      result := (Object(aVal) = nil) or (Object(aVal) = fZero);
+      result := (Object(aVal) = nil) or (Object(aVal) = Object(fZero)) or ((aVal.fArray = EmptyArray) and (aVal.Length = 0) and (aVal.Capacity = 0));
     end;
 
     method Assign(aOrg: array of T);
@@ -580,14 +597,14 @@ type
 
   method cap<T>(v: Slice<T>): Integer; public;
   begin
-    if v = nil then exit -1;
+    if Object(v) = nil then exit -1;
     exit v.Capacity;
   end;
 
 
   method len(v: string): Integer; public;
   begin
-    exit length(v);
+    exit v.Value.Length;
   end;
 
   method len<T>(v: array of T): Integer; public;
@@ -695,7 +712,7 @@ type
     var lEnd := valueOrDefault(aEnd, aSlice.Length);
     if Integer(lEnd) > aSlice.Length then lEnd := aSlice.Length;
     if (lStart = 0) and (lEnd = aSlice.Length) then exit aSlice;
-    exit aSlice.Substring(lStart, lEnd - lStart);
+    exit new string(new Slice<byte>(aSlice.Value, lStart, lEnd));
   end;
 
   method Slice<T>(aSlice: array of T; aStart, aEnd: nullable Integer): Slice<T>; public;
@@ -717,6 +734,13 @@ type
     exit (default(T), false); // for integers, T(V) cast would fail otherwise.
   end;
 
+  method TypeAssertReference<T>(v: Object): tuple of (&Reference<T>, Boolean);
+  begin
+    result := TypeAssert<Reference<T>>(v);
+    if result[1] then exit;
+    if v is T then
+      exit (new Reference<T>(T(v)), true);
+  end;
 
   method panic(v: Object);
   begin
@@ -725,12 +749,16 @@ type
 
   operator implicit(aVal: string): Slice<Char>; public;
   begin
-    exit new Slice<Char>(aVal.ToArray);
+    // TODO
+    //exit new Slice<Char>(aVal.ToArray);
+    exit nil;
   end;
 
   operator implicit(aVal: string): Slice<go.builtin.rune>; public;
   begin
-    exit new Slice<go.builtin.rune>(aVal.Select(a -> go.builtin.rune(a)).ToArray);
+    // TODO
+    //exit new Slice<go.builtin.rune>(aVal.Select(a -> go.builtin.rune(a)).ToArray);
+    exit nil;
   end;
 
   operator implicit(aVal: byte): string; public;
@@ -754,23 +782,20 @@ type
 
   operator Implicit(aVal: Slice<Char>): string; public;
   begin
-    {$IF ISLAND}
-    exit string.FromCharArray(aVal.ToArray());
-    {$ELSEIF ECHOES}
     exit new string(aVal.ToArray());
-    {$ENDIF}
   end;
 
   operator Implicit(aVal: Slice<rune>): string; public;
   begin
-  {$IF ISLAND}
-  exit string.FromCharArray(aVal.ToArray().Select(a -> Char(a.Value)).ToArray());
-  {$ELSEIF ECHOES}
-  exit new string(aVal.ToArray());
-  {$ENDIF}
+    exit new string(aVal.ToArray());
   end;
 
   operator Explicit(aVal: string): Slice<byte>; public;
+  begin
+    result := new Slice<byte>(aVal.Value);
+  end;
+
+  operator Explicit(aVal: PlatformString): Slice<byte>; public;
   begin
     {$IFDEF ISLAND}
     exit new Slice<byte>(Encoding.UTF8.GetBytes(aVal));
@@ -778,11 +803,24 @@ type
     exit new Slice<byte>(System.Text.Encoding.UTF8.GetBytes(aVal));
     {$ENDIF}
   end;
-  operator Explicit(aVal: string): go.net.http.htmlSig; public;
+
+  operator Explicit(aVal: PlatformString): go.net.http.htmlSig; public;
+  begin
+    var q: go.builtin.Slice<byte> := (aVal as go.builtin.Slice<byte>);
+    {$IF ISLAND}
+    // TODO
+    result := nil;
+    {$ELSEIF ECHOES}
+    exit new go.net.http.htmlSig(Value := System.Text.Encoding.UTF8.GetBytes(aVal));
+    {$ENDIF}
+    //exit new go.net.http.htmlSig(Value := q);
+  end;
+
+  {operator Explicit(aVal: string): go.net.http.htmlSig; public;
   begin
     var q: go.builtin.Slice<byte> := (aVal as go.builtin.Slice<byte>);
     exit new go.net.http.htmlSig(Value := q);
-  end;
+  end;}
 
   extension method ISequence<T>.GoldIterate: sequence of tuple of (Integer, T); iterator; public;
   begin
@@ -796,7 +834,7 @@ type
       constructor(aVal: array of go.builtin.rune);
       begin
         {$IF ISLAND}
-        exit string.FromCharArray(aVal.Select(a -> :RemObjects.Elements.System.Char(a.Value)).ToArray());
+        exit new string(aVal.Select(a -> :RemObjects.Elements.System.Char(a.Value)).ToArray());
         {$ELSEIF ECHOES}
         exit new string(aVal.Select(a -> :System.Char(a.Value)).ToArray());
         {$ENDIF}
@@ -805,7 +843,7 @@ type
      method GoldIterate: sequence of tuple of (Integer, go.builtin.rune); iterator; public;
       begin
         for each el in self index n do
-          yield (n, go.builtin.rune(el));
+          yield (n, go.builtin.rune(el[1]));
       end;
     end;
 
@@ -823,7 +861,7 @@ type
   private
     fTag: string;
   public
-    constructor(aTag: string);
+    constructor(aTag: PlatformString);
     begin
       fTag := aTag;
     end;

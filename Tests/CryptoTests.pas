@@ -31,12 +31,12 @@ type
 
     method NewTripleDESCipher;
     begin
-      //Assert.AreEqual(TestApplication2.DoNewTripleDESCipher(), true); // T81984
+      Assert.AreEqual(TestApplication2.DoNewTripleDESCipher(), true);
     end;
 
     method ECDSAVerify;
     begin
-      //Assert.AreEqual(TestApplication2.DoECDSAVerify(), true); // T81984 seems, array inside struct
+      //Assert.AreEqual(TestApplication2.DoECDSAVerify(), true); // T82197 array inside struct
     end;
 
     method DoMD5;

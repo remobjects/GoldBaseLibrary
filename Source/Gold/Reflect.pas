@@ -971,10 +971,14 @@ type
     else begin
       var lZero := TypeImpl(aType).fRealType.GetProperty('Zero');
       if lZero <> nil then
-        exit new Value(lZero.GetValue(nil))
-      else
-        exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType));
+        exit new Value(lZero.GetValue(nil));
     end;
+
+    if not TypeImpl(aType).RealType.IsValueType and (TypeImpl(aType).RealType.GetMethods.Any(a -> a.Name = '__Set')) then
+      exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType))
+    else
+      exit new Value(nil);
+      //exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType));
     {$ENDIF}
   end;
 

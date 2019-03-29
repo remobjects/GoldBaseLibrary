@@ -46,11 +46,11 @@ namespace go.path
 {
 	namespace filepath {
 
-		static Slice<String> splitList(string s) {
+		static Slice<go.builtin.string> splitList(string s) {
 			#if ECHOES
-			return new builtin.Slice<String>(s.Split(new[] {go.os.PathListSeparator}, StringSplitOptions.RemoveEmptyEntries));
+			return go.builtin.string.PlatformStringArrayToGoSlice(s.Split(new[] {go.os.PathListSeparator}, StringSplitOptions.RemoveEmptyEntries));
 			#else
-			return new builtin.Slice<String>(s.Split(go.os.PathListSeparator, true));
+			return go.builtin.string.PlatformStringArrayToGoSlice(s.Split(go.os.PathListSeparator, true));
 			#endif
 		}
 
@@ -58,7 +58,7 @@ namespace go.path
 			return (null, go.errors.New("Not supported"));
 		}
 
-		static String join(Slice<string> s) {
+		static go.builtin.string join(Slice<go.builtin.string> s) {
 			return String.Join(go.os.PathSeparator.ToString(), s.ToArray());
 		}
 
@@ -153,23 +153,23 @@ namespace go.os {
 
 	namespace exec {
 		public partial class __Global {
-			public static (string, builtin.error) LookPath(String file) {
+			public static (go.builtin.string, builtin.error) LookPath(go.builtin.string file) {
 				#if ECHOES
 				if (System.IO.File.Exists(file)) return (file, null);
-				foreach (var el in go.os.Getenv("PATH").Split(System.IO.Path.PathSeparator)) {
-					var p = System.IO.Path.Combine(el, file);
+				foreach (var el in go.strings.Split(go.os.Getenv("PATH"), System.IO.Path.PathSeparator)) {
+					var p = System.IO.Path.Combine(el[1], file);
 					if (System.IO.File.Exists(p)) return (p, null);
 				}
 				#else
 				if (new RemObjects.Elements.System.File(file).Exists()) return (file, null);
-				foreach (var el in go.os.Getenv("PATH").Split(Path.DirectorySeparatorChar)) {
-					var p = RemObjects.Elements.System.Path.Combine(el, file);
+				foreach (var el in go.strings.Split(go.os.Getenv("PATH"), Path.DirectorySeparatorChar)) {
+					var p = RemObjects.Elements.System.Path.Combine(el[1], file);
 					if (new RemObjects.Elements.System.File(p).Exists()) return (p, null);
 				}
 				#endif
-				return (null, go.errors.New("Could not find file"));
+				return ("", go.errors.New("Could not find file"));
 			}
-			public static Reference<Cmd> Command(string name, params string[] args) {
+			public static Reference<Cmd> Command(string name, params go.builtin.string[] args) {
 				return new Cmd {
 					Path = name,
 					Args = args
@@ -180,8 +180,8 @@ namespace go.os {
 		[ValueTypeSemantics]
 		public partial class Cmd {
 			public string Path;
-			public Slice<string> Args;
-			public Slice<string> Env;
+			public Slice<go.builtin.string> Args;
+			public Slice<go.builtin.string> Env;
 			public string Dir;
 			public io.Reader Stdin;
 			public io.Writer Stdout;
