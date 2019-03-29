@@ -184,12 +184,12 @@ type
     fLock: Object := new Object;
     {$ENDIF}
   public
-    method &Do(a: Action);
+    method &Do(a: Func<RemObjects.Elements.MicroTasks.VoidResult>): RemObjects.Elements.MicroTasks.VoidResult; async;
     begin
       if fDone = 1 then exit;
       locking fLock do begin
         if fDone = 1 then exit;
-        a();
+        await (a());
         fDone := 1;
       end;
     end;
@@ -206,21 +206,21 @@ type
     {$ENDIF}
 
   public
-    property &New: Func<Object>;
+    property &New: Func<RemObjects.Elements.MicroTasks.Result<Object>>;
     method Put(x: Object);
     begin
       locking fLock do
           fItems.Add(x);
     end;
 
-    method Get: Object;
+    method Get: RemObjects.Elements.MicroTasks.Result<Object>;
     begin
       locking fLock do begin
         if fItems.Count = 0 then begin
-          if &New = nil then exit nil;
+          if &New = nil then exit RemObjects.Elements.MicroTasks.Result<Object>.FromResult(nil);
           exit &New();
         end;
-        result := fItems[0];
+        result := RemObjects.Elements.MicroTasks.Result<Object>.FromResult(fItems[0]);
         fItems.RemoveAt(0);
       end;
     end;

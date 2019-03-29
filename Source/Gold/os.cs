@@ -191,31 +191,31 @@ namespace go.os {
 			public Reference<os.Process> Process;
 			public Reference<os.ProcessState> ProcessState;
 
-			public builtin.error Start() {
-				var pp = StartProcess(Path, Args, new ProcAttr {
+			public RemObjects.Elements.MicroTasks.Result<builtin.error> Start() {
+				var pp = await StartProcess(Path, Args, new ProcAttr {
 					Dir = Dir,
 					Env = Env
 				});
 				if (pp.Item2 != null) return pp.Item2;
 				Process = pp.Item1;
 				ProcessState = new Reference<os.ProcessState>(new os.ProcessState(pp.Item1.Process));
-				return null;
+				return RemObjects.Elements.MicroTasks.Result<builtin.error>.FromREsult(null);
 			}
 
-			public builtin.error Wait() {
+			public RemObjects.Elements.MicroTasks.Result<builtin.error> Wait() {
 				try {
-					Process.Wait();
+					await Process.Wait();
 				} catch(Exception e){
 					return go.errors.New(e.Message);
 				}
 			}
 
-			public (go.io.ReadCloser, go.builtin.error) StdoutPipe() {
-				return (null, go.errors.New("not implemented"));
+			public RemObjects.Elements.MicroTasks.Result<(go.io.ReadCloser, go.builtin.error)> StdoutPipe() {
+				return (null, await go.errors.New("not implemented"));
 			}
 
-			public (Slice<byte>, go.builtin.error) Output() {
-				return (null, go.errors.New("not implemented"));
+			public RemObjects.Elements.MicroTasks.Result<(Slice<byte>, go.builtin.error)> Output() {
+				return (null, await go.errors.New("not implemented"));
 			}
 
 			// stdoutpipe

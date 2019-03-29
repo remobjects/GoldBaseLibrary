@@ -147,19 +147,19 @@ type
         while lCount > 0 do begin
           var c := fs.Read(p.fArray, lStart, lCount);
           if c = 0  then
-            exit (p.fCount - lCount, go.errors.New('EOF'));
+            exit (p.fCount - lCount, await go.errors.New('EOF'));
           lStart := lStart + c;
           lCount := lCount - c;
         end;
       except
         on e: Exception do
-         exit (-1, go.errors.New(e.Message));
+         exit (-1, await go.errors.New(e.Message));
       end;
       fs.Position := pp;
       exit (p.fCount, nil);
     end;
 
-    method Readdirnames(n: Integer): tuple of (go.builtin.Slice<go.builtin.string>, go.builtin.error);
+    method Readdirnames(n: Integer): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.Slice<go.builtin.string>, go.builtin.error)>;
     begin
       if n < 0 then n := Int32.MaxValue;
       try
@@ -184,7 +184,7 @@ type
         exit (go.builtin.string.PlatformStringArrayToGoSlice(res), nil);
       except
         on e: Exception do
-          exit (nil, go.Errors.New(e.Message));
+          exit (nil, await go.Errors.New(e.Message));
       end;
     end;
 
@@ -213,7 +213,7 @@ type
         exit (new go.builtin.Slice<FileInfo>(lRes), nil);
       except
         on e: Exception do
-          exit (nil, go.Errors.New(e.Message));
+          exit (nil, await go.Errors.New(e.Message));
       end;
     end;
 
@@ -226,19 +226,19 @@ type
     begin
       disposeAndNil(fs);
 
-      exit nil;
+      exit RemObjects.Elements.MicroTasks.Result<go.builtin.error>.FromREsult(nil);
     end;
 
     method &Read(p: go.builtin.Slice<go.builtin.byte>): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>;
     begin
       try
         var b := fs.Read(p.fArray, p.fStart, p.fCount);
-        if b = -1 then exit (0, go.Errors.New('EOF'));
+        if b = -1 then exit (0, await go.Errors.New('EOF'));
         exit (b, nil);
 
       except
         on e: Exception do
-          exit (0, go.Errors.New(e.Message));
+          exit (0, await go.Errors.New(e.Message));
       end;
     end;
 
@@ -250,7 +250,7 @@ type
 
       except
         on e: Exception do
-          exit (0, go.Errors.New(e.Message));
+          exit (0, await go.Errors.New(e.Message));
       end;
     end;
 
@@ -260,7 +260,7 @@ type
         exit (fs.Seek(offset, if whence = 0 then SeekOrigin.Begin else if whence = 2 then SeekOrigin.End else SeekOrigin.Current), nil);
      except
        on e: Exception do
-         exit (0, go.Errors.New(e.Message));
+         exit (0, await go.Errors.New(e.Message));
      end;
     end;
   end;
@@ -269,7 +269,7 @@ type
     exit (Environment.CurrentDirectory, nil);
   end;
 
-  method executable(): tuple of (go.builtin.string, go.builtin.error); public;
+  method executable(): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.string, go.builtin.error)>; public;
   begin
     {$IF ISLAND AND WINDOWS}
     var lBuffer := new Char[rtl.MAX_PATH + 1];
@@ -277,7 +277,7 @@ type
     result := (new go.builtin.string(lBuffer), nil);
     {$ELSEIF ECHOES}
     var asm :=  &System.Reflection.Assembly.GetEntryAssembly();
-    if asm = nil then exit ('', go.Errors.New('Unknown entry assembly'));
+    if asm = nil then exit ('', await go.Errors.New('Unknown entry assembly'));
     exit (asm.Location, nil);
     {$ENDIF}
   end;
@@ -290,7 +290,7 @@ type
       {$ELSEIF ECHOES}
       System.IO.Directory.CreateDirectory(name);
       {$ENDIF}
-      exit nil;
+      exit RemObjects.Elements.MicroTasks.Result<go.builtin.error>.FromResult(nil);
     except
       on e: Exception do
         exit go.errors.New(e.Message);
@@ -311,7 +311,7 @@ type
       else
         exit go.errors.New('Not found');
       {$ENDIF}
-      exit nil;
+      exit RemObjects.Elements.MicroTasks.Result<go.builtin.error>.FromResult(nil);
     except
       on e: Exception do
         exit go.errors.New(e.Message);
@@ -337,7 +337,7 @@ begin
   {$ENDIF}
   except
     on e: Exception do
-      exit (nil, go.errors.New(e.Message));
+      exit (nil, await go.errors.New(e.Message));
    end;
 end;
 
@@ -358,7 +358,7 @@ begin
     {$ENDIF}
   except
     on e: Exception do
-      exit (nil, go.errors.New(e.Message));
+      exit (nil, await go.errors.New(e.Message));
    end;
 end;
 
@@ -382,7 +382,7 @@ begin
     {$ENDIF}
   except
     on e: Exception do
-      exit (nil, go.errors.New(e.Message));
+      exit (nil, await go.errors.New(e.Message));
   end;
 end;
 method hostname: RemObjects.Elements.MicroTasks.Result<tuple of (string, go.builtin.error)>;
@@ -416,7 +416,7 @@ begin
   if System.IO.File.Exists(fn) or System.IO.Directory.Exists(fn) then
     exit (new MyFileInfo(fn), nil);
   {$ENDIF}
-  exit (nil, go.errors.New('Not found '+fn));
+  exit (nil, await go.errors.New('Not found '+fn));
 end;
 
 method statNolog(fn: string): RemObjects.Elements.MicroTasks.Result<tuple of (FileInfo, go.builtin.error)>;
@@ -430,7 +430,7 @@ begin
   if System.IO.File.Exists(fn) or System.IO.Directory.Exists(fn) then
     exit (new MyFileInfo(fn), nil);
   {$ENDIF}
-  exit (nil, go.errors.New('Not found '+fn));
+  exit (nil, await go.errors.New('Not found '+fn));
 end;
 
 type
@@ -457,9 +457,10 @@ type
       raise new NotImplementedException;
       {$ELSEIF ECHOES}
       var lAtt := System.IO.File.GetAttributes(fFile);
-      result := new FileMode(Value := 0);
+      var lResult := new FileMode(Value := 0);
       if FileAttributes.Directory in lAtt then
-        result.Value := result.Value or Integer(ModeDir);
+        lResult.Value := lResult.Value or Integer(ModeDir);
+      result := lResult;
       {$ENDIF}
     end;
     method ModTime: RemObjects.Elements.MicroTasks.Result<go.time.Time>;
@@ -484,7 +485,7 @@ type
   method IsPathSeparator(c: Char): RemObjects.Elements.MicroTasks.Result<Boolean>; begin exit c = PathSeparator; end;
   method Readlink(name: string): RemObjects.Elements.MicroTasks.Result<tuple of (string, builtin.error)>;
   begin
-    exit ('', go.Errors.New('Not supported'));
+    exit ('', await go.Errors.New('Not supported'));
   end;
 type
   DiscardWriter = class(go.io.Writer)
@@ -510,7 +511,7 @@ type
 
     method Close: RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
-      exit nil;
+      exit RemObjects.Elements.MicroTasks.Result<go.builtin.error>.FromResult(nil);
     end;
 
   end;
@@ -537,7 +538,7 @@ type
 
     class method ReadFile(fn: String): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.Slice<Byte>, go.builtin.error)>;
     begin
-      var res := Open(fn);
+      var res := await Open(fn);
       if res.Item2 <> nil then exit (nil, res.Item2);
       try
         exit ReadAll(res.Item1);
@@ -551,7 +552,7 @@ type
       var ms := new MemoryStream;
       var b := new go.builtin.Slice<Byte>(512);
       loop begin
-        var (res, i) := r.Read(b);
+        var (res, i) := await r.Read(b);
         if i <> nil then begin
           ms.Write(b.fArray, 0, res);
           if (i is go.errors.errorString) and (i.Error() = "EOF") then
@@ -592,7 +593,7 @@ public
       {$ELSEIF ECHOES}
       Process.Kill;
       {$ENDIF}
-      exit nil;
+      exit RemObjects.Elements.MicroTasks.Result< go.builtin.error>.FromResult(nil);
     except
       on e: Exception do
         exit go.errors.New(e.Message);
@@ -606,7 +607,7 @@ public
     {$ELSEIF ECHOES}
     Process.Dispose;
     {$ENDIF}
-    exit nil;
+    exit RemObjects.Elements.MicroTasks.Result< go.builtin.error>.FromResult(nil);
   end;
 
   method Signal: RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
@@ -625,7 +626,7 @@ public
       exit (new ProcessState(Process), nil);
     except
       on e: Exception do
-        exit (nil, go.errors.New(e.Message));
+        exit (nil, await go.errors.New(e.Message));
     end;
   end;
 end;
@@ -659,7 +660,7 @@ begin
         lPSI.WorkingDirectory := p.Dir;
       if p.Env <> nil then
         for each el in p.Env do begin
-          var n := go.strings.SplitN(el.Item2, '=', 2);
+          var n := await go.strings.SplitN(el.Item2, '=', 2);
           if n.Length <> 2 then continue;
           lPSI.EnvironmentVariables.Add(n[0], n[1]);
         end;
@@ -673,7 +674,7 @@ begin
     {$ENDIF}
   except
     on e: Exception do
-      exit (nil, go.errors.New(e.Message));
+      exit (nil, await go.errors.New(e.Message));
   end;
   {$ENDIF}
 end;
@@ -692,11 +693,11 @@ begin
     var p := ProcessType.GetProcessById(pid);
     {$ENDIF}
     if p = nil then
-      exit (nil, go.errors.New('No such process'));;
+      exit (nil, await go.errors.New('No such process'));;
     exit (new Process(Process := p), nil);
   except
     on e: Exception do
-      exit (nil, go.errors.New(e.Message));
+      exit (nil, await go.errors.New(e.Message));
   end;
   //exit (nil, errors.New('Not implemented'));
 end;

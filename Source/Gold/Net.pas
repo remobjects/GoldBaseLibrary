@@ -614,7 +614,7 @@ type
     end;
     method SyscallConn(): RemObjects.Elements.MicroTasks.Result<tuple of  (go.syscall.RawConn, go.builtin.error)>;
     begin
-      exit (nil, nil, await go.Errors.new('Not supported'));
+      exit (nil, await go.Errors.new('Not supported'));
     end;
     method CloseRead(): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
@@ -669,7 +669,7 @@ type
 
     method SetKeepAlivePeriod(d: go.time.Duration): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
-      exit nil;
+      exit RemObjects.Elements.MicroTasks.Result<go.builtin.error>.FromResult(nil);
     end;
 
 
@@ -685,7 +685,7 @@ type
         exit (b.fCount, nil);
       except
         on e: Exception do
-          exit (0, nil, await go.Errors.new(e.Message));
+          exit (0, await go.Errors.new(e.Message));
       end;
     end;
 
@@ -707,7 +707,7 @@ begin
   if( n > 0) and Integer.TryParse(s.Substring(n+1), out var port) then begin
     s := s.Substring(0, n);
   end;
-  exit RemObjects.Elements.MicroTasks.Result.FromResult((s, port));
+  exit RemObjects.Elements.MicroTasks.Result<tuple of (string, Integer)>.FromResult((s, port));
 end;
 
 method Listen(network, address: string): RemObjects.Elements.MicroTasks.Result<tuple of (Listener, go.builtin.error)>;
@@ -867,7 +867,7 @@ type
               goto udp6;
           end;
         else
-          exit (nil, awaitgo.Errors.new('Unknown network'));
+          exit (nil, await go.Errors.new('Unknown network'));
         end;
         var lSock := new Socket(lAF, lST, if lST = SocketType.Dgram then ProtocolType.Udp else ProtocolType.Tcp);
         lSock.Connect(lRep);
@@ -902,7 +902,7 @@ type
       if Integer.TryParse(service, out var res) then begin
         exit (res, nil);
       end;
-      exit (0, go.Errors.new('Unknown port'));
+      exit (0, await go.Errors.new('Unknown port'));
     end;
     method LookupIPAddr(ctx: go.context.Context; host: string): RemObjects.Elements.MicroTasks.Result<tuple of (Slice<IPAddr>, go.builtin.error)>;
     begin

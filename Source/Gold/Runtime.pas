@@ -262,9 +262,9 @@ type
       {$ENDIF}
     end;
 
-  class method Getgroups: tuple of (go.builtin.Slice<Integer>, go.builtin.error);
+  class method Getgroups: RemObjects.Elements.MicroTasks.&Result<tuple of (go.builtin.Slice<Integer>, go.builtin.error)>;
   begin
-    exit (new go.builtin.Slice<Integer>, go.Errors.New('Not supported'));
+    exit (new go.builtin.Slice<Integer>, await go.Errors.New('Not supported'));
   end;
 
     class var
@@ -383,11 +383,11 @@ type
       "/usr/lib/locale/TZ/"]);
     end;
 
-    class method initLocal;
+    class method initLocal: RemObjects.Elements.MicroTasks.VoidResult;
     begin
       var (tz, ok) := go.syscall.Getenv("TZ");
       if (not ok) then begin
-        var (z, err) := loadLocation("localtime", new go.builtin.Slice<go.builtin.string>(["/etc/"]));
+        var (z, err) := await loadLocation("localtime", new go.builtin.Slice<go.builtin.string>(["/etc/"]));
         if err = nil then begin
           localLoc := go.builtin.Reference<go.time.Location>.Get(z);
           localLoc.name := "Local";
@@ -395,7 +395,7 @@ type
         end;
       end;
       if (tz <> '') and (tz <> 'UTC') then begin
-         var (z, err) := loadLocation(tz, zoneSources);
+        var (z, err) := await loadLocation(tz, zoneSources);
 
         if err = nil  then begin
           localLoc := go.builtin.Reference<go.time.Location>.Get(z);
@@ -453,12 +453,12 @@ type
       exit DateTime.Now.Ticks * 100;
     end;
 
-    class method Sleep(x: go.time.Duration);
+    class method Sleep(x: go.time.Duration): RemObjects.Elements.MicroTasks.VoidResult;
     begin
       {$IF ISLAND}
-      Thread.Sleep(x.Nanoseconds / 1000000);
+      Thread.Sleep((await x.Nanoseconds) / 1000000);
       {$ELSEIF ECHOES}
-      System.Threading.Thread.Sleep(x.Nanoseconds / 1000000);
+      System.Threading.Thread.Sleep((await x.Nanoseconds) / 1000000);
       {$ENDIF}
     end;
   end;
@@ -575,23 +575,23 @@ type
         exit -1;
     end;
 
-    class method &Index(a, b: go.builtin.Slice<Byte>): Integer;
+    class method &Index(a, b: go.builtin.Slice<Byte>): RemObjects.Elements.MicroTasks.&Result<Integer>;
     begin
-      if b.Len > a.Len then
-        exit(-1);
+      if (await b.Len) > (await a.Len) then
+        exit RemObjects.Elements.MicroTasks.&Result<Integer>.FromResult(-1);
 
-      for i: Integer := 0 to (a.Len - b.Len) do begin
+      for i: Integer := 0 to ((await a.Len) - (await b.Len)) do begin
         var lFound := true;
-        for j: Integer := 0 to b.Len - 1 do begin
+        for j: Integer := 0 to (await b.Len) - 1 do begin
           if a[i+j] ≠ b[j] then begin
             lFound := false;
             break;
           end;
         end;
         if lFound then
-          exit i;
+          exit RemObjects.Elements.MicroTasks.&Result<Integer>.FromResult(i);
       end;
-      exit -1;
+      exit RemObjects.Elements.MicroTasks.&Result<Integer>.FromResult(-1);
     end;
 
     class method IndexString(a, b: String): Integer;
@@ -664,7 +664,7 @@ type
     method Write(p: go.builtin.Slice<Byte>): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>;
     begin
       fStr.Append(Encoding.UTF8.GetString(p.fArray, p.fStart, p.fCount));
-      exit (p.fCount, nil);
+      exit RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>.FromResult((p.fCount, nil));
     end;
   end;
 

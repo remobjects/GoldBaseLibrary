@@ -322,11 +322,12 @@ type
       result := fType.Kind;
     end;
 
-    method Len: Integer;
+    method Len: RemObjects.Elements.MicroTasks.&Result<Integer>;
     begin
       if fValue is go.sort.Interface then
-        exit go.sort.Interface(fValue).Len;
+        exit await go.sort.Interface(fValue).Len;
       //TODO check other types?
+      exit 0;
     end;
 
     method &Index(i: Integer): Value;
