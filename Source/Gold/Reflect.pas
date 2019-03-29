@@ -691,6 +691,9 @@ type
         end;
       end;
       {$ELSEIF ECHOES}
+      if fRealType.AssemblyQualifiedName.StartsWith('go.builtin.string') then
+        exit go.reflect.String;
+
       if fRealType.IsArray then
         exit go.reflect.Array;
 

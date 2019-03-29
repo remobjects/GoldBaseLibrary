@@ -533,6 +533,7 @@ type
       lNew[slc] := elems;
     exit lNew;
   end;
+
   method append<T>(sl: Slice<T>; a: T; params elems: array of T): Slice<T>;
   begin
     var c := if elems = nil then 0 else IList<T>(elems).Count;
@@ -577,11 +578,7 @@ type
 
   method append(sl: Slice<byte>; elems: string): Slice<byte>;
   begin
-    {$IFDEF ISLAND}
-    exit append(sl, Encoding.UTF8.GetBytes(elems));
-    {$ELSE}
-    exit append(sl, System.Text.Encoding.UTF8.GetBytes(elems));
-    {$ENDIF}
+    exit append(sl, elems.Value);
   end;
 
   method close<T>(v: Channel<T>); public;
@@ -600,7 +597,6 @@ type
     if Object(v) = nil then exit -1;
     exit v.Capacity;
   end;
-
 
   method len(v: string): Integer; public;
   begin
@@ -712,7 +708,7 @@ type
     var lEnd := valueOrDefault(aEnd, aSlice.Length);
     if Integer(lEnd) > aSlice.Length then lEnd := aSlice.Length;
     if (lStart = 0) and (lEnd = aSlice.Length) then exit aSlice;
-    exit new string(new Slice<byte>(aSlice.Value, lStart, lEnd));
+    exit new string(new Slice<byte>(aSlice.Value, lStart, lEnd - lStart));
   end;
 
   method Slice<T>(aSlice: array of T; aStart, aEnd: nullable Integer): Slice<T>; public;
@@ -747,105 +743,16 @@ type
     raise new GoException(v);
   end;
 
-  operator implicit(aVal: string): Slice<Char>; public;
-  begin
-    // TODO
-    //exit new Slice<Char>(aVal.ToArray);
-    exit nil;
-  end;
-
-  operator implicit(aVal: string): Slice<go.builtin.rune>; public;
-  begin
-    // TODO
-    //exit new Slice<go.builtin.rune>(aVal.Select(a -> go.builtin.rune(a)).ToArray);
-    exit nil;
-  end;
-
-  operator implicit(aVal: byte): string; public;
-  begin
-    exit Char(aVal).ToString();
-  end;
-
-  operator Implicit(aVal: Slice<byte>): string; public;
-  begin
-    {$IFDEF ISLAND}
-    exit Encoding.UTF8.GetString(aVal.fArray, aVal.fStart, aVal.fCount);
-    {$ELSE}
-    exit System.Text.Encoding.UTF8.GetString(aVal.fArray, aVal.fStart, aVal.fCount);
-    {$ENDIF}
-  end;
-
   method recover: Object;
   begin
     exit nil;
   end;
-
-  operator Implicit(aVal: Slice<Char>): string; public;
-  begin
-    exit new string(aVal.ToArray());
-  end;
-
-  operator Implicit(aVal: Slice<rune>): string; public;
-  begin
-    exit new string(aVal.ToArray());
-  end;
-
-  operator Explicit(aVal: string): Slice<byte>; public;
-  begin
-    result := new Slice<byte>(aVal.Value);
-  end;
-
-  operator Explicit(aVal: PlatformString): Slice<byte>; public;
-  begin
-    {$IFDEF ISLAND}
-    exit new Slice<byte>(Encoding.UTF8.GetBytes(aVal));
-    {$ELSE}
-    exit new Slice<byte>(System.Text.Encoding.UTF8.GetBytes(aVal));
-    {$ENDIF}
-  end;
-
-  operator Explicit(aVal: PlatformString): go.net.http.htmlSig; public;
-  begin
-    var q: go.builtin.Slice<byte> := (aVal as go.builtin.Slice<byte>);
-    {$IF ISLAND}
-    // TODO
-    result := nil;
-    {$ELSEIF ECHOES}
-    exit new go.net.http.htmlSig(Value := System.Text.Encoding.UTF8.GetBytes(aVal));
-    {$ENDIF}
-    //exit new go.net.http.htmlSig(Value := q);
-  end;
-
-  {operator Explicit(aVal: string): go.net.http.htmlSig; public;
-  begin
-    var q: go.builtin.Slice<byte> := (aVal as go.builtin.Slice<byte>);
-    exit new go.net.http.htmlSig(Value := q);
-  end;}
 
   extension method ISequence<T>.GoldIterate: sequence of tuple of (Integer, T); iterator; public;
   begin
     for each el in self index n do
       yield (n, el);
   end;
-
-  type
-    System.StrExt = public extension class(string)
-    public
-      constructor(aVal: array of go.builtin.rune);
-      begin
-        {$IF ISLAND}
-        exit new string(aVal.Select(a -> :RemObjects.Elements.System.Char(a.Value)).ToArray());
-        {$ELSEIF ECHOES}
-        exit new string(aVal.Select(a -> :System.Char(a.Value)).ToArray());
-        {$ENDIF}
-      end;
-
-     method GoldIterate: sequence of tuple of (Integer, go.builtin.rune); iterator; public;
-      begin
-        for each el in self index n do
-          yield (n, go.builtin.rune(el[1]));
-      end;
-    end;
 
 type
   IntExtension = extension class(Integer, go.fmt.Stringer)

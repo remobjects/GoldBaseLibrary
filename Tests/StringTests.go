@@ -216,7 +216,11 @@ func DoStringsToLowerTest() bool {
 }
 
 func DoStringsToLowerSpecialTest() bool {
-	return strings.ToLowerSpecial(unicode.TurkishCase, "Önnek İş") == "önnek iş"
+	lString := strings.ToLowerSpecial(unicode.TurkishCase, "Önnek İş")
+	lToCompare := "önnek iş"
+	return lString == lToCompare
+
+	//return strings.ToLowerSpecial(unicode.TurkishCase, "Önnek İş") == "önnek iş"
 }
 
 func DoStringsToTitleTest() bool {
