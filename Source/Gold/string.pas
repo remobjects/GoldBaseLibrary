@@ -5,7 +5,6 @@ uses
   ;
 
 type
-  //{$IF NEWSTRING}
   string = public partial record
   public
     Value: Slice<byte>;
@@ -50,7 +49,7 @@ type
 
     class operator Implicit(aValue: string): Slice<byte>;
     begin
-      result := nil;
+      result := new Slice<byte>(aValue.Value);
     end;
 
     class operator Implicit(aValue: Char): string;
@@ -146,7 +145,6 @@ type
     end;
 
   end;
-  //{$ENDIF}
 
   operator Implicit(aVal: PlatformString): Slice<byte>; public;
   begin
