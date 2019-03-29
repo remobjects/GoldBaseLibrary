@@ -139,7 +139,7 @@ type
     begin
       self.Value := aValue;
     end;
-    method Error: go.builtin.string;
+    method Error: RemObjects.Elements.MicroTasks.Result<go.builtin.string>;
     begin
       exit Value.ToString;
     end;
@@ -155,7 +155,7 @@ type
     begin
       self.Value := aValue;
     end;
-    method Error: go.builtin.string;
+    method Error: RemObjects.Elements.MicroTasks.Result<go.builtin.string>;
     begin
       exit Value;
     end;
@@ -309,7 +309,7 @@ type
     begin
       Exception := err;
     end;
-    method Error: go.builtin.string; begin exit Exception.ToString; end;
+    method Error: RemObjects.Elements.MicroTasks.Result<go.builtin.string>; begin exit Exception.ToString; end;
     property Exception: Exception; readonly;
   end;
 
@@ -661,7 +661,7 @@ type
       fStr.Append(Char(b));
     end;
 
-    method Write(p: go.builtin.Slice<Byte>): tuple of (go.builtin.int, go.builtin.error);
+    method Write(p: go.builtin.Slice<Byte>): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int, go.builtin.error)>;
     begin
       fStr.Append(Encoding.UTF8.GetString(p.fArray, p.fStart, p.fCount));
       exit (p.fCount, nil);

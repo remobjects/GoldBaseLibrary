@@ -222,7 +222,7 @@ type
       exit (new MyFileInfo(path), nil);
     end;
 
-    method Close: go.builtin.error;
+    method Close: RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       disposeAndNil(fs);
 
@@ -254,7 +254,7 @@ type
       end;
     end;
 
-    method &Seek(offset: go.builtin.int64; whence: go.builtin.int): tuple of (go.builtin.int64, go.builtin.error);
+    method &Seek(offset: go.builtin.int64; whence: go.builtin.int): RemObjects.Elements.MicroTasks.Result<tuple of (go.builtin.int64, go.builtin.error)>;
     begin
       try
         exit (fs.Seek(offset, if whence = 0 then SeekOrigin.Begin else if whence = 2 then SeekOrigin.End else SeekOrigin.Current), nil);
@@ -436,7 +436,7 @@ end;
 type
 
   FileInfo = public interface
-    method Name: go.builtin.string;
+    method Name: RemObjects.Elements.MicroTasks.Result<go.builtin.string>;
     method Size: RemObjects.Elements.MicroTasks.Result<go.builtin.int64>;
     method Mode: RemObjects.Elements.MicroTasks.Result<FileMode>;
     method ModTime: RemObjects.Elements.MicroTasks.Result<go.time.Time>;
@@ -449,7 +449,7 @@ type
     fFile: String;
   public
     constructor(aFile: String); begin fFile := aFile; end;
-    method Name: go.builtin.string; begin exit Path.GetFilename(fFile); end;
+    method Name: RemObjects.Elements.MicroTasks.Result<go.builtin.string>; begin exit Path.GetFilename(fFile); end;
     method Size: RemObjects.Elements.MicroTasks.Result<go.builtin.int64>; begin {$IF ISLAND}exit new RemObjects.Elements.System.File(fFile).Length;{$ELSEIF ECHOES}exit new System.IO.FileInfo(fFile).Length;{$ENDIF} end;
     method Mode: RemObjects.Elements.MicroTasks.Result<FileMode>;
     begin

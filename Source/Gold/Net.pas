@@ -355,7 +355,7 @@ type
       fSock := aSock;
     end;
 
-    method Accept: tuple of (Conn, go.builtin.error);
+    method Accept: RemObjects.Elements.MicroTasks.Result<tuple of (Conn, go.builtin.error)>;
     begin
       try
         exit (new IPConn(fSock.Accept()), nil);
@@ -364,7 +364,7 @@ type
           exit (nil, go.Errors.new(e.Message));
       end;
     end;
-    method AcceptTCP: tuple of (TCPConn, go.builtin.error);
+    method AcceptTCP: RemObjects.Elements.MicroTasks.Result<tuple of (TCPConn, go.builtin.error)>;
     begin
       try
         exit (new TCPConn(fSock.Accept()), nil);
@@ -373,7 +373,7 @@ type
           exit (nil, go.Errors.new(e.Message));
       end;
     end;
-    method Close: go.builtin.error;
+    method Close: RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       try
         fSock.Close;
@@ -384,7 +384,7 @@ type
       end;
     end;
 
-    method Addr: Addr;
+    method Addr: RemObjects.Elements.MicroTasks.Result<Addr>;
     begin
       var lAddr := IPEndPoint(fSock.LocalEndPoint);
 
