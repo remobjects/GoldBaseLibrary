@@ -52,7 +52,7 @@ begin
   raise new NotImplementedException;
 end;
 
-method StartTrace: go.builtin.error;
+method StartTrace: RemObjects.Elements.MicroTasks.&Result<go.builtin.error>;
 begin
   exit go.Errors.new('Not supported');
 end;
@@ -578,7 +578,7 @@ type
     class method &Index(a, b: go.builtin.Slice<Byte>): RemObjects.Elements.MicroTasks.&Result<Integer>;
     begin
       if (await b.Len) > (await a.Len) then
-        exit RemObjects.Elements.MicroTasks.&Result<Integer>.FromResult(-1);
+        exit -1;
 
       for i: Integer := 0 to ((await a.Len) - (await b.Len)) do begin
         var lFound := true;
@@ -589,9 +589,9 @@ type
           end;
         end;
         if lFound then
-          exit RemObjects.Elements.MicroTasks.&Result<Integer>.FromResult(i);
+          exit i;
       end;
-      exit RemObjects.Elements.MicroTasks.&Result<Integer>.FromResult(-1);
+      exit -1;
     end;
 
     class method IndexString(a, b: String): Integer;

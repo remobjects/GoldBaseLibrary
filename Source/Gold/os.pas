@@ -541,7 +541,7 @@ type
       var res := await Open(fn);
       if res.Item2 <> nil then exit (nil, res.Item2);
       try
-        exit ReadAll(res.Item1);
+        exit await ReadAll(res.Item1);
       finally
         res.Item1.Close;
       end;
@@ -555,7 +555,7 @@ type
         var (res, i) := await r.Read(b);
         if i <> nil then begin
           ms.Write(b.fArray, 0, res);
-          if (i is go.errors.errorString) and (i.Error() = "EOF") then
+          if (i is go.errors.errorString) and ( i.Error().GetResult() = "EOF") then
             exit (ms.ToArray(), nil)
           else
             exit (ms.ToArray(), i);

@@ -739,7 +739,7 @@ begin
         s.Bind(new IPEndPoint(addr.AddressList[0], p[1]));
         s.Listen(10);
       end;
-    else exit (nil, go.Errors.new('only tcp, tcp4 and tcp6 supported'));
+    else exit (nil, await go.Errors.new('only tcp, tcp4 and tcp6 supported'));
     end;
     exit (new TCPListener(s), nil);
   except
@@ -819,11 +819,11 @@ type
     method DialContext(ctx: go.context.Context; network, address: string): RemObjects.Elements.MicroTasks.Result<tuple of (Conn, go.builtin.error)>;
     begin
       var p := go.strings.SplitN(address, ':', 2);
-      if p.Length <> 2 then exit (nil, go.Errors.new('Port missing; address/ip:port'));
+      if p.Length <> 2 then exit (nil, await go.Errors.new('Port missing; address/ip:port'));
       try
-        var lPort := coalesce(Reference<Resolver>.Get(self.Resolver), go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
+        var lPort := await coalesce(Reference<Resolver>.Get(self.Resolver), go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
         if lPort.Item2 <> nil then exit (nil, lPort.Item2);
-        var lHost := coalesce(Reference<Resolver>.Get(self.Resolver),go. net.Resolver.Default).LookupIPAddr(ctx, p[0]);
+        var lHost := await coalesce(Reference<Resolver>.Get(self.Resolver),go. net.Resolver.Default).LookupIPAddr(ctx, p[0]);
         if lHost.Item2 <> nil then exit (Nil, lPort.Item2);
 
         var lRep: IPEndPoint;
@@ -836,7 +836,7 @@ type
         case network of
           'tcp4': begin
               tcp4:;
-              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4.Value <> nil).Item2.IP.To4.Value.fArray), lPort[0]);
+              lRep := new IPEndPoint(new IPAddress(lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4().Value <> nil).Item2.IP.To4.Value.fArray), lPort[0]);
               lAF := AddressFamily.InterNetwork;
               lST := SocketType.Stream;
             end;
@@ -847,7 +847,7 @@ type
               lST := SocketType.Stream;
             end;
           'tcp': begin
-              if lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4.Value <> nil) <> nil then goto tcp4;
+              if lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4.GetResult().Value <> nil) <> nil then goto tcp4;
               goto tcp6;
           end;
           'udp4': begin
@@ -863,7 +863,7 @@ type
               lST := SocketType.Dgram;
           end;
           'udp': begin
-              if lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4.Value <> nil) <> nil then goto udp4;
+              if lHost.Item1.GetSequence.FirstOrDefault(a -> a.Item2.IP.To4.GetResult().Value <> nil) <> nil then goto udp4;
               goto udp6;
           end;
         else
