@@ -154,21 +154,14 @@ type
 
     method GetSequence: sequence of tuple of (Integer, rune); iterator;
     begin
-      // TODO optimize!!
-      {$IF ISLAND}
-      var lString := Encoding.UTF8.GetString(Value);
-      {$ELSEIF ECHOES}
-      var lString := System.Text.Encoding.UTF8.GetString(Value);
-      {$ENDIF}
-      var lRunes := new Slice<rune>(lString.Select(a -> rune(a)).ToArray());
-      for i: Integer := 0 to lRunes.Length -1 do
-        yield (i, lRunes[i]);
-    end;
-
-    method GoldIterate: sequence of tuple of (Integer, go.builtin.rune); iterator; public;
-    begin
-      for each el in self index n do
-        yield (n, go.builtin.rune(el[1]));
+      var i := 0;
+      var c := 0;
+      var r: rune;
+      while i < Value.Length do begin
+        r := UTF8ToString(Value, i, var c);
+        yield (i, r);
+        i := i + c;
+      end;
     end;
 
     method Name: string;
@@ -203,6 +196,71 @@ type
 
     class var fZero: string := new string();
     class property Zero: string := fZero; public;
+
+    class method UTF8ToString(aValue: array of byte; aIndex: Integer; var aSize: Integer): rune;
+    begin
+      if aValue = nil then new ArgumentNullException('aValue is nil');
+      var len := aValue.Length;
+      if len = 0 then exit 0;
+      var pos := aIndex;
+      var last := aValue.Length;
+      // skip BOM
+      if len>2 then begin
+        if (aValue[0] = $EF) and
+           (aValue[1] = $BB) and
+           (aValue[2] = $BF) then pos := 3;
+      end;
+        var ch := aValue[pos];
+        if ch and $F0 = $F0 then begin
+          //   11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+          if pos+4 > last then
+            raise new Exception('Bad UTF8 string');
+          var code := (((((
+                        uint32(ch and $7) shl 6 +
+                        (uint32(aValue[pos+1]) and $3F)) shl 6)+
+                        (uint32(aValue[pos+2]) and $3F)) shl 6)+
+                        (uint32(aValue[pos+3]) and $3F));
+          //if (code < $10000) or (code>$1FFFFF) then MalformedError;
+          var code1 := code - $10000;
+          //str.Append(Char($D800 or (code1 shr 10)));
+          //str.Append(Char($DC00 or (code1 and $3FF)));
+          aSize := 4;
+          exit 65; // TODO
+        end
+        else if (ch and $E0) = $E0 then begin
+          //1110xxxx 10xxxxxx 10xxxxxx
+          if pos+3 > last then
+            raise new Exception('Bad UTF8 string');
+          var code := ((
+                        uint32(ch and $F) shl 6 +
+                        (uint32(aValue[pos+1]) and $3F)) shl 6)+
+                        (uint32(aValue[pos+2]) and $3F);
+          if (code < $800) or (code > $FFFF) then
+            raise new Exception('Bad UTF8 string');
+          aSize := 3;
+          exit code;
+        end
+        else if (ch and $C0) = $C0 then begin
+          // 110xxxxx 10xxxxxx
+          if pos+2 > last then
+            raise new Exception('Bad UTF8 string');
+          var code :=
+                      uint32(ch and $1F) shl 6 +
+                      (uint32(aValue[pos+1]) and $3F);
+          if (code < $80) or (code >$7FF) then
+            raise new Exception('Bad UTF8 string');
+          aSize := 2;
+          exit code;
+        end
+        else begin
+          // 0xxxxxxx
+          var code := ch;
+          if (code < $0)  or (code > $7F) then
+            raise new Exception('Bad UTF8 string');
+          aSize := 1;
+          exit code;
+        end;
+    end;
 
     class method PlatformStringArrayToGoArray(aValue: array of PlatformString): array of go.builtin.string;
     begin
