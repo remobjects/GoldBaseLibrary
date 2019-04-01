@@ -624,12 +624,12 @@ type
     exit v.Length;
   end;
 
-  method Start(v: Action); public;
+  method Start(v: Func<RemObjects.Elements.MicroTasks.VoidResult>); public;
   begin
     {$IFDEF ISLAND}
-    Task.Run(v);
+    Task.Run(-> v());
     {$ELSE}
-    System.Threading.Tasks.Task.Factory.StartNew(v);
+    System.Threading.Tasks.Task.Factory.StartNew(-> v());
     {$ENDIF}
   end;
 

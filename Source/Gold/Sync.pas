@@ -184,7 +184,7 @@ type
     fLock: Object := new Object;
     {$ENDIF}
   public
-    method &Do(a: Func<RemObjects.Elements.MicroTasks.VoidResult>): RemObjects.Elements.MicroTasks.VoidResult; async;
+    method &Do(a: Func<RemObjects.Elements.MicroTasks.VoidResult>): RemObjects.Elements.MicroTasks.VoidResult;
     begin
       if fDone = 1 then exit;
       locking fLock do begin

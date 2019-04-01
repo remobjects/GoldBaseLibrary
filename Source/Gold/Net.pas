@@ -340,7 +340,7 @@ Listener = public interface
   method Addr: RemObjects.Elements.MicroTasks.&Result<Addr>;
 end;
 
-method FileListener(f: Reference<go.os.File>): tuple of (Listener, go.builtin.error);
+method FileListener(f: Reference<go.os.File>): RemObjects.Elements.MicroTasks.&Result<tuple of (Listener, go.builtin.error)>;
 begin
   exit (nil, await go.Errors.new('not supported'));
 end;
@@ -502,7 +502,7 @@ type
     method SetReadDeadline(tt: go.time.Time): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       {$IF ISLAND}
-      fSock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, tt.Nanosecond() / 1000);
+      fSock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, (await tt.Nanosecond()) / 1000);
       {$ELSEIF ECHOES}
       if tt = nil then
         fSock.ReceiveTimeout := 0
@@ -514,7 +514,7 @@ type
     method SetWriteDeadline(t: go.time.Time): RemObjects.Elements.MicroTasks.Result<go.builtin.error>;
     begin
       {$IF ISLAND}
-      fSock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, t.Nanosecond() / 1000);
+      fSock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, (await t.Nanosecond()) / 1000);
       {$ELSEIF ECHOES}
       if t = nil then
         fSock.SendTimeout := 0
