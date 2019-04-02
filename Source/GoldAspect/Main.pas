@@ -56,6 +56,12 @@ type
       new StandaloneStatement(
       new ProcValue(new TypeValue(Services.GetType('go.sync.atomic.__Global')), 'StoreInt32', [new FieldValue(lPar, lType, 'Value'), new DataValue(1)])
       ));
+
+      lType := Services.GetType('go.net.http.__Global');
+      var lMethod := lType.GetStaticMethods('http2isNoCachedConnError')[0] as IMethodDefinition;
+      lMethod.ReplaceMethodBody(
+         new ExitStatement(new BinaryValue(new ParamValue(0), new TypeValue(Services.GetType('go.net.http.http2noCachedConnError')), BinaryOperator.Is))
+      );
     end;
   end;
 
