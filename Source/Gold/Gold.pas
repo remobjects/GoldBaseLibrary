@@ -547,6 +547,7 @@ type
     exit lNew;
   end;
 
+/*
   method append<T>(sl: Slice<T>; elems: Object): Slice<T>;
   begin
     if elems is Slice<T> then
@@ -561,9 +562,9 @@ type
     for i: Integer := 0 to c -1 do
       lNew[i + slc] := IList<T>(elems)[i];
     exit new Slice<T>(lNew, 0, slc + c);
-  end;
+  end;*/
 
-  method appendSlice<T>(sl, elems: Slice<T>): Slice<T>;
+  method append<T>(sl, elems: Slice<T>): Slice<T>;
   begin
     var c := if elems = nil then 0 else elems.Length;
     var slc := if sl = nil then 0 else sl.Length;

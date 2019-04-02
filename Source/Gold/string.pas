@@ -71,9 +71,9 @@ type
     class operator Implicit(aValue: PlatformString): string;
     begin
       {$IF ISLAND}
-      result := new String(Encoding.UTF8.GetBytes(aValue));
+      result := new string(Encoding.UTF8.GetBytes(aValue));
       {$ELSEIF ECHOES}
-      result := new String(System.Text.Encoding.UTF8.GetBytes(aValue));
+      result := new string(System.Text.Encoding.UTF8.GetBytes(aValue));
       {$ENDIF}
     end;
 
@@ -122,7 +122,7 @@ type
       var lNew := new byte[aLeft.Length];
       for i: Integer := 0 to aLeft.Length - 1 do
         lNew[i] := aLeft[i];
-      result := new string(appendSlice(aLeft, aRight.Value));
+      result := new string(append(aLeft, aRight.Value));
     end;
 
     class operator &Add(aLeft: string; aRight: Integer): string;
