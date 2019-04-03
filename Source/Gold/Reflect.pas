@@ -232,8 +232,10 @@ type
         (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, lValue);
         {$ENDIF}
       end
-      else
+      else begin
         go.builtin.IReference(fPtr).Set(lValue);
+        fValue := lValue;
+      end;
     end;
 
     method InternalSet(aValue: Object); private;
@@ -667,8 +669,8 @@ type
       case fRealType.Code of
         TypeCodes.Boolean: result := go.reflect.Bool;
         TypeCodes.Char: result := go.reflect.Uint16;
-        TypeCodes.SByte: result := go.reflect.Uint8;
-        TypeCodes.Byte: result := go.reflect.Int8;
+        TypeCodes.SByte: result := go.reflect.Int8;
+        TypeCodes.Byte: result := go.reflect.UInt8;
         TypeCodes.Int16: result := go.reflect.Int16;
         TypeCodes.UInt16: result := go.reflect.Uint16;
         TypeCodes.Int32: result := go.reflect.Int32;
@@ -718,8 +720,8 @@ type
 
       case System.Type.GetTypeCode(fRealType) of
         TypeCode.Boolean: result := go.reflect.Bool;
-        TypeCode.Byte: result := go.reflect.Int8;
-        TypeCode.SByte: result := go.reflect.Uint8;
+        TypeCode.Byte: result := go.reflect.UInt8;
+        TypeCode.SByte: result := go.reflect.Int8;
         TypeCode.Int16: result := go.reflect.Int16;
         TypeCode.UInt16: result := go.reflect.Uint16;
         TypeCode.Int32: result := go.reflect.Int32;
