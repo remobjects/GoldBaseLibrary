@@ -39,7 +39,8 @@ function runEBuild(project, out, params)
 function compileGoBaseLibrary()
 {
 	msbuild.updateAssemblyVersion("../Source/Gold/Properties/AssemblyInfo.pas", elementsVersion);
-	runEBuild("../Source/GoBaseLibrary/Source/GoBaseLibrary.sln", "./Bin/Go", expand('--skip-targets:Island.Windows;Island.Linux;Island.Darwin.macOS --output-folder-uses-mode-name --output-folder-uses-sdk-name "--setting:AdditionalReferencePaths=$(bin);$(binIsland);$(gc)" --setting:Architecture=Legacy'));
+	//--skip-targets:Island.Windows;Island.Linux;Island.Darwin.macOS
+	runEBuild("../Source/GoBaseLibrary.sln", "./Bin/Go", "--output-folder-uses-mode-name --output-folder-uses-sdk-name --setting:Architecture=Legacy");
 	runHeaderParser("NET ", "Go_echoes.xml", "$(elements)/Bin/Go/Echoes/Go.dll");
 	file.remove("../Bin/Go/Echoes/GoldAspect.*"); // we don't need the Aspect
 }
