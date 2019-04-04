@@ -12,6 +12,7 @@ var ebuildIntermediatebasefolder = expand("c:\\ci\\EBuild-cache\\GBL\\$(CIBranch
 var eBuildReferenceFolderOverrides = '"--setting:ToffeeSDKFolder=$(elementsInTools)/Toffee/SDKs" "--setting:IslandSDKFolder=$(elementsInTools)/Island/SDKs" "--setting:AdditionalReferencePaths=$(elementsInTools)/References"';
 var eBuildStandardParams = expand("--setting:Device=True --setting:Simulator=True --setting:SimulatorArchitecture=Legacy --debug --intermediatebasefolder:$(ebuildIntermediatebasefolder)");
 
+var optionNoParallel = !ciOptions.contains("PARALLEL");
 var optionRebuild = ciOptions.contains("REBUILD");
 var optionClearCache = ciOptions.contains("CLEARCACHE") || optionRebuild;
 
