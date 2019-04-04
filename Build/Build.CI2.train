@@ -1,0 +1,51 @@
+include("$(Train)/ci2.train");
+
+var elementsInTools = expand("$(CIToolsBaseFolder)/Tools/Elements");
+
+var elementsVersionIni = ini.fromFile("$(elementsInTools)/VersionInfo.ini");
+var elementsVersion = elementsVersionIni.getValue("Options", "VERSION");
+
+var ebuildExe = expand('$(elementsInTools)/EBuild.exe');
+var ebuildIntermediatebasefolder = expand("c:\\ci\\EBuild-cache\\GBL\\$(CIBranch)");
+var eBuildReferenceFolderOverrides = '"--setting:ToffeeSDKFolder=$(elementsInTools)/Toffee/SDKs" "--setting:IslandSDKFolder=$(elementsInTools)/Island/SDKs" "--setting:AdditionalReferencePaths=$(elementsInTools)/References"';
+var eBuildStandardParams = expand("--setting:Device=True --setting:Simulator=True --setting:SimulatorArchitecture=Legacy --debug --intermediatebasefolder:$(ebuildIntermediatebasefolder)");
+
+if (optionClearCache)
+{
+	folder.remove(ebuildIntermediatebasefolder);
+}
+
+//
+// Methods
+//
+
+function runEBuild(project, out, params)
+{
+	var commandline = expand('--debug --no-copy-local $(eBuildReferenceFolderOverrides) $(eBuildStandardParams) "--out:$(out)" $(params)');
+	if (optionRebuild)
+		commandline = commandline+" --nocache";
+	if (!optionNoParallel)
+		commandline = commandline+" --parallel";
+	log(commandline);
+	ebuild.runCustomEBuild(path.resolve(ebuildExe), project, commandline);	
+}
+
+function compileGoBaseLibrary()
+{
+	if (!lLocal)
+	{
+		msbuild.updateAssemblyVersion("../Source/Gold/Properties/AssemblyInfo.pas", elementsVersion);
+		runEBuild("../Source/GoBaseLibrary/Source/GoBaseLibrary.sln", "./Bin/Go", expand('--skip-targets:Island.Windows;Island.Linux;Island.Darwin.macOS --output-folder-uses-mode-name --output-folder-uses-sdk-name "--setting:AdditionalReferencePaths=$(bin);$(binIsland);$(gc)" --setting:Architecture=Legacy'));
+		runHeaderParser("NET ", "Go_echoes.xml", "$(elements)/Bin/Go/Echoes/Go.dll");
+		file.remove("../Bin/Go/Echoes/GoldAspect.*"); // we don't need the Aspect
+	}
+}
+
+compileGoBaseLibrary();
+
+zipName = expand("$(CIReleaseFolder)/GoBaseLibrary.zip";
+zip.compress(zipName, "../Source", "*.*", true);
+
+var s3 = getSharedS3Bucket();
+s3.uploadFile(zipName, ciSharedPrefix);
+
