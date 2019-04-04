@@ -230,10 +230,12 @@ type
         raise new NotImplementedException();
         {$ELSEIF ECHOES}
         (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, lValue);
+        fValue := lValue;
         {$ENDIF}
       end
       else begin
-        go.builtin.IReference(fPtr).Set(lValue);
+        if fPtr is go.builtin.IReference then
+          go.builtin.IReference(fPtr).Set(lValue);
         fValue := lValue;
       end;
     end;
@@ -247,8 +249,10 @@ type
         (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, aValue);
         {$ENDIF}
       end
-      else
+      else begin
         go.builtin.IReference(fPtr).Set(aValue);
+        fValue := aValue;
+      end;
     end;
 
     method SetBytes(aval: go.builtin.Slice<Byte>);
@@ -331,13 +335,36 @@ type
       //TODO check other types?
     end;
 
+    method InternalGetValue: Object; private;
+    begin
+      var lType := TypeImpl(fType).RealType;
+      if lType.IsValueType then begin
+        {$IF ECHOES}
+        var lFieldValue := lType.GetField('Value');
+        {$ELSE}
+        var lFieldValue := lType.Fields.FirstOrDefault(a -> a.Name = 'Value');
+        {$ENDIF}
+        var lValue: Object;
+        if fExtended <> nil then begin
+          lValue := (fExtended as FieldInfo).GetValue(if fPtr is go.builtin.IReference then go.builtin.IReference(fPtr).Get else fPtr);
+        end
+        else
+          lValue := fValue;
+        exit lFieldValue.GetValue(lValue);
+      end
+      else
+        exit fValue;
+    end;
+
     method &Index(i: Integer): Value;
     begin
       var lKind := Kind;
       if (lKind <> &Array) and (lKind <> go.reflect.Slice) and (lKind <> go.reflect.String) then
         raise new Exception("Wrong type, need array, slice or string");
 
-      var lValue := if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue;
+      //var lValue := if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue;
+      var lValue := InternalGetValue;
+      // TODO need to create and return a reference here???
       case lKind of
         go.reflect.Slice:
           result := new Value(go.builtin.ISlice(lValue).getAtIndex(i));
@@ -574,6 +601,7 @@ type
   private
   assembly
     fRealType: PlatformType;
+    fTrueType: PlatformType; // used for ValueType
 
     method IsInteger: Boolean;
     begin
@@ -592,6 +620,10 @@ type
     constructor(aType: PlatformType);
     begin
       fRealType := aType;
+      if fRealType.IsValueType and (fRealType.GetConstructors().Count = 2) and (fRealType.GetFields().Count = 1) then
+        fTrueType := fRealType.GetFields()[0].FieldType
+      else
+        fTrueType := fRealType;
     end;
 
     method Align: Integer;
@@ -632,7 +664,11 @@ type
       {$IF ISLAND}
       result := fRealType.Methods.Count;
       {$ELSEIF ECHOES}
-      result := fRealType.GetMethods.Length;
+      // TODO!! do this in a better way
+      if Kind = go.reflect.Interface then
+        exit 0
+      else
+        result := fRealType.GetMethods.Length;
       {$ENDIF}
     end;
 
@@ -663,6 +699,8 @@ type
     method Kind: Kind;
     begin
       {$IF ISLAND}
+      // TODO valueType like Echoes!!
+      // TODO interfaces!!
       if (fRealType.GenericArguments <> nil) and (fRealType.GenericArguments.Count > 0) then
         exit go.reflect.Ptr;
 
@@ -693,32 +731,35 @@ type
         end;
       end;
       {$ELSEIF ECHOES}
-      if fRealType.AssemblyQualifiedName.StartsWith('go.builtin.string') then
+      if fTrueType.AssemblyQualifiedName.StartsWith('go.builtin.string') then
         exit go.reflect.String;
 
-      if fRealType.IsArray then
+      if fTrueType.IsArray then
         exit go.reflect.Array;
 
-      if fRealType.IsInterface then
+      if fTrueType.IsInterface then
         exit go.reflect.Interface;
 
       //if fRealType.IsPointer then
       //if fRealType is builtin.Reference<Object> then
       //if fRealType is sort.Interface then
         //exit reflect.Slice;
-      if fRealType.BaseType = TypeOf(System.MulticastDelegate) then
+      if fTrueType.BaseType = TypeOf(System.MulticastDelegate) then
         exit go.reflect.Func;
 
-      if fRealType.GenericTypeArguments.Length > 0 then
-        if fRealType.AssemblyQualifiedName.StartsWith('go.builtin.Slice') then
+      if fTrueType.GenericTypeArguments.Length > 0 then
+        if fTrueType.AssemblyQualifiedName.StartsWith('go.builtin.Slice') then
           exit go.reflect.Slice
         else
-          if fRealType.AssemblyQualifiedName.StartsWith('go.builtin.BidirectionalChannel') then
+          if fTrueType.AssemblyQualifiedName.StartsWith('go.builtin.BidirectionalChannel') then
             exit go.reflect.Map
           else
             exit go.reflect.Ptr;
 
-      case System.Type.GetTypeCode(fRealType) of
+      if fTrueType.FullName = 'System.Object' then
+        exit go.reflect.Interface;
+
+      case System.Type.GetTypeCode(fTrueType) of
         TypeCode.Boolean: result := go.reflect.Bool;
         TypeCode.Byte: result := go.reflect.UInt8;
         TypeCode.SByte: result := go.reflect.Int8;
@@ -751,7 +792,10 @@ type
         raise new Exception('nil type in AssignableTo');
 
       {$IF ISLAND OR ECHOES}
-      result := TypeImpl(u).fRealType.IsAssignableFrom(self.fRealType);
+      if Kind = go.reflect.interface then
+        result := true
+      else
+        result := TypeImpl(u).fRealType.IsAssignableFrom(self.fRealType);
       {$ENDIF}
     end;
 
@@ -804,7 +848,7 @@ type
         {$IF ISLAND}
         lRealType := fRealType.GenericArguments.FirstOrDefault;
         {$ELSEIF ECHOES}
-        lRealType := fRealType.GenericTypeArguments[0];
+        lRealType := fTrueType.GenericTypeArguments[0];
         {$ENDIF}
         exit new TypeImpl(lRealType);
       end;
@@ -1038,7 +1082,7 @@ type
       exit lFieldValue.GetValue(lValue);
     end
     else
-      exit aVal;
+      exit aVal.fValue;
   end;
 
   method Copy(dst: Value; src: Value): Integer;

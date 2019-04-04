@@ -346,6 +346,7 @@ begin
     exit;
     exit true;
   end;
+  exit true;
 end;
 
 end.
