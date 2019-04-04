@@ -16,10 +16,9 @@ if (useLatestCompiler)
 {
 	var elementsShared = "./elements-shared";
 	folder.create(elementsShared);
-	var elementsBin = expand("$(elementsShared)/MacDistro");
+	var elementsBin = expand("$(elementsShared)/ZipDistro");
 
-	export("CIBranch", "develop");
-	var sharedElementsS3 = findClosestSharedS3Folder("elements");
+	var sharedElementsS3 = findClosestSharedS3FolderWithBranch("elements", "develop");
 	extractZipFromS3(getSharedS3Bucket(), sharedElementsS3, "FullZipDistro.zip", elementsBin);
 	file.copy("$(elementsBin)/References/Echoes/NET", elementsBin);
 	var ebuildExe = expand('$(elementsBin)/EBuild.exe');
@@ -57,7 +56,7 @@ function compileGoBaseLibrary()
 {
 	msbuild.updateAssemblyVersion("../Source/Gold/Properties/AssemblyInfo.pas", elementsVersion);
 	//--skip-targets:Island.Windows;Island.Linux;Island.Darwin.macOS
-	runEBuild("../Source/GoBaseLibrary.sln", "./Bin/Go", "--output-folder-uses-mode-name --output-folder-uses-sdk-name --setting:Architecture=Legacy");
+	runEBuild("../Source/GoBaseLibrary.sln", "../Bin/Go", "--output-folder-uses-mode-name --output-folder-uses-sdk-name --setting:Architecture=Legacy");
 	file.remove("../Bin/Go/Echoes/GoldAspect.*"); // we don't need the Aspect
 }
 
