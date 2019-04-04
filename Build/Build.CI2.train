@@ -18,6 +18,7 @@ if (useLatestCompiler)
 	folder.create(elementsShared);
 	var elementsBin = expand("$(elementsShared)/MacDistro");
 
+	export("CIBranch", "develop");
 	var sharedElementsS3 = findClosestSharedS3Folder("elements");
 	extractZipFromS3(getSharedS3Bucket(), sharedElementsS3, "FullZipDistro.zip", elementsBin);
 	var ebuildExe = expand('$(elementsBin)/EBuild.exe');
