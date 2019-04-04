@@ -7,14 +7,29 @@ var elementsInTools = expand("$(CIToolsBaseFolder)/Tools/Elements");
 var elementsVersion = getVersionNumberFromGlobalIni("Elements");
 export("CIVersionNumber", elementsVersion);
 
-var ebuildExe = expand('$(elementsInTools)/EBuild.exe');
-var ebuildIntermediatebasefolder = expand("c:\\ci\\EBuild-cache\\GBL\\$(CIBranch)");
-var eBuildReferenceFolderOverrides = '"--setting:ToffeeSDKFolder=$(elementsInTools)/Toffee SDKs" "--setting:IslandSDKFolder=$(elementsInTools)/Island SDKs" "--setting:AdditionalReferencePaths=$(elementsInTools)/References"';
-var eBuildStandardParams = expand("--setting:Device=True --setting:Simulator=True --setting:SimulatorArchitecture=Legacy --debug --intermediatebasefolder:$(ebuildIntermediatebasefolder)");
-
 var optionNoParallel = !ciOptions.contains("PARALLEL");
 var optionRebuild = ciOptions.contains("REBUILD");
 var optionClearCache = ciOptions.contains("CLEARCACHE") || optionRebuild;
+var useLatestCompiler = true;
+
+if (useLatestCompiler)
+{
+	var elementsShared = "./elements-shared";
+	folder.create(elementsShared);
+	var elementsBin = expand("$(elementsShared)/MacDistro");
+
+	var sharedElementsS3 = findClosestSharedS3Folder("elements");
+	extractZipFromS3(getSharedS3Bucket(), sharedElementsS3, "FullZipDistro.zip", elementsBin);
+	var ebuildExe = expand('$(elementsBin)/EBuild.exe');
+	var eBuildReferenceFolderOverrides = '"--setting:ToffeeSDKFolder=$(elementsBin)/Toffee SDKs" "--setting:IslandSDKFolder=$(elementsBin)/Island SDKs" "--setting:AdditionalReferencePaths=$(elementsInTools)/References"';
+}
+else
+{
+	var ebuildExe = expand('$(elementsInTools)/EBuild.exe');
+	var eBuildReferenceFolderOverrides = '"--setting:ToffeeSDKFolder=$(elementsInTools)/Toffee SDKs" "--setting:IslandSDKFolder=$(elementsInTools)/Island SDKs" "--setting:AdditionalReferencePaths=$(elementsInTools)/References"';
+}
+var ebuildIntermediatebasefolder = expand("c:\\ci\\EBuild-cache\\GBL\\$(CIBranch)");
+var eBuildStandardParams = expand("--setting:Device=True --setting:Simulator=True --setting:SimulatorArchitecture=Legacy --debug --intermediatebasefolder:$(ebuildIntermediatebasefolder)");
 
 if (optionClearCache)
 {
