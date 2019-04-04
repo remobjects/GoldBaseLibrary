@@ -2,8 +2,10 @@ include("$(Train)/ci2.train");
 
 var elementsInTools = expand("$(CIToolsBaseFolder)/Tools/Elements");
 
-var elementsVersionIni = ini.fromFile("$(elementsInTools)/VersionInfo.ini");
-var elementsVersion = elementsVersionIni.getValue("Options", "VERSION");
+//var elementsVersionIni = ini.fromFile("$(elementsInTools)/VersionInfo.ini");
+//var elementsVersion = elementsVersionIni.getValue("Options", "VERSION");
+var elementsVersion = getVersionNumberFromGlobalIni("Elements");
+export("CIVersionNumber", elementsVersion);
 
 var ebuildExe = expand('$(elementsInTools)/EBuild.exe');
 var ebuildIntermediatebasefolder = expand("c:\\ci\\EBuild-cache\\GBL\\$(CIBranch)");
@@ -43,7 +45,7 @@ function compileGoBaseLibrary()
 
 compileGoBaseLibrary();
 
-zipName = expand("$(CIReleaseFolder)/GoBaseLibrary.zip";
+zipName = expand("$(CIReleaseFolder)/GoBaseLibrary.zip");
 zip.compress(zipName, "../Source", "*.*", true);
 
 var s3 = getSharedS3Bucket();
