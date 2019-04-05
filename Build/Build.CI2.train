@@ -63,7 +63,7 @@ function compileGoBaseLibrary()
 compileGoBaseLibrary();
 
 zipName = expand("$(CIReleaseFolder)/GoBaseLibrary.zip");
-zip.compress(zipName, "../Source", "*.*", true);
+zip.compress(zipName, "../Bin", "*.*", true);
 
 var s3 = getSharedS3Bucket();
 s3.uploadFile(zipName, ciSharedPrefix);
