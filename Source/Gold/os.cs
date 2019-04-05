@@ -24,8 +24,8 @@ namespace go.crypto {
 			{
 				#if ECHOES
 				var lRoots = go.crypto.x509.NewCertPool();
-				X509Store lStore = new X509Store(StoreName.Root);
-				lStore.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+				X509Store lStore = new X509Store(StoreName.Root, StoreLocation.LocalMachine);
+				lStore.Open(OpenFlags.ReadOnly);
 				foreach(var lCertificate in lStore.Certificates)
 				{
 					var lRawCert = lCertificate.RawData;
@@ -34,7 +34,7 @@ namespace go.crypto {
 					var (lNewCert, lErr) = go.crypto.x509.ParseCertificate(lRawCert);
 					if (lErr == null)
 					{
-						//lRoots.AddCert(lNewCert);
+						lRoots.AddCert(lNewCert);
 					}
 				}
 				lStore.Close();
