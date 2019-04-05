@@ -9,7 +9,6 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <AllowUnsafeCode>True</AllowUnsafeCode>
     <TargetFramework>.NETFramework4.5</TargetFramework>
-    <GenerateDebugInfo>True</GenerateDebugInfo>
     <RootNamespace>go</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -22,6 +21,7 @@
     <CpuType>anycpu</CpuType>
     <RuntimeVersion>v25</RuntimeVersion>
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
+    <GenerateDebugInfo>True</GenerateDebugInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <OutputPath>.\Bin\Release</OutputPath>
