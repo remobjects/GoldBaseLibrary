@@ -1,4 +1,7 @@
 ﻿using go.builtin;
+#if ECHOES
+using System.Security.Cryptography.X509Certificates;
+#endif
 
 
 namespace go.math {
@@ -19,8 +22,27 @@ namespace go.crypto {
 		public partial class __Global {
 			public static (Reference<CertPool>, go.builtin.error) loadSystemRoots()
 			{
+				#if ECHOES
+				var lRoots = go.crypto.x509.NewCertPool();
+				X509Store lStore = new X509Store(StoreName.Root);
+				lStore.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+				foreach(var lCertificate in lStore.Certificates)
+				{
+					var lRawCert = lCertificate.RawData;
+					var lNewData = new byte[lRawCert.Length];
+					Array.Copy(lRawCert, lNewData, lRawCert.Length);
+					var (lNewCert, lErr) = go.crypto.x509.ParseCertificate(lRawCert);
+					if (lErr == null)
+					{
+						//lRoots.AddCert(lNewCert);
+					}
+				}
+				lStore.Close();
 
+				return (lRoots, null);
+				#else
 				return (null, null);
+				#endif
 			}
 		}
 		public partial class Certificate {
