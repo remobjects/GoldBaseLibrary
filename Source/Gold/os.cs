@@ -46,8 +46,38 @@ namespace go.crypto {
 			}
 		}
 		public partial class Certificate {
-			public (Slice<Slice<Reference<crypto.x509.Certificate>>>, go.builtin.error) systemVerify(Reference<go.crypto.x509.VerifyOptions> opts) {
+			public (Slice<Slice<Reference<crypto.x509.Certificate>>>, go.builtin.error) systemVerify(Reference<go.crypto.x509.VerifyOptions> opts)
+			{
+				#if ECHOES
+				var lHasDNSName = (opts != null) && (opts.DNSName.Length > 0);
+				X509Certificate2 lCert = new X509Certificate2(this.Raw);
+				X509Chain lChain = new X509Chain();
+				if (lChain.Build(lCert))
+				{
+					var lResult = new Slice<Slice<Reference<go.crypto.x509.Certificate>>>(1);
+					var lNewChain = new Slice<Reference<go.crypto.x509.Certificate>>(lChain.ChainElements.Count);
+					for (var i = 0; i < lChain.ChainElements.Count; i++)
+					{
+						var lCertificate = lChain.ChainElements[i].Certificate;
+						var lRawCert = lCertificate.RawData;
+						var lNewData = new byte[lRawCert.Length];
+						Array.Copy(lRawCert, lNewData, lRawCert.Length);
+						var (lNewCert, lErr) = go.crypto.x509.ParseCertificate(lRawCert);
+						if (lErr == null)
+						{
+							lNewChain[i] = lNewCert;
+						}
+					}
+					lResult[0] = lNewChain;
+					return(lResult, null);
+				}
+				else
+				{
+					return(null, go.errors.New("Wrong certificate"));
+				}
+				#else
 				return (null, null);
+				#endif
 			}
 		}
 	}

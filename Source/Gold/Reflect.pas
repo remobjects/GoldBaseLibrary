@@ -394,9 +394,11 @@ type
       {$IF ISLAND}
       raise new NotImplementedException;
       {$ELSEIF ECHOES}
-      var lFields := System.Reflection.TypeInfo(TypeImpl(fType).fRealType).DeclaredFields.ToArray();
+      var lFields := System.Reflection.TypeInfo(TypeImpl(fType).fTrueType).DeclaredFields.ToArray();
+      var lValue := InternalGetValue;
       //result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), fPtr, lFields[i]);
-      result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), new go.builtin.Reference<Object>(fValue), lFields[i]);
+      //result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), new go.builtin.Reference<Object>(fValue), lFields[i]);
+      result := new Value(lFields[i].GetValue(lValue), new TypeImpl(lFields[i].FieldType), new go.builtin.Reference<Object>(lValue), lFields[i]);
       {$ENDIF}
     end;
 
@@ -642,9 +644,9 @@ type
         raise new Exception('Wrong method index');
 
       {$IF ISLAND}
-      result := new MethodImpl(fRealType.Methods.ToList[i]);
+      result := new MethodImpl(fTrueType.Methods.ToList[i]);
       {$ELSEIF ECHOES}
-      result := new MethodImpl(fRealType.GetMethods[i]);
+      result := new MethodImpl(fTrueType.GetMethods[i]);
       {$ENDIF}
     end;
 
@@ -652,9 +654,9 @@ type
     begin
       var lMethod: &PlatformMethod;
       {$IF ISLAND}
-      lMethod := fRealType.Methods.Where(a->a.Name = s).FirstOrDefault;
+      lMethod := fTrueType.Methods.Where(a->a.Name = s).FirstOrDefault;
       {$ELSEIF ECHOES}
-      lMethod := System.Array.Find(fRealType.GetMethods, a->a.Name = s);
+      lMethod := System.Array.Find(fTrueType.GetMethods, a->a.Name = s);
       {$ENDIF}
       exit(new MethodImpl(lMethod), lMethod ≠ nil);
     end;
@@ -662,13 +664,13 @@ type
     method NumMethod: Integer;
     begin
       {$IF ISLAND}
-      result := fRealType.Methods.Count;
+      result := fTrueType.Methods.Count;
       {$ELSEIF ECHOES}
       // TODO!! do this in a better way
       if Kind = go.reflect.Interface then
         exit 0
       else
-        result := fRealType.GetMethods.Length;
+        result := fTrueType.GetMethods.Length;
       {$ENDIF}
     end;
 
@@ -859,11 +861,11 @@ type
       if Kind ≠ go.reflect.Struct then
         raise new Exception('Wrong type, it needs to be struct');
       {$IF ISLAND}
-      var lFields := fRealType.Fields.ToList();
+      var lFields := fTrueType.Fields.ToList();
       if i ≥ lFields.Count then
         raise new IndexOutOfRangeException('Index out of range');
       {$ELSEIF ECHOES}
-      var lFields := System.Reflection.TypeInfo(fRealType).DeclaredFields.ToArray();
+      var lFields := System.Reflection.TypeInfo(fTrueType).DeclaredFields.ToArray();
       if i ≥ lFields.Length then
         raise new IndexOutOfRangeException('Index out of range');
       {$ENDIF}
@@ -886,9 +888,9 @@ type
     begin
       var lField: &PlatformField;
       {$IF ISLAND}
-      lField := fRealType.Fields.Where(a->a.Name = aname).FirstOrDefault;
+      lField := fTrueType.Fields.Where(a->a.Name = aname).FirstOrDefault;
       {$ELSEIF ECHOES}
-      lField := System.Reflection.TypeInfo(fRealType).DeclaredFields.Where(a->a.Name = aname).FirstOrDefault;
+      lField := System.Reflection.TypeInfo(fTrueType).DeclaredFields.Where(a->a.Name = aname).FirstOrDefault;
       {$ENDIF}
       exit(new StructFieldImpl(lField), lField ≠ nil);
     end;
@@ -897,9 +899,9 @@ type
     begin
       var lField: &PlatformField;
       {$IF ISLAND}
-      lField := fRealType.Fields.Where(match).FirstOrDefault;
+      lField := fTrueType.Fields.Where(match).FirstOrDefault;
       {$ELSEIF ECHOES}
-      lField := TypeInfo(fRealType).DeclaredFields.Where((a) -> match(a.Name)).FirstOrDefault;
+      lField := TypeInfo(fTrueType).DeclaredFields.Where((a) -> match(a.Name)).FirstOrDefault;
       {$ENDIF}
       exit(new StructFieldImpl(lField), lField ≠ nil);
     end;
@@ -938,9 +940,9 @@ type
       if Kind ≠ go.reflect.Struct then
         raise new Exception('Wrong type, it needs to be struct');
       {$IF ISLAND}
-      result := fRealType.Fields.Count;
+      result := fTrueType.Fields.Count;
       {$ELSEIF ECHOES}
-      result := System.Reflection.TypeInfo(fRealType).DeclaredFields.ToArray().Length;
+      result := System.Reflection.TypeInfo(fTrueType).DeclaredFields.ToArray().Length;
       {$ENDIF}
     end;
 
@@ -949,10 +951,10 @@ type
       if Kind ≠ go.reflect.Func then
         raise new Exception('Wrong type, it needs to be Func');
       {$IF ISLAND}
-      var lMethod := fRealType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
+      var lMethod := fTrueType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
       result := lMethod.Arguments.Count;
       {$ELSEIF ECHOES}
-      var lMethod := fRealType.GetMethod('Invoke');
+      var lMethod := fTrueType.GetMethod('Invoke');
       result := lMethod.GetParameters().Length;
       {$ENDIF}
     end;
@@ -962,10 +964,10 @@ type
       if Kind ≠ go.reflect.Func then
         raise new Exception('Wrong type, it needs to be Func');
       {$IF ISLAND}
-      var lMethod := fRealType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
+      var lMethod := fTrueType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
       result := lMethod.Arguments.Count;
       {$ELSEIF ECHOES}
-      var lMethod := fRealType.GetMethod('Invoke');
+      var lMethod := fTrueType.GetMethod('Invoke');
       if System.Reflection.TypeInfo(lMethod.ReturnType).IsGenericType and (System.Reflection.TypeInfo(lMethod.ReturnType).FullName.StartsWith('System.Tuple')) then
         result := System.Reflection.TypeInfo(lMethod.ReturnType).DeclaredFields.ToArray().Length
       else
@@ -978,13 +980,13 @@ type
       if Kind ≠ go.reflect.Func then
         raise new Exception('Wrong type, it needs to be Func');
       {$IF ISLAND}
-      var lMethod := fRealType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
+      var lMethod := fTrueType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
       var lParameters := lMethod.Arguments.ToList();
       if lParameters.Count ≤ i then
         raise new IndexOutOfRangeException('Index out of range');
       result := new TypeImpl(lParameters[i].Type);
       {$ELSEIF ECHOES}
-      var lMethod := fRealType.GetMethod('Invoke');
+      var lMethod := fTrueType.GetMethod('Invoke');
       var lTotal := 1;
       if System.Reflection.TypeInfo(lMethod.ReturnType).IsGenericType and (System.Reflection.TypeInfo(lMethod.ReturnType).FullName.StartsWith('System.Tuple')) then
         lTotal := System.Reflection.TypeInfo(lMethod.ReturnType).DeclaredFields.ToArray().Length;
