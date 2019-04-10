@@ -622,10 +622,15 @@ type
     constructor(aType: PlatformType);
     begin
       fRealType := aType;
+      {$IF ISLAND}
+      // TODO
+      fTrueType := fRealType;
+      {$ELSEIF ECHOES}
       if fRealType.IsValueType and (fRealType.GetConstructors().Count = 2) and (fRealType.GetFields().Count = 1) then
         fTrueType := fRealType.GetFields()[0].FieldType
       else
         fTrueType := fRealType;
+      {$ENDIF}
     end;
 
     method Align: Integer;
