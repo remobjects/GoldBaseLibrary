@@ -44,7 +44,7 @@ begin
   exit 0;
 end;
 
-var GOOS: String := {$IFDEF ECHOES}Environment.OSVersion.Platform.ToString{$ELSE}Environment.OSName{$ENDIF};
+var GOOS: String := {$IFDEF ECHOES}if Environment.OSVersion.Platform.ToString.ToLower.Contains('win32nt') then 'windows' else Environment.OSVersion.Platform.ToString{$ELSE}Environment.OSName{$ENDIF};
 var GOARCH: String := 'unknown';
 
 method GOROOT: String;
