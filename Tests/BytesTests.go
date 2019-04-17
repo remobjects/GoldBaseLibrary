@@ -2,7 +2,6 @@
 
 import (
 	"bytes"
-	"buffer"
 	"encoding/base64"
 	"fmt"
 )
