@@ -109,7 +109,7 @@ func DoBCDEncrypterTest() string {
 	// using crypto/hmac) before being decrypted in order to avoid creating
 	// a padding oracle.
 
-	fmt.Printf("%s\n", ciphertext[aes.BlockSize:])
+	// fmt.Printf("%s\n", ciphertext[aes.BlockSize:]) // TODO!!
 
 	return string(ciphertext[aes.BlockSize:])
 }
@@ -175,14 +175,14 @@ func NewCFBEncrypter() string {
 	// It's important to remember that ciphertexts must be authenticated
 	// (i.e. by using crypto/hmac) as well as being encrypted in order to
 	// be secure.
-	fmt.Printf("%x\n", ciphertext)
+	// fmt.Printf("%x\n", ciphertext) TODO
 
 
 	stream2 := cipher.NewCFBDecrypter(block, iv)
 
 	// XORKeyStream can work in-place if the two arguments are the same.
 	stream2.XORKeyStream(ciphertext, ciphertext)
-	fmt.Printf("%s", ciphertext[aes.BlockSize:])
+	//fmt.Printf("%s", ciphertext[aes.BlockSize:]) TODO
 
 	return string(ciphertext[aes.BlockSize:])
 }

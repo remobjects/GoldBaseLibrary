@@ -1,4 +1,7 @@
 ﻿using go.builtin;
+#if ECHOES
+using System.Security.Cryptography.X509Certificates;
+#endif
 
 
 namespace go.math {
@@ -19,13 +22,62 @@ namespace go.crypto {
 		public partial class __Global {
 			public static (Reference<CertPool>, go.builtin.error) loadSystemRoots()
 			{
+				#if ECHOES
+				var lRoots = go.crypto.x509.NewCertPool();
+				X509Store lStore = new X509Store(StoreName.Root, StoreLocation.LocalMachine);
+				lStore.Open(OpenFlags.ReadOnly);
+				foreach(var lCertificate in lStore.Certificates)
+				{
+					var lRawCert = lCertificate.RawData;
+					var lNewData = new byte[lRawCert.Length];
+					Array.Copy(lRawCert, lNewData, lRawCert.Length);
+					var (lNewCert, lErr) = go.crypto.x509.ParseCertificate(lRawCert);
+					if (lErr == null)
+					{
+						lRoots.AddCert(lNewCert);
+					}
+				}
+				lStore.Close();
 
+				return (lRoots, null);
+				#else
 				return (null, null);
+				#endif
 			}
 		}
 		public partial class Certificate {
-			public (Slice<Slice<Reference<crypto.x509.Certificate>>>, go.builtin.error) systemVerify(Reference<go.crypto.x509.VerifyOptions> opts) {
+			public (Slice<Slice<Reference<crypto.x509.Certificate>>>, go.builtin.error) systemVerify(Reference<go.crypto.x509.VerifyOptions> opts)
+			{
+				#if ECHOES
+				var lHasDNSName = (opts != null) && (opts.DNSName.Length > 0);
+				X509Certificate2 lCert = new X509Certificate2(this.Raw);
+				X509Chain lChain = new X509Chain();
+				if (lChain.Build(lCert))
+				{
+					var lResult = new Slice<Slice<Reference<go.crypto.x509.Certificate>>>(1);
+					var lNewChain = new Slice<Reference<go.crypto.x509.Certificate>>(lChain.ChainElements.Count);
+					for (var i = 0; i < lChain.ChainElements.Count; i++)
+					{
+						var lCertificate = lChain.ChainElements[i].Certificate;
+						var lRawCert = lCertificate.RawData;
+						var lNewData = new byte[lRawCert.Length];
+						Array.Copy(lRawCert, lNewData, lRawCert.Length);
+						var (lNewCert, lErr) = go.crypto.x509.ParseCertificate(lRawCert);
+						if (lErr == null)
+						{
+							lNewChain[i] = lNewCert;
+						}
+					}
+					lResult[0] = lNewChain;
+					return(lResult, null);
+				}
+				else
+				{
+					return(null, go.errors.New("Wrong certificate"));
+				}
+				#else
 				return (null, null);
+				#endif
 			}
 		}
 	}
@@ -46,11 +98,11 @@ namespace go.path
 {
 	namespace filepath {
 
-		static Slice<String> splitList(string s) {
+		static Slice<go.builtin.string> splitList(string s) {
 			#if ECHOES
-			return new builtin.Slice<String>(s.Split(new[] {go.os.PathListSeparator}, StringSplitOptions.RemoveEmptyEntries));
+			return go.builtin.string.PlatformStringArrayToGoSlice(s.Split(new[] {go.os.PathListSeparator}, StringSplitOptions.RemoveEmptyEntries));
 			#else
-			return new builtin.Slice<String>(s.Split(go.os.PathListSeparator, true));
+			return go.builtin.string.PlatformStringArrayToGoSlice(s.Split(go.os.PathListSeparator, true));
 			#endif
 		}
 
@@ -58,7 +110,7 @@ namespace go.path
 			return (null, go.errors.New("Not supported"));
 		}
 
-		static String join(Slice<string> s) {
+		static go.builtin.string join(Slice<go.builtin.string> s) {
 			return String.Join(go.os.PathSeparator.ToString(), s.ToArray());
 		}
 
@@ -153,23 +205,23 @@ namespace go.os {
 
 	namespace exec {
 		public partial class __Global {
-			public static (string, builtin.error) LookPath(String file) {
+			public static (go.builtin.string, builtin.error) LookPath(go.builtin.string file) {
 				#if ECHOES
 				if (System.IO.File.Exists(file)) return (file, null);
-				foreach (var el in go.os.Getenv("PATH").Split(System.IO.Path.PathSeparator)) {
-					var p = System.IO.Path.Combine(el, file);
+				foreach (var el in go.strings.Split(go.os.Getenv("PATH"), System.IO.Path.PathSeparator)) {
+					var p = System.IO.Path.Combine(el[1], file);
 					if (System.IO.File.Exists(p)) return (p, null);
 				}
 				#else
 				if (new RemObjects.Elements.System.File(file).Exists()) return (file, null);
-				foreach (var el in go.os.Getenv("PATH").Split(Path.DirectorySeparatorChar)) {
-					var p = RemObjects.Elements.System.Path.Combine(el, file);
+				foreach (var el in go.strings.Split(go.os.Getenv("PATH"), Path.DirectorySeparatorChar)) {
+					var p = RemObjects.Elements.System.Path.Combine(el[1], file);
 					if (new RemObjects.Elements.System.File(p).Exists()) return (p, null);
 				}
 				#endif
-				return (null, go.errors.New("Could not find file"));
+				return ("", go.errors.New("Could not find file"));
 			}
-			public static Reference<Cmd> Command(string name, params string[] args) {
+			public static Reference<Cmd> Command(string name, params go.builtin.string[] args) {
 				return new Cmd {
 					Path = name,
 					Args = args
@@ -180,8 +232,8 @@ namespace go.os {
 		[ValueTypeSemantics]
 		public partial class Cmd {
 			public string Path;
-			public Slice<string> Args;
-			public Slice<string> Env;
+			public Slice<go.builtin.string> Args;
+			public Slice<go.builtin.string> Env;
 			public string Dir;
 			public io.Reader Stdin;
 			public io.Writer Stdout;
