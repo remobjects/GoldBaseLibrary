@@ -9,7 +9,6 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <AllowUnsafeCode>True</AllowUnsafeCode>
     <TargetFramework>.NETFramework4.5</TargetFramework>
-    <GenerateDebugInfo>True</GenerateDebugInfo>
     <RootNamespace>go</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -22,6 +21,7 @@
     <CpuType>anycpu</CpuType>
     <RuntimeVersion>v25</RuntimeVersion>
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
+    <GenerateDebugInfo>True</GenerateDebugInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <OutputPath>.\Bin\Release</OutputPath>
@@ -31,6 +31,10 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Target)' == 'Echoes' ">
     <Mode>Echoes</Mode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Echoes.Standard' ">
+    <Mode>Echoes</Mode>
+    <TargetFramework>.NETStandard2.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Target)' == 'Island.Windows' ">
     <Mode>Island</Mode>
@@ -63,6 +67,9 @@
     </Reference>
     <Reference Include="Echoes">
       <Target>Echoes</Target>
+    </Reference>
+    <Reference Include="Echoes">
+      <Target>Echoes.Standard</Target>
     </Reference>
     <Reference Include="rt">
       <Target>Cooper</Target>
