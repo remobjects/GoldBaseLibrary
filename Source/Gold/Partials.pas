@@ -469,8 +469,8 @@ type
   go.net.http.gzipReader = public partial class(go.io.ReadCloser);
 
 
-  go.crypto.tls.fixedNonceAEAD = public partial class(go.crypto.cipher.AEAD);
-  go.crypto.tls.xorNonceAEAD = public partial class(go.crypto.cipher.AEAD);
+  go.crypto.tls.fixedNonceAEAD = public partial class(go.crypto.cipher.AEAD, go.crypto.tls.aead);
+  go.crypto.tls.xorNonceAEAD = public partial class(go.crypto.cipher.AEAD, go.crypto.tls.aead);
   go.crypto.tls.cthWrapper = public partial class(go.hash.Hash);
 
   go.net.http.fileTransport = public partial class(go.net.http.RoundTripper);
