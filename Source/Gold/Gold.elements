@@ -580,6 +580,27 @@
     <Compile Include="math\cmplx\tan.go" />
     <Compile Include="crypto.rand.pas" />
     <Compile Include="string.pas" />
+    <Compile Include="testing\internal\testdeps\deps.go" />
+    <Compile Include="testing\iotest\logger.go" />
+    <Compile Include="testing\iotest\reader.go" />
+    <Compile Include="testing\iotest\writer.go" />
+    <Compile Include="testing\quick\quick.go" />
+    <Compile Include="testing\allocs.go" />
+    <Compile Include="testing\allocs_test.go" />
+    <Compile Include="testing\benchmark.go" />
+    <Compile Include="testing\benchmark_test.go" />
+    <Compile Include="testing\cover.go" />
+    <Compile Include="testing\export_test.go" />
+    <Compile Include="testing\helper_test.go" />
+    <Compile Include="testing\helperfuncs_test.go" />
+    <Compile Include="testing\match.go" />
+    <Compile Include="testing\match_test.go" />
+    <Compile Include="testing\sub_test.go" />
+    <Compile Include="testing\testing.go" />
+    <Compile Include="testing\testing_test.go" />
+    <Compile Include="internal\race\doc.go" />
+    <Compile Include="internal\race\norace.go" />
+    <Compile Include="testing\example.go" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

@@ -10,6 +10,7 @@ type
   uint16 = public RemObjects.Elements.System.UInt16;
   uintptr = public RemObjects.Elements.System.NativeUInt;
   intptr = public RemObjects.Elements.System.NativeInt;
+  go.unsafe.Pointer = public RemObjects.Elements.System.NativeUInt;
   [AliasSemantics]
   int64 = public partial record
   public
