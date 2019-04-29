@@ -601,6 +601,8 @@
     <Compile Include="internal\race\doc.go" />
     <Compile Include="internal\race\norace.go" />
     <Compile Include="testing\example.go" />
+    <Compile Include="Runtime.pprof.pas" />
+    <Compile Include="Runtime.debug.pas" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

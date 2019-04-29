@@ -72,6 +72,36 @@ begin
   exit (0,'',0, false);
 end;
 
+method GOMAXPROCS(n: Integer): Integer;
+begin
+  result := 0;
+end;
+
+method Goexit;
+begin
+  // TODO
+end;
+
+method GC;
+begin
+  // TODO
+end;
+
+method Gosched;
+begin
+  // TODO
+end;
+
+method SetBlockProfileRate(rate: Integer);
+begin
+end;
+
+method SetMutexProfileFraction(rate: Integer): Integer;
+begin
+end;
+
+var MemProfileRate: Integer := 0;
+
 type
   go.builtin.__Global = public partial class
   private
@@ -672,6 +702,8 @@ type
   [valueTypeSemantics]
   MemStats = public partial class
   public
+    Mallocs: go.builtin.uint64;
+    TotalAlloc: go.builtin.uint64;
   end;
 
   method ReadMemStats(m: go.builtin.Reference<MemStats>);

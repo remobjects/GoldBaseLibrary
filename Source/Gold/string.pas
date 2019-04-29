@@ -87,6 +87,11 @@ type
       result := new string([aValue]);
     end;
 
+    class operator Implicit(aValue: string): go.builtin.error;
+    begin
+      exit go.Errors.new(aValue);
+    end;
+
     class operator Equal(a, b: string): Boolean;
     begin
       result := go.bytes.Compare(a.Value, b.Value) = 0;

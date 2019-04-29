@@ -701,4 +701,8 @@ begin
   //exit (nil, errors.New('Not implemented'));
 end;
 
+method Pipe: tuple of (r: go.builtin.Reference<File>, w: go.builtin.Reference<File>, err: go.builtin.error);
+begin
+end;
+
 end.
