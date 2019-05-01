@@ -597,6 +597,8 @@
     <Compile Include="Runtime.pprof.pas" />
     <Compile Include="Runtime.debug.pas" />
     <Compile Include="internal\testlog\log.go" />
+    <Compile Include="testing\internal\testdeps\deps.go" />
+    <Compile Include="TestingHelper.pas" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

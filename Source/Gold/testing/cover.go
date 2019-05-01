@@ -1,4 +1,4 @@
-// Copyright 2013 The Go Authors. All rights reserved.
+﻿// Copyright 2013 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -49,7 +49,9 @@ func Coverage() float64 {
 	var n, d int64
 	for _, counters := range cover.Counters {
 		for i := range counters {
-			if atomic.LoadUint32(&counters[i]) > 0 {
+			//if atomic.LoadUint32(&counters[i]) > 0 {
+			if counters[i] > 0 {
+			// elements change
 				n++
 			}
 			d++
@@ -94,7 +96,9 @@ func coverReport() {
 		for i := range counts {
 			stmts := int64(blocks[i].Stmts)
 			total += stmts
-			count = atomic.LoadUint32(&counts[i]) // For -mode=atomic.
+			//count = atomic.LoadUint32(&counts[i]) // For -mode=atomic.
+			count = counts[i] // For -mode=atomic.
+			// elements change
 			if count > 0 {
 				active += stmts
 			}
