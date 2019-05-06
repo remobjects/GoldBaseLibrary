@@ -10,6 +10,14 @@ type
   private
     class method DiscoverTestsFrom(aType: System.Type): List<MethodInfo>;
     begin
+      writeLn('-----------------Discover: ' + aType.FullName);
+      result := new List<MethodInfo>();
+      for each lMethod in aType.GetMethods do begin
+        if lMethod.Name.StartsWith('Test') then begin
+          result.Add(lMethod);
+          writeLn(lMethod.Name);
+        end;
+      end;
 
     end;
 
@@ -23,10 +31,10 @@ type
       var lAllTypes := &Assembly.GetExecutingAssembly().GetTypes();
       var lTests: List<MethodInfo>;
       for each lType in lAllTypes do begin
-        if lType.Name.EndsWith('.__Global') then begin
+        if lType.FullName.EndsWith('.__Global') then begin
           lTests := DiscoverTestsFrom(lType);
           if lTests.Count > 0 then
-            AllTests.Add(lType.Name, lTests);
+            AllTests.Add(lType.FullName, lTests);
         end;
       end;
       {$ENDIF}
