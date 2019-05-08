@@ -21,7 +21,10 @@ type
   public
     method Next(): tuple of (Frame, Boolean);
     begin
-      exit (nil, false);
+      //exit (nil, false);
+      var lFrame := new Frame();
+      lFrame.Function := '';
+      exit (lFrame, false);
     end;
   end;
   [ValueTypeSemantics]
@@ -31,7 +34,7 @@ type
 
 method Callers(&skip: Integer; pc: go.builtin.Slice<go.builtin.uintptr>): Integer;
 begin
-  exit 0;
+  exit 1;
 end;
 
 method CallersFrames(acallers: go.builtin.Slice<go.builtin.uintptr>): go.builtin.Reference<Frames>;
@@ -74,7 +77,7 @@ end;
 
 method GOMAXPROCS(n: Integer): Integer;
 begin
-  result := 0;
+  result := 1;
 end;
 
 method Goexit;

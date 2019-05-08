@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -201,7 +201,7 @@
 // which code runs on the main thread. To support these and other cases,
 // if a test file contains a function:
 //
-//	func TestMain(m *testing.M)
+//    func TestMain(m *testing.M)
 //
 // then the generated test will call TestMain(m) instead of running the tests
 // directly. TestMain runs in the main goroutine and can do whatever setup
@@ -212,10 +212,10 @@
 //
 // A simple implementation of TestMain is:
 //
-//	func TestMain(m *testing.M) {
-//		// call flag.Parse() here if TestMain uses flags
-//		os.Exit(m.Run())
-//	}
+//    func TestMain(m *testing.M) {
+//        // call flag.Parse() here if TestMain uses flags
+//        os.Exit(m.Run())
+//    }
 //
 package testing
 
@@ -499,8 +499,8 @@ type TB interface {
 	private()
 }
 
-var _ TB = (*T)(nil)
-var _ TB = (*B)(nil)
+//var _ TB = (*T)(nil)
+//var _ TB = (*B)(nil)
 
 // T is a type passed to Test functions to manage test state and support formatted test logs.
 // Logs are accumulated during execution and dumped to standard output when done.
@@ -574,9 +574,9 @@ func (c *common) FailNow() {
 	//
 	// A previous version of this code said:
 	//
-	//	c.duration = ...
-	//	c.signal <- c.self
-	//	runtime.Goexit()
+	//    c.duration = ...
+	//    c.signal <- c.self
+	//    runtime.Goexit()
 	//
 	// This previous version duplicated code (those lines are in
 	// tRunner no matter what), but worse the goroutine teardown
