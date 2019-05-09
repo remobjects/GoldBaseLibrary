@@ -541,7 +541,7 @@ type
     var lNew := new T[slc + c + 1];
     for i: Integer := 0 to slc -1 do
       lNew[i] := sl[i];
-      lNew[slc + 1] := a;
+    lNew[slc] := a;
     for i: Integer := 0 to c -1 do
       lNew[i + slc + 1] := IList<T>(elems)[i];
     exit lNew;
