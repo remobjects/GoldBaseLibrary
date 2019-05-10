@@ -27,19 +27,27 @@
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="gc" />
+    <Reference Include="gc">
+      <HintPath>C:\Program Files (x86)\RemObjects Software\Elements\Island\SDKs\Windows\Windows 10.0.17763.0\i386\gc.fx</HintPath>
+    </Reference>
     <Reference Include="Island" />
-    <Reference Include="rtl" />
-    <Reference Include="Gold">
-      <HintPath>..\Source\Gold\Bin\Debug\Windows\i386\Gold.fx</HintPath>
+    <Reference Include="rtl">
+      <HintPath>C:\Program Files (x86)\RemObjects Software\Elements\Island\SDKs\Windows\Windows 10.0.17763.0\i386\rtl.fx</HintPath>
     </Reference>
     <Reference Include="EUnit" />
     <Reference Include="GoldAspect">
-      <HintPath>..\Source\GoldAspect\Bin\Debug\GoldAspect.dll</HintPath>
+      <HintPath>C:\dev\ro\GoldBaseLibrary\Source\GoldAspect\Bin\Debug\GoldAspect.dll</HintPath>
+    </Reference>
+    <Reference Include="Elements" />
+    <Reference Include="Go">
+      <HintPath>..\Source\Gold\Bin\Debug\Go.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.go" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Island.Windows.targets" />
   <Import Project="GoldLibrary.Tests.Shared.projitems" Label="Shared" />
