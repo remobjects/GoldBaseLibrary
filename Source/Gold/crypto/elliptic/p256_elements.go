@@ -1,4 +1,4 @@
-// Copyright 2013 The Go Authors. All rights reserved.
+﻿// Copyright 2013 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -652,7 +652,11 @@ func p256Mul(out, in, in2 *[p256Limbs]uint32) {
 }
 
 func p256Assign(out, in *[p256Limbs]uint32) {
-	*out = *in
+	for i := 0; i < p256Limbs; i++ {
+		out[i] = in[i]
+	}
+	// elements change
+	//*out = *in
 }
 
 // p256Invert calculates |out| = |in|^{-1}

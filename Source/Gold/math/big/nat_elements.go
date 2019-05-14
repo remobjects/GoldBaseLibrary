@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -363,7 +363,9 @@ func karatsuba(z, x, y nat) {
 //       no 3-operand slice expressions in this code (or worse,
 //       reflect-based operations to the same effect).
 func alias(x, y nat) bool {
-	return cap(x) > 0 && cap(y) > 0 && &x[0:cap(x)][cap(x)-1] == &y[0:cap(y)][cap(y)-1]
+	//return cap(x) > 0 && cap(y) > 0 && &x[0:cap(x)][cap(x)-1] == &y[0:cap(y)][cap(y)-1]
+	// elements change
+	return x.fArray == y.fArray
 }
 
 // addAt implements z += x<<(_W*i); z must be long enough.

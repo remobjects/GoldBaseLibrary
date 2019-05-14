@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProductVersion>3.5</ProductVersion>
@@ -413,7 +413,7 @@
     <Compile Include="crypto\ecdsa\ecdsa.go" />
     <Compile Include="crypto\elliptic\elliptic.go" />
     <Compile Include="crypto\elliptic\p224.go" />
-    <Compile Include="crypto\elliptic\p256.go" />
+    <Compile Include="crypto\elliptic\p256_elements.go" />
     <Compile Include="crypto\elliptic\p256_generic.go" />
     <Compile Include="crypto\hmac\hmac.go" />
     <Compile Include="crypto\internal\randutil\randutil.go" />
@@ -474,7 +474,7 @@
     <Compile Include="math\big\int.go" />
     <Compile Include="math\big\intconv.go" />
     <Compile Include="math\big\intmarsh.go" />
-    <Compile Include="math\big\nat.go" />
+    <Compile Include="math\big\nat_elements.go" />
     <Compile Include="math\big\natconv.go" />
     <Compile Include="math\big\prime.go" />
     <Compile Include="math\big\rat.go" />
