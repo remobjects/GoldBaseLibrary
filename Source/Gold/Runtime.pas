@@ -87,7 +87,12 @@ type
       var q := new DateTime(DateTime.UtcNow.Ticks - dtbase.Ticks);
       exit (Int64(q.Ticks / DateTime.TicksPerSecond), (q.Ticks * 100) mod 1 000 000 000, rtl.GetTickCount  * 100);
       {$ELSEIF ISLAND AND POSIX}
-      // TODO
+      var ts: rtl.__struct_timespec;
+      rtl.clock_gettime(rtl.CLOCK_MONOTONIC, @ts);
+      var lTickCount := ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+
+      var q := new DateTime(DateTime.UtcNow.Ticks - dtbase.Ticks);
+      exit (Int64(q.Ticks / DateTime.TicksPerSecond), (q.Ticks * 100) mod 1 000 000 000, lTickCount  * 100);
       {$ELSEIF ECHOES}
       var q := DateTime.UtcNow - dtbase;
       exit (Int64(q.TotalSeconds), (q.Ticks * 100) mod 1 000 000 000, System.Diagnostics.StopWatch.GetTimestamp  * 100);
@@ -343,7 +348,9 @@ type
       if lInterval < 0 then
         lInterval := go.math.MaxInt32;
       {$IF ISLAND}
-      // TODO
+      lTimer.Repeat := false;
+      lTimer.Interval := lInterval;
+      lTimer.Elapsed := (a)-> begin aTimer.f(aTimer.arg, aTimer.seq); end;
       {$ELSEIF ECHOES}
       lTimer.AutoReset := false;
       lTimer.Interval := lInterval;
