@@ -8,9 +8,18 @@ uses
 type
   Kind = public type go.builtin.uint;
   ChanDir = public type go.builtin.int;
+  PlatformEnumerator = {$IF ISLAND}IEnumerator<KeyValuePair<go.reflect.Value, go.reflect.Value>>{$ELSEIF ECHOES}System.Collections.Generic.Dictionary<go.reflect.Value, go.reflect.Value>.Enumerator{$ENDIF};
+
   [ValueTypeSemantics]
   MapIter = public class
+  private
+    fEnumerator: PlatformEnumerator;
   public
+    {constructor(aEnum: PlatformEnumerator);
+    begin
+      fEnumerator := aEnum;
+    end;}
+
     method Key: Value; begin raise new NotImplementedException; end;
     method Value: Value; begin raise new NotImplementedException; end;
     method Next: Boolean; begin raise new NotImplementedException; end;

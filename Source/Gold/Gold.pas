@@ -30,7 +30,7 @@ type
   {$IFDEF ECHOES}
     fDict: System.Collections.Generic.Dictionary<K, V> := new System.Collections.Generic.Dictionary<K, V>;
   {$ELSEIF ISLAND}
-  fDict: Dictionary<K, V> := new Dictionary<K, V>;
+    fDict: Dictionary<K, V> := new Dictionary<K, V>;
   {$ELSE}
   {$ERROR NOT SUPPORTED}
   {$ENDIF}
@@ -178,6 +178,15 @@ type
       exit fDict.GetSequence.Select(a -> (a.Key, a.Value));
       {$ELSE}
       exit fDict.Select(a -> (a.Key, a.Value));
+      {$ENDIF}
+    end;
+
+    method GetReflectSequence: sequence of tuple of(go.reflect.Value, go.reflect.Value);
+    begin
+      {$IFDEF ISLAND}
+      exit fDict.GetSequence.Select(a -> (new go.reflect.Value(a.Key), new go.reflect.Value(a.Value)));
+      {$ELSE}
+      exit fDict.Select(a -> (new go.reflect.Value(a.Key), new go.reflect.Value(a.Value)));
       {$ENDIF}
     end;
   end;
