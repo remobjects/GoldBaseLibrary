@@ -180,8 +180,9 @@ type
 
     method GetHashCode: Integer; override; public;
     begin
-      // TODO optimize
+      // TODO optimize ECHOES
       {$IF ISLAND}
+      result := Utilities.CalcHash(^Void(@Value.fArray[0]), Value.Length);
       {$ELSEIF ECHOES}
       result := System.Text.Encoding.UTF8.GetString(Value).GetHashCode();
       {$ENDIF}
@@ -340,12 +341,11 @@ type
   begin
     var q: go.builtin.Slice<byte> := (aVal as go.builtin.Slice<byte>);
     {$IF ISLAND}
-    // TODO
+    exit new go.net.http.htmlSig(Value := Encoding.UTF8.GetBytes(aVal));
     result := nil;
     {$ELSEIF ECHOES}
     exit new go.net.http.htmlSig(Value := System.Text.Encoding.UTF8.GetBytes(aVal));
     {$ENDIF}
-    //exit new go.net.http.htmlSig(Value := q);
   end;
 
   operator Implicit(aVal: Slice<byte>): string; public;
@@ -365,7 +365,7 @@ type
   operator Implicit(aVal: PlatformString): array of byte; public;
   begin
     {$IF ISLAND}
-    // TODO
+    result := Encoding.UTF8.GetBytes(aVal);
     {$ELSEIF ECHOES}
     result := System.Text.Encoding.UTF8.GetBytes(aVal);
     {$ENDIF}
