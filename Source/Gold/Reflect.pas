@@ -8,7 +8,7 @@ uses
 type
   Kind = public type go.builtin.uint;
   ChanDir = public type go.builtin.int;
-  PlatformEnumerator = {$IF ISLAND}IEnumerator<KeyValuePair<go.reflect.Value, go.reflect.Value>>{$ELSEIF ECHOES}System.Collections.Generic.Dictionary<go.reflect.Value, go.reflect.Value>.Enumerator{$ENDIF};
+  PlatformEnumerator = {$IF ISLAND}IEnumerator<tuple of (go.reflect.Value, go.reflect.Value)>{$ELSEIF ECHOES}System.Collections.Generic.IEnumerator<tuple of (go.reflect.Value, go.reflect.Value)>{$ENDIF};
 
   [ValueTypeSemantics]
   MapIter = public class
@@ -22,12 +22,12 @@ type
 
     method Key: Value;
     begin
-      result := fEnumerator.Current.Key;
+      result := fEnumerator.Current[0];
     end;
 
     method Value: Value;
     begin
-      result := fEnumerator.Current.Value;
+      result := fEnumerator.Current[1];
     end;
 
     method Next: Boolean;
@@ -176,8 +176,8 @@ type
       if fType.Kind ≠ Map then
         raise new Exception('Wrong type, need a map');
 
-      //var lIter := new MapIter(go.builtin.IMap(fValue).GetReflectSequence().GetEnumerator());
-      //result := new go.builtin.Reference<MapIter>(lIter);
+      var lIter := new MapIter(go.builtin.IMap(fValue).GetReflectSequence().GetEnumerator());
+      result := new go.builtin.Reference<MapIter>(lIter);
     end;
 
     method MapKeys: go.builtin.Slice<Value>;
