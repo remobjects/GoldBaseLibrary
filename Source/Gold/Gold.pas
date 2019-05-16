@@ -24,8 +24,12 @@ type
     end;
   end;
 
+  IMap = public interface
+    method GetReflectSequence: sequence of tuple of(go.reflect.Value, go.reflect.Value);
+  end;
+
   [ValueTypeSemantics]
-  Map<K, V> = public class
+  Map<K, V> = public class(IMap)
   private
   {$IFDEF ECHOES}
     fDict: System.Collections.Generic.Dictionary<K, V> := new System.Collections.Generic.Dictionary<K, V>;

@@ -15,14 +15,25 @@ type
   private
     fEnumerator: PlatformEnumerator;
   public
-    {constructor(aEnum: PlatformEnumerator);
+    constructor(aEnum: PlatformEnumerator);
     begin
       fEnumerator := aEnum;
-    end;}
+    end;
 
-    method Key: Value; begin raise new NotImplementedException; end;
-    method Value: Value; begin raise new NotImplementedException; end;
-    method Next: Boolean; begin raise new NotImplementedException; end;
+    method Key: Value;
+    begin
+      result := fEnumerator.Current.Key;
+    end;
+
+    method Value: Value;
+    begin
+      result := fEnumerator.Current.Value;
+    end;
+
+    method Next: Boolean;
+    begin
+      result := fEnumerator.MoveNext;
+    end;
   end;
 
 const
@@ -162,7 +173,11 @@ type
 
     method MapIter: go.builtin.Reference<MapIter>;
     begin
-      raise new NotImplementedException;
+      if fType.Kind ≠ Map then
+        raise new Exception('Wrong type, need a map');
+
+      //var lIter := new MapIter(go.builtin.IMap(fValue).GetReflectSequence().GetEnumerator());
+      //result := new go.builtin.Reference<MapIter>(lIter);
     end;
 
     method MapKeys: go.builtin.Slice<Value>;
