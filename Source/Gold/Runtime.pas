@@ -86,6 +86,8 @@ type
       {$IF ISLAND AND WINDOWS}
       var q := new DateTime(DateTime.UtcNow.Ticks - dtbase.Ticks);
       exit (Int64(q.Ticks / DateTime.TicksPerSecond), (q.Ticks * 100) mod 1 000 000 000, rtl.GetTickCount  * 100);
+      {$ELSEIF ISLAND AND DARWIN}
+      // TODO
       {$ELSEIF ISLAND AND POSIX}
       var ts: rtl.__struct_timespec;
       rtl.clock_gettime(rtl.CLOCK_MONOTONIC, @ts);

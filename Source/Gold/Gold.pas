@@ -26,6 +26,8 @@ type
 
   IMap = public interface
     method GetReflectSequence: sequence of tuple of(go.reflect.Value, go.reflect.Value);
+    method GetReflectValue(aKey: go.reflect.Value): go.reflect.Value;
+    method GetReflectKeys: Slice<go.reflect.Value>;
   end;
 
   [ValueTypeSemantics]
@@ -193,6 +195,20 @@ type
       exit fDict.Select(a -> (new go.reflect.Value(a.Key), new go.reflect.Value(a.Value)));
       {$ENDIF}
     end;
+
+    method GetReflectValue(aKey: go.reflect.Value): go.reflect.Value;
+    begin
+      result := new go.reflect.Value(Item[K(aKey.fValue)]);
+    end;
+
+    method GetReflectKeys: Slice<go.reflect.Value>;
+    begin
+      {$IFDEF ISLAND}
+      exit fDict.GetSequence.Select(a -> (new go.reflect.Value(a.Key))).ToArray;
+      {$ELSE}
+      exit fDict.Select(a -> (new go.reflect.Value(a.Key))).ToArray;
+      {$ENDIF}
+    end;
   end;
 
 {$IFDEF ISLAND}
@@ -206,6 +222,7 @@ type
     method getLen: Integer;
     method setLen: Integer;
     method setFrom(aSrc: ISlice);
+    method getReflectSlice(i: Integer; j: Integer): go.reflect.Value;
   end;
 
 
@@ -358,6 +375,11 @@ type
     method Len: go.builtin.int;
     begin
       result := fCount;
+    end;
+
+    method getReflectSlice(i: Integer; j: Integer): go.reflect.Value;
+    begin
+      result := new go.reflect.Value(new Slice<T>(fArray, i, j-i));
     end;
 
     method Less(a, b: go.builtin.int): go.builtin.bool;

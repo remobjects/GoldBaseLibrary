@@ -166,9 +166,12 @@ type
       raise new NotImplementedException();
     end;
 
-    method MapIndex(key: Value): tuple of (Value);
+    method MapIndex(key: Value): Value;
     begin
-      raise new NotImplementedException();
+      if fType.Kind ≠ Map then
+        raise new Exception('Wrong type, need a map');
+
+      result := go.builtin.IMap(fValue).GetReflectValue(key);
     end;
 
     method MapIter: go.builtin.Reference<MapIter>;
@@ -182,7 +185,10 @@ type
 
     method MapKeys: go.builtin.Slice<Value>;
     begin
-      raise new NotImplementedException();
+      if fType.Kind ≠ Map then
+        raise new Exception('Wrong type, need a map');
+
+      result := go.builtin.IMap(fValue).GetReflectKeys();
     end;
 
     method CanInterface(): Boolean;
@@ -193,7 +199,18 @@ type
 
     method Slice(i, j: Integer): Value;
     begin
-      raise new NotImplementedException;
+      case fType.Kind of
+        go.reflect.Slice:
+          exit go.builtin.ISlice(fValue).getReflectSlice(i, j);
+
+        go.reflect.String: begin
+          var lString := fValue as go.builtin.string;
+          exit new Value(new go.builtin.Slice<Byte>(lString.Value, i, j-i));
+        end;
+
+        else
+          raise new Exception('Wrong type, need a Map or String');
+      end;
     end;
 
     method Pointer(): UInt64;
@@ -250,12 +267,8 @@ type
           raise new Exception('Can not set object');
 
       if fExtended <> nil then begin // struct field
-        {$IF ISLAND}
-        raise new NotImplementedException();
-        {$ELSEIF ECHOES}
         (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, lValue);
         fValue := lValue;
-        {$ENDIF}
       end
       else begin
         if fPtr is go.builtin.IReference then
