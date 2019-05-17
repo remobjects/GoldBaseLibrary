@@ -280,11 +280,7 @@ type
     method InternalSet(aValue: Object); private;
     begin
       if fExtended <> nil then begin // struct field
-        {$IF ISLAND}
-        raise new NotImplementedException();
-        {$ELSEIF ECHOES}
         (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, aValue);
-        {$ENDIF}
       end
       else begin
         go.builtin.IReference(fPtr).Set(aValue);
