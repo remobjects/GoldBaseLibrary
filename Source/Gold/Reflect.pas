@@ -10,6 +10,9 @@ type
   ChanDir = public type go.builtin.int;
   PlatformEnumerator = {$IF ISLAND}IEnumerator<tuple of (go.reflect.Value, go.reflect.Value)>{$ELSEIF ECHOES}System.Collections.Generic.IEnumerator<tuple of (go.reflect.Value, go.reflect.Value)>{$ENDIF};
 
+  SliceCtor = procedure(aInst: Object; aCount: Integer);
+  SliceObjectCtor = procedure(aInst: Object; aObject: Object);
+
   [ValueTypeSemantics]
   MapIter = public class
   private
@@ -425,12 +428,12 @@ type
     method Field(i: Integer): Value;
     begin
       {$IF ISLAND}
-      raise new NotImplementedException;
+      var lFields := TypeImpl(fType).fTrueType.Fields.ToArray();
+      var lValue := InternalGetValue;
+      result := new Value(lFields[i].GetValue(lValue), new TypeImpl(lFields[i].Type), new go.builtin.Reference<Object>(lValue), lFields[i]);
       {$ELSEIF ECHOES}
       var lFields := System.Reflection.TypeInfo(TypeImpl(fType).fTrueType).DeclaredFields.ToArray();
       var lValue := InternalGetValue;
-      //result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), fPtr, lFields[i]);
-      //result := new Value(lFields[i].GetValue(fValue), new TypeImpl(lFields[i].FieldType), new go.builtin.Reference<Object>(fValue), lFields[i]);
       result := new Value(lFields[i].GetValue(lValue), new TypeImpl(lFields[i].FieldType), new go.builtin.Reference<Object>(lValue), lFields[i]);
       {$ENDIF}
     end;
@@ -450,12 +453,15 @@ type
     method Addr: Value;
     begin
       result := new go.builtin.Reference<Value>(fValue);
-      //raise new NotImplementedException;
     end;
 
     method MapRange() :go.builtin.Reference<MapIter>;
     begin
-      raise new NotImplementedException;
+      if fType.Kind ≠ Map then
+        raise new Exception('Wrong type, need a map');
+
+      var lIter := new MapIter(go.builtin.IMap(fValue).GetReflectSequence().GetEnumerator());
+      result := new go.builtin.Reference<MapIter>(lIter);
     end;
 
     method &Interface: Object;
@@ -576,7 +582,9 @@ type
       PkgPath := '';
       var lTag := '';
       {$IF ISLAND}
-      raise new NotImplementedException();
+      var lAttrs := aField.Attributes.Where(b->b.Type = TypeOf(go.builtin.TagAttribute)).ToList;
+      if (lAttrs ≠ nil) and (lAttrs.Count > 0) then
+        lTag := go.builtin.PlatformString(lAttrs[0].Arguments[0].Value);
       {$ELSEIF ECHOES}
       var lAttrs := aField.GetCustomAttributes(true);
       if lAttrs.Length > 0 then begin
@@ -656,8 +664,12 @@ type
     begin
       fRealType := aType;
       {$IF ISLAND}
-      // TODO
-      fTrueType := fRealType;
+      var lCtors := fRealType.Methods.Where(a -> (MethodFlags.Constructor in a.Flags)).ToArray;
+      var lFields := fRealType.Fields.ToArray;
+      if fRealType.IsValueType and (lCtors.Count = 2) and (lFields.Count = 1) then
+        fTrueType := lFields[0].Type
+      else
+        fTrueType := fRealType;
       {$ELSEIF ECHOES}
       if fRealType.IsValueType and (fRealType.GetConstructors().Count = 2) and (fRealType.GetFields().Count = 1) then
         fTrueType := fRealType.GetFields()[0].FieldType
@@ -702,7 +714,10 @@ type
     method NumMethod: Integer;
     begin
       {$IF ISLAND}
-      result := fTrueType.Methods.Count;
+      if Kind = go.reflect.Interface then
+        exit 0
+      else
+        result := fTrueType.Methods.Count;
       {$ELSEIF ECHOES}
       // TODO!! do this in a better way
       if Kind = go.reflect.Interface then
@@ -739,12 +754,27 @@ type
     method Kind: Kind;
     begin
       {$IF ISLAND}
-      // TODO valueType like Echoes!!
-      // TODO interfaces!!
-      if (fRealType.GenericArguments <> nil) and (fRealType.GenericArguments.Count > 0) then
-        exit go.reflect.Ptr;
+      writeLn(fTrueType.Name);
+      if fTrueType.Name.Contains('go.builtin.string') then
+        exit go.reflect.String;
 
-      case fRealType.Code of
+      if (fTrueType.GenericArguments <> nil) and (fTrueType.GenericArguments.Count > 0) then begin
+        if fTrueType.Name.Contains('go.builtin.Slice') then
+          exit go.reflect.Slice;
+
+        if fTrueType.Name.Contains('go.builtin.BidirectionalChannel') then
+          exit go.reflect.Map
+        else
+          exit go.reflect.Ptr;
+      end;
+
+      if fTrueType.Name.Contains('<Projection>') then
+        exit go.reflect.Func;
+
+      if fTrueType = TypeOf(Object) then
+        exit go.reflect.Interface;
+
+      case fTrueType.Code of
         TypeCodes.Boolean: result := go.reflect.Bool;
         TypeCodes.Char: result := go.reflect.Uint16;
         TypeCodes.SByte: result := go.reflect.Int8;
@@ -761,7 +791,7 @@ type
         TypeCodes.IntPtr: result := go.reflect.Ptr;
         TypeCodes.String: result := go.reflect.String;
         TypeCodes.None: begin
-          case (fRealType.Flags and IslandTypeFlags.TypeKindMask) of
+          case (fTrueType.Flags and IslandTypeFlags.TypeKindMask) of
             IslandTypeFlags.Array: exit go.reflect.Array;
             IslandTypeFlags.Struct: exit go.reflect.Struct;
             IslandTypeFlags.Interface: exit go.reflect.Interface;
@@ -1053,7 +1083,15 @@ type
   method Zero(aType: &Type): Value;public;
   begin
     {$IFDEF ISLAND}
-    exit new Value(TypeImpl(aType).RealType.Instantiate());
+    var lZero := TypeImpl(aType).fRealType.Properties.Where(a->a.Name = 'Zero').FirstOrDefault;
+    if lZero <> nil then
+      exit new Value(lZero.GetValue(nil, []));
+
+    if not TypeImpl(aType).RealType.IsValueType and (TypeImpl(aType).RealType.Methods.Any(a -> a.Name = '__Set')) then
+      exit new Value(TypeImpl(aType).RealType.Instantiate())
+    else
+      exit new Value(nil);
+    //exit new Value(TypeImpl(aType).RealType.Instantiate());
     {$ELSE}
     if TypeImpl(aType).fRealType = System.Type.GetType('go.builtin.string') then
       exit new Value(go.builtin.string.Zero) // String .net does not have a constructor with no arguments.
@@ -1127,9 +1165,6 @@ type
 
   method Copy(dst: Value; src: Value): Integer;
   begin
-    {$IF ISLAND}
-    raise new NotImplementedException;
-    {$ELSEIF ECHOES}
     // TODO check kind
     var lDst := go.builtin.ISlice(InternalGetValue(dst));
     var lSrc := go.builtin.ISlice(InternalGetValue(src));
@@ -1137,14 +1172,26 @@ type
     result := Math.Min(if lSrc = nil then 0 else lSrc.getLen, if lDst = nil then 0 else lDst.getLen);
     for i: Integer := 0 to result -1 do
       lDst.setAtIndex(i, lSrc.getAtIndex(i));
-    {$ENDIF}
   end;
 
   method InstantiateSlice(aType: PlatformType; aCount: Integer): Object; private;
   begin
     {$IF ISLAND}
-    result := nil;
-    // TODO
+    // TODO check
+    if aType.IsValueType then begin
+      var lCtors := aType.Methods.Where(a -> (MethodFlags.Constructor in a.Flags)).ToArray;
+      var lFields := aType.Fields.ToArray;
+      if (lCtors.Count = 2) and (lFields.Count = 1) then begin
+        var lCtor: MethodInfo := aType.Methods.FirstOrDefault(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1) and (a.Arguments.ToArray[0].Type = lFields[0].Type));
+        var lRealCtor := SliceObjectCtor(lCtor.Pointer);
+        lRealCtor(result, InstantiateSlice(lFields[0].Type, aCount));
+        //exit Activator.CreateInstance(aType, [InstantiateSlice(lFields[0].Type, aCount)]);
+      end;
+    end;
+
+    var lCtor: MethodInfo := aType.Methods.FirstOrDefault(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1) and (a.Arguments.ToArray[0].Type.IsInteger));
+    var lRealCtor := SliceCtor(lCtor.Pointer);
+    lRealCtor(result, aCount);
     {$ELSEIF ECHOES}
     if aType.IsValueType and (aType.GetConstructors().Count = 2) and (aType.GetFields().Count = 1) then begin
       exit Activator.CreateInstance(aType, [InstantiateSlice(aType.GetFields()[0].FieldType, aCount)]);
