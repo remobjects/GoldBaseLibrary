@@ -258,7 +258,11 @@ type
 
     method Cap: Integer;
     begin
-      raise new NotImplementedException;
+      var lKind := Kind;
+      if (lKind <> &Array) and (lKind <> go.reflect.Slice) then
+        raise new Exception("Wrong type, need array or slice");
+
+      exit go.builtin.ISlice(fValue).getCap;
     end;
 
     method &Set(aVal: Value);
@@ -291,9 +295,13 @@ type
       end;
     end;
 
-    method SetBytes(aval: go.builtin.Slice<Byte>);
+    method SetBytes(aVal: go.builtin.Slice<Byte>);
     begin
-      raise new NotImplementedException;
+      var lValue := fValue as go.builtin.Slice<Byte>;
+      if lValue = nil then
+        raise new Exception('Wrong type, need a Slice of bytes');
+
+      lValue.Assign(aVal);
     end;
 
     method &SetInt(aVal: Int64);
@@ -356,7 +364,11 @@ type
 
     method Bytes: go.builtin.Slice<Byte>;
     begin
-      raise new NotImplementedException;
+      var lValue := fValue as go.builtin.Slice<Byte>;
+      if lValue = nil then
+        raise new Exception('Wrong type, need a Slice of bytes');
+
+      exit lValue;
     end;
 
     method Kind: Kind;
@@ -412,7 +424,10 @@ type
 
     method SetMapIndex(key: Value; val: Value);
     begin
-      raise new NotImplementedException;
+      if Kind ≠ go.reflect.Map then
+        raise new Exception("Wrong type, need a map");
+
+      go.builtin.IMap(fValue).SetReflectKeyValue(key, val);
     end;
 
     method NumField: Integer;

@@ -28,6 +28,7 @@ type
     method GetReflectSequence: sequence of tuple of(go.reflect.Value, go.reflect.Value);
     method GetReflectValue(aKey: go.reflect.Value): go.reflect.Value;
     method GetReflectKeys: Slice<go.reflect.Value>;
+    method SetReflectKeyValue(aKey: go.reflect.Value; aValue: go.reflect.Value);
   end;
 
   [ValueTypeSemantics]
@@ -208,6 +209,14 @@ type
       {$ELSE}
       exit fDict.Select(a -> (new go.reflect.Value(a.Key))).ToArray;
       {$ENDIF}
+    end;
+
+    method SetReflectKeyValue(aKey: go.reflect.Value; aValue: go.reflect.Value);
+    begin
+      if aValue.IsValid then
+        &Add(aKey.fValue as K, aValue.fValue as V)
+      else
+        Delete(aKey.fValue as K);
     end;
   end;
 
