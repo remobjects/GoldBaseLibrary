@@ -851,11 +851,6 @@ func Replace(s, old, new string, n int) string {
 	} else if n < 0 || m < n {
 		n = m
 	}
-	writeLn("----")
-	writeLn(s)
-	writeLn(old)
-	writeLn(new)
-	writeLn("----")
 
 	// Apply replacements to buffer.
 	t := make([]byte, len(s)+n*(len(new)-len(old)))
