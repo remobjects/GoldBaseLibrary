@@ -1048,7 +1048,7 @@ type
         raise new Exception('Wrong type, it needs to be Func');
       {$IF ISLAND}
       var lMethod := fTrueType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
-      result := lMethod.Arguments.Count;
+      result := lMethod.Type.Fields.Count;
       {$ELSEIF ECHOES}
       var lMethod := fTrueType.GetMethod('Invoke');
       if System.Reflection.TypeInfo(lMethod.ReturnType).IsGenericType and (System.Reflection.TypeInfo(lMethod.ReturnType).FullName.StartsWith('System.Tuple')) then
@@ -1064,7 +1064,7 @@ type
         raise new Exception('Wrong type, it needs to be Func');
       {$IF ISLAND}
       var lMethod := fTrueType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
-      var lParameters := lMethod.Arguments.ToList();
+      var lParameters := lMethod.Type.Fields.ToList();
       if lParameters.Count ≤ i then
         raise new IndexOutOfRangeException('Index out of range');
       result := new TypeImpl(lParameters[i].Type);
