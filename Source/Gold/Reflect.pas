@@ -769,7 +769,6 @@ type
     method Kind: Kind;
     begin
       {$IF ISLAND}
-      writeLn(fTrueType.Name);
       if fTrueType.Name.Contains('go.builtin.string') then
         exit go.reflect.String;
 
@@ -805,6 +804,7 @@ type
         TypeCodes.UIntPtr: result := go.reflect.UintPtr;
         TypeCodes.IntPtr: result := go.reflect.Ptr;
         TypeCodes.String: result := go.reflect.String;
+        TypeCodes.Object: result := go.reflect.Struct;
         TypeCodes.None: begin
           case (fTrueType.Flags and IslandTypeFlags.TypeKindMask) of
             IslandTypeFlags.Array: exit go.reflect.Array;
