@@ -378,8 +378,11 @@ type
 
     method Len: Integer;
     begin
-      if fValue is go.sort.Interface then
-        exit go.sort.Interface(fValue).Len;
+      if Kind() = go.reflect.Slice then
+        exit go.builtin.ISlice(fValue).getLen();
+
+      //if fValue is go.sort.Interface then
+        //exit go.sort.Interface(fValue).Len;
       //TODO check other types?
     end;
 
@@ -811,7 +814,7 @@ type
             IslandTypeFlags.Struct: exit go.reflect.Struct;
             IslandTypeFlags.Interface: exit go.reflect.Interface;
             IslandTypeFlags.Generic: exit go.reflect.Ptr;
-            default: exit go.reflect.Invalid;
+            default: exit go.reflect.Struct;
           end;
         end;
       end;
