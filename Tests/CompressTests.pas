@@ -13,12 +13,12 @@ type
 
     method FlateTest;
     begin
-      //TestApplication2.DoFlateTest(); // T82177
+      TestApplication2.DoFlateTest(); // T82177
     end;
 
     method GZipTest;
     begin
-      //TestApplication2.DoGZIPTest(); // T82177
+      TestApplication2.DoGZIPTest(); // T82177
     end;
   end;
 
