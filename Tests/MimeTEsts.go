@@ -40,7 +40,7 @@ func DoMimeWordDecodeTest() bool {
 }
 
 func DoNewReaderTest() bool {
-	msg := &mail.Message{
+	/*msg := &mail.Message{
 		Header: map[string][]string{
 			"Content-Type": {"multipart/mixed; boundary=foo"},
 		},
@@ -72,6 +72,7 @@ func DoNewReaderTest() bool {
 			lCount++
 		}
 	}
-	return lCount == 2
+	return lCount == 2*/
+	return false // disabled for T82753
 
 }

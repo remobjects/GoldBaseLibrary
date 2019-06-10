@@ -20,7 +20,8 @@ func DoImageDecodeTest() bool {
 	reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(data))
 	config, format, err := image.DecodeConfig(reader)
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		return false
 	}
 	return (config.Width == 150) && (config.Height == 103) && (format == "jpeg")
 }

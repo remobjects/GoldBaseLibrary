@@ -9,7 +9,7 @@ type
   public
     method ImageDecoderTest;
     begin
-      TestApplication2.DoImageDecodeTest();
+      Assert.IsTrue(TestApplication2.DoImageDecodeTest());
     end;
   end;
 

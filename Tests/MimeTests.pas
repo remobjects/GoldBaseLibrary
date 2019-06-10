@@ -9,12 +9,12 @@ type
   public
     method WordDecoderTest;
     begin
-      TestApplication2.DoMimeWordDecodeTest();
+      Assert.IsTrue(TestApplication2.DoMimeWordDecodeTest());
     end;
 
     method NewReaderTest;
     begin
-      TestApplication2.DoNewReaderTest();
+      Assert.IsTrue(TestApplication2.DoNewReaderTest());
     end;
 
   end;
