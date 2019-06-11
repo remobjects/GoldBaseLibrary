@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProductVersion>3.5</ProductVersion>
@@ -580,6 +580,7 @@
     <Compile Include="math\cmplx\tan.go" />
     <Compile Include="crypto.rand.pas" />
     <Compile Include="string.pas" />
+    <Compile Include="Partials.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

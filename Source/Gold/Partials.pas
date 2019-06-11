@@ -283,7 +283,7 @@ type
 
   go.net.http.http2StreamError = public partial class(go.builtin.error);
 
-  go.mime.multipart.Part = public partial class(go.io.Reader);
+  //go.mime.multipart.Part = public partial class(go.io.Reader); // defined in partials.cs
   go.bytes.Reader = public partial class(go.io.ReaderAt);
 
   go.net.http.noBody = public partial class(go.io.ReadCloser);
