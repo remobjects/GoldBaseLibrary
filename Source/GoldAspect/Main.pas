@@ -9,6 +9,7 @@ type
   [AttributeUsage(AttributeTargets.Assembly)]
   GoldFixer = public partial class(Attribute, IAssemblyInterfaceDecorator)
   public
+    /*
     method GetCallToClassConstructor(aServices: IServices; aNamespace: String): Statement;
     begin
       var lType := aServices.GetType('go.'+aNamespace+'.__Global');
@@ -30,18 +31,18 @@ type
       for each x in aArgs do
         lBeg.Add(GetCallToClassConstructor(aServices, x));
       lCCtor.SurroundMethodBody(lBeg, new BeginStatement, SurroundMethod.Never);
-    end;
+    end;*/
 
     method HandleInterface(Services: IServices);
     begin
-      ForceInitializationOfNamespaces(Services, 'crypto.tls', ["crypto",
+      /*ForceInitializationOfNamespaces(Services, 'crypto.tls', ["crypto",
       "crypto.hmac",
       "crypto.md5",
       "crypto.sha1",
       "crypto.sha256",
       "crypto.sha512",
       "errors",
-      "fmt"]);
+      "fmt"]);*/
       var lType := Services.GetType('go.net.http.atomicBool');
       ITypeDefinition(lType).RemoveMethod(lType.GetStaticMethods('isSet')[0] as IMethodDefinition);
       ITypeDefinition(lType).RemoveMethod(lType.GetStaticMethods('setTrue')[0] as IMethodDefinition);
