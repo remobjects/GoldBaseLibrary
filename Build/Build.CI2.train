@@ -14,7 +14,7 @@ var useLatestCompiler = true;
 
 if (useLatestCompiler)
 {
-	var elementsShared = "./elements-shared";
+	var elementsShared = path.resolve("./elements-shared");
 	folder.create(elementsShared);
 	var elementsBin = expand("$(elementsShared)/ZipDistro");
 
