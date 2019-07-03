@@ -22,7 +22,7 @@ if (useLatestCompiler)
 	extractZipFromS3(getSharedS3Bucket(), sharedElementsS3, "FullZipDistro.zip", elementsBin);
 	file.copy("$(elementsBin)/References/Echoes/NET", elementsBin);
 	var ebuildExe = expand('$(elementsBin)/EBuild.exe');
-	var eBuildReferenceFolderOverrides = '"--setting:ToffeeSDKFolder=$(elementsBin)/Toffee SDKs" "--setting:IslandSDKFolder=$(elementsBin)/Island SDKs" "--setting:AdditionalReferencePaths=$(elementsInTools)/References"';
+	var eBuildReferenceFolderOverrides = '"--setting:ToffeeSDKFolder=$(elementsBin)/Toffee SDKs" "--setting:IslandSDKFolder=$(elementsBin)/Island SDKs" "--setting:AdditionalReferencePaths=$(elementsBin)/References"';
 }
 else
 {
