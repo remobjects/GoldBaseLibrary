@@ -30,7 +30,7 @@ else
 	var eBuildReferenceFolderOverrides = '"--setting:ToffeeSDKFolder=$(elementsInTools)/Toffee SDKs" "--setting:IslandSDKFolder=$(elementsInTools)/Island SDKs" "--setting:AdditionalReferencePaths=$(elementsInTools)/References"';
 }
 var ebuildIntermediatebasefolder = expand("c:\\ci\\EBuild-cache\\GBL\\$(CIBranch)");
-var eBuildStandardParams = expand("--setting:Device=True --setting:Simulator=True --setting:SimulatorArchitecture=Legacy --debug --intermediatebasefolder:$(ebuildIntermediatebasefolder)");
+var eBuildStandardParams = expand("--setting:Device=True --setting:Simulator=True --setting:Mac=True --setting:SimulatorArchitecture=Legacy --debug --intermediatebasefolder:$(ebuildIntermediatebasefolder)");
 
 if (optionClearCache)
 {
