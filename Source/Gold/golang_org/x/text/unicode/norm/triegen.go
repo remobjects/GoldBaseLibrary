@@ -1,4 +1,4 @@
-// Copyright 2011 The Go Authors. All rights reserved.
+﻿// Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -10,7 +10,7 @@
 // sequence are used to lookup offsets in the index table to be used for the
 // next byte. The last byte is used to index into a table with 16-bit values.
 
-package main
+package norm
 
 import (
 	"fmt"
