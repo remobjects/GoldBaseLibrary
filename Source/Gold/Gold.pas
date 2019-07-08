@@ -164,11 +164,10 @@ type
       if VTCheck<V>.IsVT then
         exit (Activator.CreateInstance<V>(), false);
       {$ENDIF}
-      {$IF ECHOES}
       var lZero := go.reflect.Zero(new go.reflect.TypeImpl(typeOf(V)));
       if lZero.fValue <> nil then
         exit (lZero.fValue as V, false);
-      {$ENDIF}
+
       exit (default(V), false);
     end;
 
@@ -772,6 +771,10 @@ type
     if VTCheck<T>.IsVT then
       exit (Activator.CreateInstance<T>(), false);
     {$ENDIF}
+    var lZero := go.reflect.Zero(new go.reflect.TypeImpl(typeOf(T)));
+    if lZero.fValue <> nil then
+      exit (lZero.fValue as T, false);
+
     exit (default(T), false); // for integers, T(V) cast would fail otherwise.
   end;
 
