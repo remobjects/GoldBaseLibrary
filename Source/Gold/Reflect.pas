@@ -1101,6 +1101,9 @@ type
   method Zero(aType: &Type): Value;public;
   begin
     {$IFDEF ISLAND}
+    if aType.Kind = go.reflect.string then
+      exit new Value(go.builtin.string.Zero);
+
     var lZero := TypeImpl(aType).fRealType.Properties.Where(a->a.Name = 'Zero').FirstOrDefault;
     if lZero <> nil then
       exit new Value(lZero.GetValue(nil, []));
