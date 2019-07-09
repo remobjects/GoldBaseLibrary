@@ -95,7 +95,7 @@ type
   assembly
   {$IFDEF ISLAND}
     fLock: Monitor := new Monitor;
-    fCS: ConditionalVariable;
+    fCS: ConditionalVariable := new ConditionalVariable;
   {$ELSE}
     fLock: Object := new Object;
   {$ENDIF}

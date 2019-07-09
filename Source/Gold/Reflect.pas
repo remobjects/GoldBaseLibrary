@@ -1051,7 +1051,10 @@ type
         raise new Exception('Wrong type, it needs to be Func');
       {$IF ISLAND}
       var lMethod := fTrueType.Methods.Where(a -> a.Name = 'Invoke').FirstOrDefault;
-      result := lMethod.Type.Fields.Count;
+      if lMethod.Type.GenericArguments.Count > 0 then
+        result := lMethod.Type.Fields.Count
+      else
+        result := 1;
       {$ELSEIF ECHOES}
       var lMethod := fTrueType.GetMethod('Invoke');
       if System.Reflection.TypeInfo(lMethod.ReturnType).IsGenericType and (System.Reflection.TypeInfo(lMethod.ReturnType).FullName.StartsWith('System.Tuple')) then
