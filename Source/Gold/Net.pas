@@ -891,6 +891,7 @@ type
     dc.Timeout := dt;
     exit dc.Dial(network, address);
   end;
+
 type
   [ValueTypeSemantics]
   Resolver = public class

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProductVersion>3.5</ProductVersion>
+    <ProjectGuid>{9068B27E-56B6-4E4A-ADFF-86159E789AE2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <RootNamespace>Gold.Cooper</RootNamespace>
+    <BinaryName>gold</BinaryName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <Optimize>False</Optimize>
+    <OutputPath>.\Bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <GenerateDebugInfo>True</GenerateDebugInfo>
+    <EnableAsserts>True</EnableAsserts>
+    <CpuType>anycpu</CpuType>
+    <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>.\Bin\Release</OutputPath>
+    <CpuType>anycpu</CpuType>
+    <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="rt" />
+    <Reference Include="cooper">
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Aliases.pas" />
+    <Compile Include="Complex.pas" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Cooper.targets" />
+</Project>
