@@ -118,9 +118,9 @@ type
     class property Stderr: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_ERROR_HANDLE), FileAccess.Write)); lazy;
     class property Stdout: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_OUTPUT_HANDLE), FileAccess.Write)); lazy;
     {$ELSEIF ISLAND AND POSIX}
-    class property Stdin: File := new File(fs := new FileStream(rtl.fdopen(rtl.STDIN_FILENO, "r"), FileAccess.Read)); lazy;
-    class property Stderr: File := new File(fs := new FileStream(rtl.fdopen(rtl.STDERR_FILENO, "w"), FileAccess.Write)); lazy;
-    class property Stdout: File := new File(fs := new FileStream(rtl.fdopen(rtl.STDOUT_FILENO, "w"), FileAccess.Write)); lazy;
+    class property Stdin: File := new File(fs := new FileStream(rtl.stdin, FileAccess.Read)); lazy;
+    class property Stderr: File := new File(fs := new FileStream(rtl.stderr, FileAccess.Write)); lazy;
+    class property Stdout: File := new File(fs := new FileStream(rtl.stdout, FileAccess.Write)); lazy;
     {$ELSEIF ECHOES}
     class property Stdin: File := new File(fs := Console.OpenStandardInput); lazy;
     class property Stderr: File := new File(fs := Console.OpenStandardError); lazy;
