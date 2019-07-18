@@ -36,5 +36,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ImageTests.go" />
     <Compile Include="$(MSBuildThisFileDirectory)MimeTests.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)MimeTEsts.go" />
+    <Compile Include="$(MSBuildThisFileDirectory)RegexTests.go" />
+    <Compile Include="$(MSBuildThisFileDirectory)RegexTests.pas" />
   </ItemGroup>
 </Project>
