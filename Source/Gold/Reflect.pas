@@ -772,9 +772,6 @@ type
     method Kind: Kind;
     begin
       {$IF ISLAND}
-      if fTrueType.Name.Contains('go.builtin.string') then
-        exit go.reflect.String;
-
       if (fTrueType.GenericArguments <> nil) and (fTrueType.GenericArguments.Count > 0) then begin
         if fTrueType.Name.Contains('go.builtin.Slice') then
           exit go.reflect.Slice;
@@ -787,6 +784,9 @@ type
 
       if fTrueType.Name.Contains('<Projection>') then
         exit go.reflect.Func;
+
+      if fTrueType.Name.Contains('go.builtin.string') then
+        exit go.reflect.String;
 
       if fTrueType = TypeOf(Object) then
         exit go.reflect.Interface;
