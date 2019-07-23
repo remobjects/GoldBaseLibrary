@@ -1201,20 +1201,25 @@ type
   method InstantiateSlice(aType: PlatformType; aCount: Integer): Object; private;
   begin
     {$IF ISLAND}
-    // TODO check
     if aType.IsValueType then begin
       var lCtors := aType.Methods.Where(a -> (MethodFlags.Constructor in a.Flags)).ToArray;
       var lFields := aType.Fields.ToArray;
       if (lCtors.Count = 2) and (lFields.Count = 1) then begin
-        var lCtor: MethodInfo := aType.Methods.FirstOrDefault(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1) and (a.Arguments.ToArray[0].Type = lFields[0].Type));
+        var lCtor: MethodInfo := aType.Methods.where(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1)).FirstOrDefault;
+        var lNew := DefaultGC.New(aType.RTTI, aType.SizeOfType);
+        result := InternalCalls.Cast<Object>(lNew);
+
+        //var lCtor: MethodInfo := aType.Methods.FirstOrDefault(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1) and (a.Arguments.ToArray[0].Type = lFields[0].Type));
         var lRealCtor := SliceObjectCtor(lCtor.Pointer);
         lRealCtor(result, InstantiateSlice(lFields[0].Type, aCount));
-        //exit Activator.CreateInstance(aType, [InstantiateSlice(lFields[0].Type, aCount)]);
+        exit;
       end;
     end;
 
     var lCtor: MethodInfo := aType.Methods.FirstOrDefault(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1) and (a.Arguments.ToArray[0].Type.IsInteger));
     var lRealCtor := SliceCtor(lCtor.Pointer);
+    var lNew := DefaultGC.New(aType.RTTI, aType.SizeOfType);
+    result := InternalCalls.Cast<Object>(lNew);
     lRealCtor(result, aCount);
     {$ELSEIF ECHOES}
     if aType.IsValueType and (aType.GetConstructors().Count = 2) and (aType.GetFields().Count = 1) then begin
