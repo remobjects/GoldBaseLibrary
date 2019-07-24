@@ -13,6 +13,11 @@ type
   SliceCtor = procedure(aInst: Object; aCount: Integer);
   SliceObjectCtor = procedure(aInst: Object; aObject: Object);
 
+  SliceAlias = record
+    VMT: IntPtr;
+    aVal: Object;
+  end;
+
   [ValueTypeSemantics]
   MapIter = public class
   private
@@ -1205,13 +1210,12 @@ type
       var lCtors := aType.Methods.Where(a -> (MethodFlags.Constructor in a.Flags)).ToArray;
       var lFields := aType.Fields.ToArray;
       if (lCtors.Count = 2) and (lFields.Count = 1) then begin
-        var lCtor: MethodInfo := aType.Methods.where(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1)).FirstOrDefault;
-        var lNew := DefaultGC.New(aType.RTTI, aType.SizeOfType);
-        result := InternalCalls.Cast<Object>(lNew);
-
-        //var lCtor: MethodInfo := aType.Methods.FirstOrDefault(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1) and (a.Arguments.ToArray[0].Type = lFields[0].Type));
-        var lRealCtor := SliceObjectCtor(lCtor.Pointer);
-        lRealCtor(result, InstantiateSlice(lFields[0].Type, aCount));
+        //var lCtorType: MethodInfo := aType.Methods.where(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1) and (a.Arguments.ToArray[0].Type = lFields[0].Type)).FirstOrDefault;
+        var lNewType := DefaultGC.New(aType.RTTI, aType.SizeOfType);
+        result := InternalCalls.Cast<Object>(lNewType);
+        ^SliceAlias(lNewType)^.aVal := InstantiateSlice(lFields[0].Type, aCount);
+        //var lRealCtor2 := SliceObjectCtor(lCtor2.Pointer);
+        //lRealCtor2(result, InstantiateSlice(lFields[0].Type, aCount));
         exit;
       end;
     end;
@@ -1227,7 +1231,6 @@ type
     end;
     //assert TypeOf(ISlice).AssignableTo(aMemberType)
     exit Activator.CreateInstance(aType, [aCount]);
-    //exit Activator.CreateInstance((aMemberType as FieldInfo).FieldType, [aCount]);
     {$ENDIF}
   end;
 
