@@ -13,6 +13,8 @@ type
   SliceCtor = procedure(aInst: Object; aCount: Integer);
   SliceObjectCtor = procedure(aInst: Object; aObject: Object);
 
+  ZeroFunction = method: Object;
+
   SliceAlias = record
     VMT: IntPtr;
     aVal: Object;
@@ -1114,7 +1116,7 @@ type
 
     var lZero := TypeImpl(aType).fRealType.Properties.Where(a->a.Name = 'Zero').FirstOrDefault;
     if lZero <> nil then
-      exit new Value(lZero.GetValue(nil, []));
+      exit new Value(ZeroFunction(lZero.Read.Pointer)());
 
     if not TypeImpl(aType).RealType.IsValueType and (TypeImpl(aType).RealType.Methods.Any(a -> a.Name = '__Set')) then
       exit new Value(TypeImpl(aType).RealType.Instantiate())
