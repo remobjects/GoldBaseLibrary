@@ -9,6 +9,7 @@ type
   public
     method ImageDecoderTest;
     begin
+      go.image.jpeg.__Initialize();
       Assert.IsTrue(TestApplication2.DoImageDecodeTest());
     end;
   end;
