@@ -40,7 +40,7 @@
     </Reference>
     <Reference Include="Elements" />
     <Reference Include="Go">
-      <HintPath>..\Source\Gold\Bin\Debug\Go.dll</HintPath>
+      <HintPath>..\Source\Gold\Bin\Debug\Windows\i386\Go.fx</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

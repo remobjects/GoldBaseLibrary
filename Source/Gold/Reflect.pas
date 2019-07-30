@@ -13,6 +13,13 @@ type
   SliceCtor = procedure(aInst: Object; aCount: Integer);
   SliceObjectCtor = procedure(aInst: Object; aObject: Object);
 
+  ZeroFunction = method: Object;
+
+  SliceAlias = record
+    VMT: IntPtr;
+    aVal: Object;
+  end;
+
   [ValueTypeSemantics]
   MapIter = public class
   private
@@ -772,9 +779,6 @@ type
     method Kind: Kind;
     begin
       {$IF ISLAND}
-      if fTrueType.Name.Contains('go.builtin.string') then
-        exit go.reflect.String;
-
       if (fTrueType.GenericArguments <> nil) and (fTrueType.GenericArguments.Count > 0) then begin
         if fTrueType.Name.Contains('go.builtin.Slice') then
           exit go.reflect.Slice;
@@ -787,6 +791,9 @@ type
 
       if fTrueType.Name.Contains('<Projection>') then
         exit go.reflect.Func;
+
+      if fTrueType.Name.Contains('go.builtin.string') then
+        exit go.reflect.String;
 
       if fTrueType = TypeOf(Object) then
         exit go.reflect.Interface;
@@ -1109,7 +1116,7 @@ type
 
     var lZero := TypeImpl(aType).fRealType.Properties.Where(a->a.Name = 'Zero').FirstOrDefault;
     if lZero <> nil then
-      exit new Value(lZero.GetValue(nil, []));
+      exit new Value(ZeroFunction(lZero.Read.Pointer)());
 
     if not TypeImpl(aType).RealType.IsValueType and (TypeImpl(aType).RealType.Methods.Any(a -> a.Name = '__Set')) then
       exit new Value(TypeImpl(aType).RealType.Instantiate())
@@ -1201,20 +1208,24 @@ type
   method InstantiateSlice(aType: PlatformType; aCount: Integer): Object; private;
   begin
     {$IF ISLAND}
-    // TODO check
     if aType.IsValueType then begin
       var lCtors := aType.Methods.Where(a -> (MethodFlags.Constructor in a.Flags)).ToArray;
       var lFields := aType.Fields.ToArray;
       if (lCtors.Count = 2) and (lFields.Count = 1) then begin
-        var lCtor: MethodInfo := aType.Methods.FirstOrDefault(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1) and (a.Arguments.ToArray[0].Type = lFields[0].Type));
-        var lRealCtor := SliceObjectCtor(lCtor.Pointer);
-        lRealCtor(result, InstantiateSlice(lFields[0].Type, aCount));
-        //exit Activator.CreateInstance(aType, [InstantiateSlice(lFields[0].Type, aCount)]);
+        //var lCtorType: MethodInfo := aType.Methods.where(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1) and (a.Arguments.ToArray[0].Type = lFields[0].Type)).FirstOrDefault;
+        var lNewType := DefaultGC.New(aType.RTTI, aType.SizeOfType);
+        result := InternalCalls.Cast<Object>(lNewType);
+        ^SliceAlias(lNewType)^.aVal := InstantiateSlice(lFields[0].Type, aCount);
+        //var lRealCtor2 := SliceObjectCtor(lCtor2.Pointer);
+        //lRealCtor2(result, InstantiateSlice(lFields[0].Type, aCount));
+        exit;
       end;
     end;
 
     var lCtor: MethodInfo := aType.Methods.FirstOrDefault(a -> (MethodFlags.Constructor in a.Flags) and (a.Arguments.Count = 1) and (a.Arguments.ToArray[0].Type.IsInteger));
     var lRealCtor := SliceCtor(lCtor.Pointer);
+    var lNew := DefaultGC.New(aType.RTTI, aType.SizeOfType);
+    result := InternalCalls.Cast<Object>(lNew);
     lRealCtor(result, aCount);
     {$ELSEIF ECHOES}
     if aType.IsValueType and (aType.GetConstructors().Count = 2) and (aType.GetFields().Count = 1) then begin
@@ -1222,7 +1233,6 @@ type
     end;
     //assert TypeOf(ISlice).AssignableTo(aMemberType)
     exit Activator.CreateInstance(aType, [aCount]);
-    //exit Activator.CreateInstance((aMemberType as FieldInfo).FieldType, [aCount]);
     {$ENDIF}
   end;
 
