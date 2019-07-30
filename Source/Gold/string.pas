@@ -77,6 +77,11 @@ type
       {$ENDIF}
     end;
 
+    class operator Implicit(aValue: array of uint8): string;
+    begin
+      result := new string(aValue);
+    end;
+
     class operator Implicit(aValue: string): Slice<byte>;
     begin
       result := new Slice<byte>(aValue.Value);
