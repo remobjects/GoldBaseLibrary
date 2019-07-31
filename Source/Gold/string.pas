@@ -143,7 +143,10 @@ type
 
     method Substring(aIndex: int32; aLen: int32): string;
     begin
-      result := new string(new Slice<byte>(Value, aIndex, (aIndex + aLen) - 1));
+      var lLength := (aIndex + aLen) - 1;
+      if lLength < 0 then
+        lLength := 0;
+      result := new string(new Slice<byte>(Value, aIndex, lLength));
     end;
 
     class method IsNullOrEmpty(aValue: string): Boolean; public;

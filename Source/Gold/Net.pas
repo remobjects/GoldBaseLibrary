@@ -704,7 +704,7 @@ begin
   var n := go.strings.LastIndex(s, ':');
   var q := go.strings.LastIndex(s, ']');
   if n < q then n := -1;
-  if( n > 0) and Integer.TryParse(s.Substring(n+1), out var port) then begin
+  if( n >= 0) and Integer.TryParse(s.Substring(n+1), out var port) then begin
     s := s.Substring(0, n);
   end;
   exit (s, port);
@@ -715,20 +715,26 @@ begin
   try
     var s: Socket;
     var p := ParseAddress(address);
-    if string.IsNullOrempty(p[0]) then
+    var lCurrentAddr: IPAddress;
+    if string.IsNullOrempty(p[0]) then begin
       p := ('0.0.0.0', p[1]);
-    var addr := Dns.GetHostEntry (p[0]);
+      lCurrentAddr := IPAddress.Parse(p[0]);
+    end
+    else begin
+      var addr := Dns.GetHostEntry (p[0]);
+      lCurrentAddr := addr.AddressList[0];
+    end;
 
     case network of
       'tcp': begin
-          if addr.AddressList[0].AddressFamily = AddressFamily.InterNetworkV6 then goto ipv6;
+          if lCurrentAddr.AddressFamily = AddressFamily.InterNetworkV6 then goto ipv6;
           goto ipv4;
         end;
       'tcp4':
       begin
         ipv4:;
         s := new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        s.Bind(new IPEndPoint(addr.AddressList[0], p[1]));
+        s.Bind(new IPEndPoint(lCurrentAddr, p[1]));
         s.Listen(10);
       end;
 
@@ -736,7 +742,7 @@ begin
       begin
         ipv6:;
         s := new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-        s.Bind(new IPEndPoint(addr.AddressList[0], p[1]));
+        s.Bind(new IPEndPoint(lCurrentAddr, p[1]));
         s.Listen(10);
       end;
     else exit (nil, go.Errors.new('only tcp, tcp4 and tcp6 supported'));
