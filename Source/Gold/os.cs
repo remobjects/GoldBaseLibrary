@@ -231,10 +231,10 @@ namespace go.os {
 
 		[ValueTypeSemantics]
 		public partial class Cmd {
-			public string Path;
+			public go.builtin.string Path;
 			public Slice<go.builtin.string> Args;
 			public Slice<go.builtin.string> Env;
-			public string Dir;
+			public go.builtin.string Dir;
 			public io.Reader Stdin;
 			public io.Writer Stdout;
 			public io.Writer Stderr;

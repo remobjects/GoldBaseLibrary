@@ -264,7 +264,7 @@ type
      end;
     end;
   end;
-  method Getwd: tuple of (string, go.builtin.error); public;
+  method Getwd: tuple of (go.builtin.string, go.builtin.error); public;
   begin
     exit (Environment.CurrentDirectory, nil);
   end;
@@ -282,7 +282,7 @@ type
     {$ENDIF}
   end;
 
-  method Mkdir(name: string; perm :FileMode): go.builtin.error;
+  method Mkdir(name: go.builtin.string; perm :FileMode): go.builtin.error;
   begin
     try
       {$IF ISLAND}
@@ -297,7 +297,7 @@ type
       end;
   end;
 
-  method Remove(s: string): go.builtin.error;
+  method Remove(s: go.builtin.string): go.builtin.error;
   begin
     try
       {$IF ISLAND}
@@ -318,7 +318,7 @@ type
     end;
   end;
 
-  method fixRootDirectory(s: string): string;
+  method fixRootDirectory(s: go.builtin.string): go.builtin.string;
   begin
     if defined('WINDOWS') or (defined('ECHOES') and (Environment.OSVersion.Platform = PlatformID.Win32NT)) then begin
       if s.Length <3 then
@@ -327,7 +327,7 @@ type
     exit s;
   end;
 
-  method &Create(name: string): tuple of (File, go.builtin.error); public;
+  method &Create(name: go.builtin.string): tuple of (File, go.builtin.error); public;
 begin
   try
   {$IF ISLAND}
@@ -342,13 +342,13 @@ begin
 end;
 
 
-method NewFile(fd: uint64; name: string): File;public;
+method NewFile(fd: go.builtin.uint64; name: go.builtin.string): File;public;
 begin
   raise new NotSupportedException;
 end;
 
 
-method &Open(name: string): tuple of (File, go.builtin.error);public;
+method &Open(name: go.builtin.string): tuple of (File, go.builtin.error);public;
 begin
   try
     {$IF ISLAND}
@@ -362,7 +362,7 @@ begin
    end;
 end;
 
-method &OpenFile(name: string; aFlags: Integer; perm: FileMode): tuple of (File, go.builtin.error);public;
+method &OpenFile(name: go.builtin.string; aFlags: Integer; perm: FileMode): tuple of (File, go.builtin.error);public;
 begin
   try
     {$IF ISLAND}
@@ -385,7 +385,7 @@ begin
       exit (nil, go.errors.New(e.Message));
   end;
 end;
-method hostname: tuple of (string, go.builtin.error);
+method hostname: tuple of (go.builtin.string, go.builtin.error);
 begin
   {$IF ISLAND}
   raise new NotImplementedException;
@@ -405,7 +405,7 @@ begin
   {$ENDIF}
 end;
 
-method lstatNolog(fn: string): tuple of(FileInfo, go.builtin.error);
+method lstatNolog(fn: go.builtin.string): tuple of(FileInfo, go.builtin.error);
 begin
   {$IF ISLAND}
   var lFile := new RemObjects.Elements.System.File(fn);
@@ -419,7 +419,7 @@ begin
   exit (nil, go.errors.New('Not found '+fn));
 end;
 
-method statNolog(fn: string): tuple of (FileInfo, go.builtin.error);
+method statNolog(fn: go.builtin.string): tuple of (FileInfo, go.builtin.error);
 begin
   {$IF ISLAND}
   var lFile := new RemObjects.Elements.System.File(fn);
@@ -482,7 +482,7 @@ type
   var PathListSeparator:  Char := {$IF ISLAND}Path.ListSeparator{$ELSEIF ECHOES}System.IO.Path.PathSeparator{$ENDIF}; readonly;public;
 
   method IsPathSeparator(c: Char): Boolean; begin exit c = PathSeparator; end;
-  method Readlink(name: string): tuple of (string, builtin.error);
+  method Readlink(name: go.builtin.string): tuple of (go.builtin.string, go.builtin.error);
   begin
     exit ('', go.Errors.New('Not supported'));
   end;
@@ -637,7 +637,7 @@ public
   Env: go.builtin.Slice<go.builtin.string>;
 end;
 
-method IntStartProcess(name: string; argv: go.builtin.Slice<string>; attr: go.builtin.Reference<ProcAttr>): tuple of (Reference<Process>, go.builtin.error);
+method IntStartProcess(name: go.builtin.string; argv: go.builtin.Slice<go.builtin.string>; attr: go.builtin.Reference<ProcAttr>): tuple of (go.builtin.Reference<Process>, go.builtin.error);
 begin
   {$IF ISLAND}
   // TODO
@@ -645,7 +645,7 @@ begin
   var lPSI := new System.Diagnostics.ProcessStartInfo(name);
   if argv <> nil then begin
     for each el in argv do
-      if string.IsNullOrEmpty(lPSI.Arguments) then begin
+      if go.builtin.string.IsNullOrEmpty(lPSI.Arguments) then begin
         lPSI.Arguments := '"'+el.Item2+'"';
       end else begin
         lPSI.Arguments := lPSI.Arguments+' "'+el.Item2+'"';
@@ -678,7 +678,7 @@ begin
   {$ENDIF}
 end;
 
-method StartProcess(name: string; argv: go.builtin.Slice<string>; attr: builtin.Reference<ProcAttr>): tuple of (Reference<Process>, go.builtin.error);
+method StartProcess(name: go.builtin.string; argv: go.builtin.Slice<go.builtin.string>; attr: go.builtin.Reference<ProcAttr>): tuple of (go.builtin.Reference<Process>, go.builtin.error);
 begin
   exit IntStartProcess(name, argv, attr);
 end;
