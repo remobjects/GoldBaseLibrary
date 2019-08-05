@@ -225,7 +225,11 @@ type
 
     method Pointer(): UInt64;
     begin
-      raise new NotImplementedException;
+      {$IF ISLAND}
+      exit RemObjects.Elements.System.UInt64(InternalCalls.Cast(fValue));
+      {$ELSEIF ECHOES}
+      exit System.Convert.ToUInt64(fValue);
+      {$ENDIF}
     end;
 
     method MethodByName(name: String): Value;
@@ -918,7 +922,7 @@ type
 
     method Comparable: Boolean;
     begin
-      raise new NotImplementedException;
+      result := Kind <> go.reflect.Func;
     end;
 
     method Bits: Integer;
