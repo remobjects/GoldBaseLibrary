@@ -62,7 +62,8 @@ type
       {$IFDEF ISLAND}
       fCond.Broadcast;
       {$ELSE}
-      System.Threading.Monitor.PulseAll(Mutex(fMutex).fMutex);
+      if System.Threading.Monitor.IsEntered(Mutex(fMutex).fMutex) then
+        System.Threading.Monitor.PulseAll(Mutex(fMutex).fMutex);
       {$ENDIF}
     end;
 
