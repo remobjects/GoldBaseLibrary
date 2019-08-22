@@ -443,7 +443,7 @@ type
     end;
   end;
 
-  error = public interface
+  error = public soft interface
     method Error: string;
   end;
 
