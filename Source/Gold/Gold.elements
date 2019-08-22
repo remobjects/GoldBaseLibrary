@@ -14,7 +14,7 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
     <OutputPath>.\Bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;math_big_pure_go</DefineConstants>
     <GeneratePDB>True</GeneratePDB>
     <GenerateMDB>True</GenerateMDB>
     <EnableAsserts>True</EnableAsserts>
@@ -24,6 +24,7 @@
     <GenerateDebugInfo>True</GenerateDebugInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+   <DefineConstants>math_big_pure_go</DefineConstants>
     <OutputPath>.\Bin\Release</OutputPath>
     <CpuType>anycpu</CpuType>
     <RuntimeVersion>v25</RuntimeVersion>

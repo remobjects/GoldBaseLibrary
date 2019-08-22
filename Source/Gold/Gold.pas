@@ -561,9 +561,9 @@ type
   method copy(dst: Slice<byte>; src: string): Integer;
   begin
     {$IFDEF ISLAND}
-    exit copy(dst, new Slice<Byte>(Encoding.UTF8.GetBytes(src)));
+    exit copy(dst, new Slice<byte>(Encoding.UTF8.GetBytes(src)));
     {$ELSE}
-    exit copy(dst, new Slice<Byte>(System.Text.Encoding.UTF8.GetBytes(src)));
+    exit copy(dst, new Slice<byte>(System.Text.Encoding.UTF8.GetBytes(src)));
     {$ENDIF}
   end;
 
