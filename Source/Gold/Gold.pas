@@ -841,4 +841,40 @@ type
   [assembly:GoldAspect.GoldFixer]
 
 
+  extension method go.reflect.Kind.String(): go.builtin.string; public;
+  begin
+    case Integer(self) of 
+      0: exit 'Invalid';
+      1: exit 'Bool';
+      2: exit 'Int';
+      3: exit 'Int8';
+      4: exit 'Int16';
+      5: exit 'Int32';
+      6: exit 'Int64';
+      7: exit 'Uint';
+      8: exit 'Uint8';
+      9: exit 'Uint16';
+      10: exit 'Uint32';
+      11: exit 'Uint64';
+      12: exit 'Uintptr';
+      13: exit 'Float32';
+      14: exit 'Float64';
+      15: exit 'Complex64';
+      16: exit 'Complex128';
+      17: exit '&Array';
+      18: exit 'Chan';
+      19: exit 'Func';
+      20: exit '&Interface';
+      21: exit 'Map';
+      22: exit 'Ptr';
+      23: exit 'Slice';
+      24: exit 'String';
+      25: exit 'Struct';
+      26: exit 'UnsafePointer';    
+    end;
+    exit 'Unknown';
+  end;
+
+
+
 end.
