@@ -252,7 +252,7 @@ type
       raise new NotImplementedException;
     end;
 
-    method FieldByIndex(idx: go.builtin.Slice<Integer>): Value;
+    method FieldByIndex(idx: go.builtin.Slice<Int64>): Value;
     begin
       raise new NotImplementedException;
     end;
@@ -550,7 +550,7 @@ type
     method IsVariadic: Boolean;
     method Elem: &Type;
     method Field(i: Integer): StructField;
-    method FiedlByIndex(i: go.builtin.Slice<Integer>): StructField;
+    method FieldByIndex(i: go.builtin.Slice<Int64>): StructField;
     method FieldByName(aname: String): tuple of (StructField, Boolean);
     method FieldByNameFunc(match: delegate(aName: String): Boolean): tuple of (StructField, Boolean);
     method &In(i: Integer): &Type;
@@ -596,7 +596,7 @@ type
     property &Type: &Type read;
     property Tag: StructTag read;
     property Offset: UIntPtr read;
-    property &Index: go.builtin.Slice<Integer> read;
+    property &Index: go.builtin.Slice<Int64> read;
     property Anonymous: Boolean read;
   end;
 
@@ -629,7 +629,7 @@ type
     property &Type: &Type read {$IF ISLAND}new TypeImpl(fField.&Type){$ELSEIF ECHOES}new TypeImpl(fField.FieldType){$ENDIF};
     property Tag: StructTag read;
     property Offset: UIntPtr read;
-    property &Index: go.builtin.Slice<Integer> read;
+    property &Index: go.builtin.Slice<Int64> read;
     property Anonymous: Boolean read;
   end;
 
@@ -969,7 +969,7 @@ type
       result := new StructFieldImpl(lFields[i]);
     end;
 
-    method FiedlByIndex(i: go.builtin.Slice<Integer>): StructField;
+    method FieldByIndex(i: go.builtin.Slice<Int64>): StructField;
     begin
       if Kind ≠ go.reflect.Struct then
         raise new Exception('Wrong type, it needs to be struct');
