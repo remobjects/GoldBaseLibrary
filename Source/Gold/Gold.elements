@@ -53,14 +53,14 @@
     <Mode>Island</Mode>
     <SubMode>Darwin</SubMode>
     <SDK>macOS</SDK>
-    <DefineConstants>POSIX</DefineConstants>
+    <DefineConstants>POSIX;math_big_pure_go</DefineConstants>
     <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Target)' == 'Island.Darwin.iOS' ">
     <Mode>Island</Mode>
     <SubMode>Darwin</SubMode>
     <SDK>iOS</SDK>
-    <DefineConstants>POSIX</DefineConstants>
+    <DefineConstants>POSIX;math_big_pure_go</DefineConstants>
     <OutputType>StaticLibrary</OutputType>
     <SupportUIKitForMac>True</SupportUIKitForMac>
   </PropertyGroup>
@@ -68,14 +68,14 @@
     <Mode>Island</Mode>
     <SubMode>Darwin</SubMode>
     <SDK>tvOS</SDK>
-    <DefineConstants>POSIX</DefineConstants>
+    <DefineConstants>POSIX;math_big_pure_go</DefineConstants>
     <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Target)' == 'Island.Darwin.watchOS' ">
     <Mode>Island</Mode>
     <SubMode>Darwin</SubMode>
     <SDK>watchOS</SDK>
-    <DefineConstants>POSIX</DefineConstants>
+    <DefineConstants>POSIX;math_big_pure_go</DefineConstants>
     <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
   <ItemGroup>

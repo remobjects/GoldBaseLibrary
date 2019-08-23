@@ -223,6 +223,11 @@ type
       end;
     end;
 
+    method &Method(i: Int64): Value;
+    begin
+      raise new NotImplementedException;
+    end;
+
     method Pointer(): UInt64;
     begin
       {$IF ISLAND}
@@ -1284,6 +1289,21 @@ type
   begin
     exit (a.fRealType = b.fRealType);
     exit Object.ReferenceEquals(a, b);
+  end;
+
+  method Append(s: Value; params x: array of Value): Value;
+  begin
+    raise new NotImplementedException;
+  end;
+
+  method Append(s: Value; x: go.builtin.Slice<Value>): Value;
+  begin
+    raise new NotImplementedException;
+  end;
+
+  method AppendSlice(s: Value; x: Value): Value;
+  begin
+    raise new NotImplementedException;
   end;
 
 
