@@ -262,7 +262,7 @@ type
 
     method TryReceive: IWaitReceiveMessage<T>;
     begin
-      if fClosed <> 0 then raise new Exception('Channel closed!');
+      if fClosed <> 0 then exit nil;
       exit new ReceiveMessage<T>(self);
     end;
 
@@ -313,6 +313,23 @@ type
     end;
   end;
 
+  RandNumber = static class
+    class var fRandom: go.crypto.rand.PlatformRandom;
+
+    method Random(aMax: Cardinal): Cardinal;
+    begin
+      {$IF ISLAND}
+      exit fRandom.Random mod aMax;
+      {$ELSEIF ECHOES}
+      exit fRandom.Next(aMax);
+      {$ENDIF}
+    end;
+
+    class constructor;
+    begin
+      fRandom := new go.crypto.rand.PlatformRandom();
+    end;
+  end;
 
   method Channel_Select(aHandles: array of IWaitMessage; aBlock: Boolean): Integer; public;
   begin
@@ -323,11 +340,13 @@ type
     var lLock := new Object;
     {$ENDIF}
     var lDone := -1;
+    var lAnyChannel := false;
     locking lLock do begin
       for i: Integer := 0 to aHandles.Count -1 do begin
         var ci := i;
         if (aHandles[i] <> nil) and aHandles[i].Start(a -> begin
           locking lLock do begin
+            lAnyChannel := true;
             if lDone <> -1 then exit false;
             if not a() then exit false;
             lDone := ci;
@@ -350,6 +369,9 @@ type
     end;
     if not aBlock then
       exit -1;
+    // if all channels are nil (reading closed channels), choose one using random number (Go way)
+    if not lAnyChannel then
+      exit RandNumber.Random(aHandles.Length);
     loop begin
       locking lLock do begin
         if lDone <> -1 then break;
