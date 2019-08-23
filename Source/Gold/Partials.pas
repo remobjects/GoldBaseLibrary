@@ -544,4 +544,6 @@ type
   go.expvar.String = public partial class(go.expvar.Var);
   go.time.Time = public partial class(go.fmt.Stringer);
   go.math.rand.rngSource = public partial class(:go.math.rand.Source, :go.math.rand.Source64);
+
+  go.crypto.ecdsa.PrivateKey = public partial class(:go.crypto.Signer);
 end.

@@ -762,6 +762,12 @@ type
 
   method TypeAssert<T>(v: Object): tuple of (T, Boolean);
   begin
+    if (v ≠ nil) and (v is go.builtin.IReference) then begin
+      var lNewV := go.builtin.IReference(v).Get;
+      if lNewV is T then
+        exit (T(lNewV), true);
+    end;
+
     if v is T then
       exit (T(v), true);
     {$IFDEF ISLAND}
@@ -843,7 +849,7 @@ type
 
   extension method go.reflect.Kind.String(): go.builtin.string; public;
   begin
-    case Integer(self) of 
+    case Integer(self) of
       0: exit 'Invalid';
       1: exit 'Bool';
       2: exit 'Int';
@@ -870,7 +876,7 @@ type
       23: exit 'Slice';
       24: exit 'String';
       25: exit 'Struct';
-      26: exit 'UnsafePointer';    
+      26: exit 'UnsafePointer';
     end;
     exit 'Unknown';
   end;
