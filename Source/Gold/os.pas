@@ -269,6 +269,12 @@ type
     exit (Environment.CurrentDirectory, nil);
   end;
 
+  method Getgid: Int64; public; empty;
+  method Getuid: Int64; public; empty;
+  method Geteuid: Int64; public; empty;
+  method Getpid: Int64; public; empty;
+  method Getppid: Int64; public; empty;
+
   method executable(): tuple of (go.builtin.string, go.builtin.error); public;
   begin
     {$IF ISLAND AND WINDOWS}
