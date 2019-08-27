@@ -365,7 +365,7 @@ func karatsuba(z, x, y nat) {
 func alias(x, y nat) bool {
 	//return cap(x) > 0 && cap(y) > 0 && &x[0:cap(x)][cap(x)-1] == &y[0:cap(y)][cap(y)-1]
 	// elements change
-	return x.fArray == y.fArray
+	return (x != nil) && (y != nil) && (x.fArray == y.fArray)
 }
 
 // addAt implements z += x<<(_W*i); z must be long enough.
