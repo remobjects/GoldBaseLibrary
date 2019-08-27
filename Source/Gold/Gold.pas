@@ -7,15 +7,17 @@ uses
   ;
 
 type
-  [AttributeUsage(AttributeTargets.Assembly)]
+  [AttributeUsage(AttributeTargets.Assembly, AllowMultiple := true)]
   PackageNameAttribute = public class(Attribute)
   public
-    constructor(aName: System.String);
+    constructor(aNamespace, aName: System.String);
     begin
+      &Namespace := aNamespace;
       Name := aName;
     end;
 
     property Name: System.String; readonly;
+    property &Namespace: System.String; readonly;
   end;
 
 
