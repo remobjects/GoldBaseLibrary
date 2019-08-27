@@ -7,6 +7,18 @@ uses
   ;
 
 type
+  [AttributeUsage(AttributeTargets.Assembly)]
+  PackageNameAttribute = public class(Attribute)
+  public
+    constructor(aName: System.String);
+    begin
+      Name := aName;
+    end;
+
+    property Name: System.String; readonly;
+  end;
+
+
   VTCheck<V> = class
   public
     class var IsVT := false; readonly;
