@@ -340,13 +340,11 @@ type
     var lLock := new Object;
     {$ENDIF}
     var lDone := -1;
-    var lAnyChannel := false;
     locking lLock do begin
       for i: Integer := 0 to aHandles.Count -1 do begin
         var ci := i;
         if (aHandles[i] <> nil) and aHandles[i].Start(a -> begin
           locking lLock do begin
-            lAnyChannel := true;
             if lDone <> -1 then exit false;
             if not a() then exit false;
             lDone := ci;
@@ -370,6 +368,13 @@ type
     if not aBlock then
       exit -1;
     // if all channels are nil (reading closed channels), choose one using random number (Go way)
+    var lAnyChannel := false;
+    for x: Integer := 0 to aHandles.Length - 1 do begin
+      if aHandles[x] ≠ nil then begin
+        lAnyChannel := true;
+        break;
+      end;
+    end;
     if not lAnyChannel then
       exit RandNumber.Random(aHandles.Length);
     loop begin
