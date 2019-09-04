@@ -242,7 +242,7 @@ type
     method getCap: Integer;
     method setCap: Integer;
     method getLen: Integer;
-    method setLen: Integer;
+    method setLen(aValue: Integer): Integer;
     method setFrom(aSrc: ISlice);
     method getReflectSlice(i: Integer; j: Integer): go.reflect.Value;
   end;
@@ -269,7 +269,7 @@ type
 
     method set_Item(i: Integer; aVal: T);
     begin
-      if (i < 0) or (i ≥ fCount) then raise new IndexOutOfRangeException('Index out of range');
+      if (i < 0) or (i ≥ Capacity) then raise new IndexOutOfRangeException('Index out of range');
       fArray[i + fStart] := aVal;
     end;
     class var EmptyArray: array of T := [];
@@ -370,9 +370,9 @@ type
 
     end;
 
-    method setLen: Integer;
+    method setLen(aValue: Integer): Integer;
     begin
-
+      fCount := aValue;
     end;
 
     method getLen: Integer;
@@ -595,31 +595,23 @@ type
   begin
     var c := if elems = nil then 0 else IList<T>(elems).Count;
     var slc := if sl = nil then 0 else sl.Length;
-    var lNew := new T[slc + c + 1];
-    for i: Integer := 0 to slc -1 do
-      lNew[i] := sl[i];
-    lNew[slc] := a;
-    for i: Integer := 0 to c -1 do
-      lNew[i + slc + 1] := IList<T>(elems)[i];
-    exit lNew;
+    if c + slc + 1 ≤ sl.Capacity then begin
+      sl[slc] := a;
+      for i: Integer := 0 to c -1 do
+        sl[slc + i + 1] := IList<T>(elems)[i];
+      sl.setLen(slc + c + 1);
+      exit sl;
+    end
+    else begin
+      var lNew := new T[slc + c + 1];
+      for i: Integer := 0 to slc -1 do
+        lNew[i] := sl[i];
+      lNew[slc] := a;
+      for i: Integer := 0 to c -1 do
+        lNew[i + slc + 1] := IList<T>(elems)[i];
+      exit lNew;
+    end;
   end;
-
-/*
-  method append<T>(sl: Slice<T>; elems: Object): Slice<T>;
-  begin
-    if elems is Slice<T> then
-      exit appendSlice(sl, elems as Slice<T>);
-    var c := if elems = nil then 0 else IList<T>(elems).Count;
-    var slc := if sl = nil then 0 else sl.Length;
-    var slCap := if sl = nil then 0 else sl.Capacity;
-    var lNew := new T[if (slc + c) <= slCap then slCap else slc + c];
-
-    for i: Integer := 0 to slc -1 do
-      lNew[i] := sl[i];
-    for i: Integer := 0 to c -1 do
-      lNew[i + slc] := IList<T>(elems)[i];
-    exit new Slice<T>(lNew, 0, slc + c);
-  end;*/
 
   method append<T>(sl, elems: Slice<T>): Slice<T>;
   begin

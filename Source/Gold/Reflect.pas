@@ -124,7 +124,12 @@ type
     end;
     method Uint: UInt64;
     begin
-      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToUInt64(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
+      {$IFDEF ISLAND}
+      exit RemObjects.Elements.System.Convert.ToUInt64(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
+      {$ELSE}
+      var lValue := InternalGetValue;
+      exit System.Convert.ToUInt64(if lValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue)) else lValue);
+      {$ENDIF}
     end;
     method Float: Double;
     begin
@@ -230,10 +235,11 @@ type
 
     method Pointer(): UInt64;
     begin
+      var lValue := InternalGetValue;
       {$IF ISLAND}
-      exit RemObjects.Elements.System.UInt64(InternalCalls.Cast(fValue));
+      exit RemObjects.Elements.System.UInt64(InternalCalls.Cast(lValue));
       {$ELSEIF ECHOES}
-      exit System.Convert.ToUInt64(fValue);
+      exit System.Convert.ToUInt64(lValue);
       {$ENDIF}
     end;
 
@@ -380,11 +386,11 @@ type
 
     method Bytes: go.builtin.Slice<Byte>;
     begin
-      var lValue := fValue as go.builtin.Slice<Byte>;
-      if lValue = nil then
+      var lValue := InternalGetValue;
+      if lValue is go.builtin.Slice<Byte> then
+        exit lValue as go.builtin.Slice<Byte>
+      else
         raise new Exception('Wrong type, need a Slice of bytes');
-
-      exit lValue;
     end;
 
     method Kind: Kind;
