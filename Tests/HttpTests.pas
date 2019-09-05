@@ -11,6 +11,16 @@ type
     begin
       TestApplication2.DoGetTest();
     end;
+
+    method SSLGet;
+    begin
+      {$IF ECHOES}
+      TestApplication2.DoSSLGetTest();
+      {$ELSE}
+      raise new Exception('Fails or Island');
+      {$ENDIF}
+    end;
+
   end;
 
 end.

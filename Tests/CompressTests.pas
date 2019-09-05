@@ -18,7 +18,11 @@ type
 
     method GZipTest;
     begin
+      {$IF ECHOES}
       TestApplication2.DoGZIPTest(); // T82177
+      {$ELSE}
+      raise new Exception('Fails for Island');
+      {$ENDIF}
     end;
   end;
 
