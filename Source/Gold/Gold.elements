@@ -24,7 +24,7 @@
     <GenerateDebugInfo>True</GenerateDebugInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-   <DefineConstants>math_big_pure_go</DefineConstants>
+    <DefineConstants>math_big_pure_go</DefineConstants>
     <OutputPath>.\Bin\Release</OutputPath>
     <CpuType>anycpu</CpuType>
     <RuntimeVersion>v25</RuntimeVersion>
@@ -652,6 +652,7 @@
     <Compile Include="crypto.rand.pas" />
     <Compile Include="string.pas" />
     <Compile Include="Partials.cs" />
+    <Compile Include="Math.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
