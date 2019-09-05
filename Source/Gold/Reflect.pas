@@ -120,11 +120,22 @@ type
 
     method Int: Int64;
     begin
-      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToInt64(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
+      var lValue := InternalGetValue;
+      {$IFDEF ISLAND}
+      exit RemObjects.Elements.System.Convert.ToInt64(if lValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue)) else lValue);
+      {$ELSE}
+      exit System.Convert.ToInt64(if lValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue)) else lValue);
+      {$endif}
     end;
+
     method Uint: UInt64;
     begin
-      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToUInt64(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
+      var lValue := InternalGetValue;
+      {$IFDEF ISLAND}
+      exit RemObjects.Elements.System.Convert.ToUInt64(if lValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue)) else lValue);
+      {$ELSE}
+      exit System.Convert.ToUInt64(if lValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue)) else lValue);
+      {$ENDIF}
     end;
     method Float: Double;
     begin
@@ -230,10 +241,11 @@ type
 
     method Pointer(): UInt64;
     begin
+      var lValue := InternalGetValue;
       {$IF ISLAND}
-      exit RemObjects.Elements.System.UInt64(InternalCalls.Cast(fValue));
+      exit RemObjects.Elements.System.UInt64(InternalCalls.Cast(lValue));
       {$ELSEIF ECHOES}
-      exit System.Convert.ToUInt64(fValue);
+      exit System.Convert.ToUInt64(lValue);
       {$ENDIF}
     end;
 
@@ -380,11 +392,11 @@ type
 
     method Bytes: go.builtin.Slice<Byte>;
     begin
-      var lValue := fValue as go.builtin.Slice<Byte>;
-      if lValue = nil then
+      var lValue := InternalGetValue;
+      if lValue is go.builtin.Slice<Byte> then
+        exit lValue as go.builtin.Slice<Byte>
+      else
         raise new Exception('Wrong type, need a Slice of bytes');
-
-      exit lValue;
     end;
 
     method Kind: Kind;
@@ -394,8 +406,10 @@ type
 
     method Len: Integer;
     begin
-      if Kind() = go.reflect.Slice then
-        exit go.builtin.ISlice(fValue).getLen();
+      if Kind() = go.reflect.Slice then begin
+        var lValue := InternalGetValue;
+        exit go.builtin.ISlice(lValue).getLen();
+      end;
 
       //if fValue is go.sort.Interface then
         //exit go.sort.Interface(fValue).Len;
@@ -411,6 +425,8 @@ type
         {$ELSE}
         var lFieldValue := lType.Fields.FirstOrDefault(a -> a.Name = 'Value');
         {$ENDIF}
+        if lFieldValue = nil then
+          exit fValue;
         var lValue: Object;
         if fExtended <> nil then begin
           lValue := (fExtended as FieldInfo).GetValue(if fPtr is go.builtin.IReference then go.builtin.IReference(fPtr).Get else fPtr);

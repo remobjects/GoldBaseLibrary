@@ -34,6 +34,7 @@ type
     end;
   end;
 
+  [ValueTypeSemantics]
   Cond = public class
   private
     fMutex: Locker;
