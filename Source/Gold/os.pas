@@ -548,6 +548,19 @@ type
 
   public
     class var Discard: go.io.Writer := new DiscardWriter;
+    class method TempDir(dir, aPrefix: String): tuple of (go.builtin.string, go.builtin.error);
+    begin
+      {$IF ISLAND}
+      if String.IsNullOrEmpty(dir) then
+        dir := Environment.TempFolder.FullName;
+      {$ELSEIF ECHOES}
+      if String.IsNullOrEmpty(dir) then
+        dir := Path.GetTempPath;
+      {$ENDIF}
+
+      dir := Path.Combine(dir, aPrefix+Guid.NewGuid.ToString.Replace('{','').Replace('}', '').Replace('-', ''));
+      exit (dir, nil);
+    end;
     class method WriteFile(filename: String; data: go.builtin.Slice<Byte>; per: go.os.FileMode): go.builtin.error;
     begin
       var res := OpenFile(filename, O_RDWR or O_CREATE, per); // 0755
@@ -574,6 +587,9 @@ type
     class method TempFile(dir, pattern: String): tuple of (go.builtin.Reference<go.os.File>, go.builtin.error);
     begin
       {$IF ISLAND}
+      if String.IsNullOrEmpty(dir) then
+        dir := Environment.TempFolder.FullName;
+      exit (new go.builtin.Reference<go.os.File>(new go.os.File(fs := new FileStream(Path.Combine(dir, pattern+Guid.NewGuid.ToString.Replace('{','').Replace('}', '').Replace('-', '')), :System.FileMode.Create, :System.FileAccess.ReadWrite))), nil);
       // TODO
       {$ELSEIF ECHOES}
       if String.IsNullOrEmpty(dir) then

@@ -126,7 +126,7 @@ namespace go.path
 			}
 		}
 
-		static bool IsAbs(string s) {
+		public static bool IsAbs(string s) {
 			return abs(s)[0] == s;
 		}
 	}
