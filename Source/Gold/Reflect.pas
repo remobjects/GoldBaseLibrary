@@ -245,7 +245,8 @@ type
       {$IF ISLAND}
       exit RemObjects.Elements.System.UInt64(InternalCalls.Cast(lValue));
       {$ELSEIF ECHOES}
-      exit System.Convert.ToUInt64(lValue);
+      //exit System.Convert.ToUInt64(lValue);
+      exit 0;
       {$ENDIF}
     end;
 
@@ -281,7 +282,10 @@ type
 
     method SetLen(n: Integer);
     begin
-      raise new NotImplementedException;
+      var lKind := Kind;
+      if (lKind <> &Array) and (lKind <> go.reflect.Slice) then
+        raise new Exception("Wrong type, need array or slice");
+      go.builtin.ISlice(fValue).SetLen(n);
     end;
 
     method Cap: Integer;
