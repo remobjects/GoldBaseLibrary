@@ -125,6 +125,10 @@ namespace go.path
 				return (null, go.errors.New(e.Message));
 			}
 		}
+
+		static bool IsAbs(string s) {
+			return abs(s)[0] == s;
+		}
 	}
 
 }

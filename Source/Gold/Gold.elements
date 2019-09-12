@@ -653,6 +653,10 @@
     <Compile Include="string.pas" />
     <Compile Include="Partials.cs" />
     <Compile Include="Math.cs" />
+    <Compile Include="encoding\xml\marshal.go" />
+    <Compile Include="encoding\xml\read.go" />
+    <Compile Include="encoding\xml\typeinfo.go" />
+    <Compile Include="encoding\xml\xml.go" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
