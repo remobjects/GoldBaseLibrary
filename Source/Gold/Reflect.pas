@@ -970,7 +970,7 @@ type
       if fRealType is go.builtin.Reference<Object> then begin
         var lRealType: PlatformType;
         {$IF ISLAND}
-        lRealType := fRealType.GenericArguments.FirstOrDefault;
+        lRealType := fTrueType.GenericArguments.FirstOrDefault;
         {$ELSEIF ECHOES}
         lRealType := fTrueType.GenericTypeArguments[0];
         {$ENDIF}
