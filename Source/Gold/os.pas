@@ -229,6 +229,11 @@ type
       exit nil;
     end;
 
+    method Sync();
+    begin
+
+    end;
+
     method &Read(p: go.builtin.Slice<go.builtin.byte>): tuple of (go.builtin.int, go.builtin.error);
     begin
       try
@@ -254,6 +259,11 @@ type
       end;
     end;
 
+    method WriteString(p: go.builtin.string): tuple of (go.builtin.int, go.builtin.error);
+    begin
+      exit &Write(p.Value);
+    end;
+
     method &Seek(offset: go.builtin.int64; whence: go.builtin.int): tuple of (go.builtin.int64, go.builtin.error);
     begin
       try
@@ -267,6 +277,20 @@ type
   method Getwd: tuple of (go.builtin.string, go.builtin.error); public;
   begin
     exit (Environment.CurrentDirectory, nil);
+  end;
+
+  method Chdir(p: String): go.builtin.error;
+  begin
+    try
+      {$IFDEF ECHOES}
+      Environment.CurrentDirectory := p;
+      {$ELSE}
+      raise new NotImplementedException;
+      {$ENDIF}
+    except
+      on e: Exception do
+        exit go.Errors.New(e.Message);
+    end;
   end;
 
   method Getgid: Int64; public; empty;
@@ -524,10 +548,48 @@ type
 
   public
     class var Discard: go.io.Writer := new DiscardWriter;
+    class method TempDir(dir, aPrefix: String): tuple of (go.builtin.string, go.builtin.error);
+    begin
+      {$IF ISLAND}
+      if String.IsNullOrEmpty(dir) then
+        dir := Environment.TempFolder.FullName;
+      {$ELSEIF ECHOES}
+      if String.IsNullOrEmpty(dir) then
+        dir := Path.GetTempPath;
+      {$ENDIF}
+
+      dir := Path.Combine(dir, aPrefix+Guid.NewGuid.ToString.Replace('{','').Replace('}', '').Replace('-', ''));
+      exit (dir, nil);
+    end;
+    class method WriteFile(filename: String; data: go.builtin.Slice<Byte>; per: go.os.FileMode): go.builtin.error;
+    begin
+      var res := OpenFile(filename, O_RDWR or O_CREATE, per); // 0755
+      if res.Item2 <> nil then exit res.Item2;
+      try
+        var res2 := res.Item1.Write(data);
+        if (res2.Item2 <> nil) then
+          exit res2.Item2;
+      finally
+        res.Item1.Close;
+      end;
+      exit nil;
+    end;
+    class method ReadDir(dir: String): tuple of (go.builtin.Slice<go.os.FileInfo>, go.builtin.error);
+    begin
+      try
+        exit new File(path := dir).Readdir(-1);
+      except
+        on e: Exception do
+          exit (nil, go.errors.New(e.Message));
+      end;
+    end;
 
     class method TempFile(dir, pattern: String): tuple of (go.builtin.Reference<go.os.File>, go.builtin.error);
     begin
       {$IF ISLAND}
+      if String.IsNullOrEmpty(dir) then
+        dir := Environment.TempFolder.FullName;
+      exit (new go.builtin.Reference<go.os.File>(new go.os.File(fs := new FileStream(Path.Combine(dir, pattern+Guid.NewGuid.ToString.Replace('{','').Replace('}', '').Replace('-', '')), :System.FileMode.Create, :System.FileAccess.ReadWrite))), nil);
       // TODO
       {$ELSEIF ECHOES}
       if String.IsNullOrEmpty(dir) then
