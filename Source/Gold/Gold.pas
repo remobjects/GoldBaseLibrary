@@ -453,6 +453,9 @@ type
 
     class operator implicit(aVal: Slice<T>): array of T;
     begin
+      if aVal = nil then
+        exit new T[0];
+
       exit aVal.ToArray();
     end;
   end;
