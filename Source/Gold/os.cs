@@ -270,6 +270,10 @@ namespace go.os {
 				return (null, go.errors.New("not implemented"));
 			}
 
+			public (go.io.WriteCloser, go.builtin.error) StdinPipe() {
+				return (null, go.errors.New("not implemented"));
+			}
+
 			public (Slice<byte>, go.builtin.error) Output() {
 				return (null, go.errors.New("not implemented"));
 			}
