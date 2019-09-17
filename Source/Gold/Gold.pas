@@ -486,6 +486,7 @@ type
   ReceivingChannel<T> = public interface(Channel<T>)
     method Receive: tuple of (T, Boolean);
     method TryReceive: IWaitReceiveMessage<T>;
+    method GetSequence: sequence of T;
   end;
 
   SendingChannel<T> = public interface(Channel<T>)
