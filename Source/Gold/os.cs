@@ -1,6 +1,7 @@
 ﻿using go.builtin;
 #if ECHOES
 using System.Security.Cryptography.X509Certificates;
+using System.IO;
 #endif
 
 
@@ -277,9 +278,42 @@ namespace go.os {
 			public (Slice<byte>, go.builtin.error) Output() {
 				return (null, go.errors.New("not implemented"));
 			}
+		}
 
-			// stdoutpipe
+		partial class ReadCloserImpl: go.io.ReadCloser {
+			private Stream fs;
 
+			public ReadCloserImpl(Stream newFs) {
+				fs = newFs;
+			}
+
+			public (go.builtin.int, go.builtin.error) Read(Slice<go.builtin.byte> p) {
+				return (fs.Read(p.fArray, p.fStart, p.fCount), null);
+			}
+
+			public go.builtin.error Close() {
+				fs.Close();
+				return null;
+			}
+		}
+
+
+		partial class WriteCloserImpl: go.io.WriteCloser {
+			private Stream fs;
+
+			public WriteCloserImpl(Stream newFs) {
+				fs = newFs;
+			}
+
+			public (go.builtin.int, go.builtin.error) Write(Slice<go.builtin.byte> p) {
+				fs.Write(p.fArray, p.fStart, p.fCount);
+				return (p.fCount, null);
+			}
+
+			public go.builtin.error Close() {
+				fs.Close();
+				return null;
+			}
 		}
 	}
 }
