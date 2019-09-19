@@ -5,7 +5,7 @@ uses
   RemObjects.Elements.System;
 {$ELSEIF ECHOES}
 uses
-  System.IO, System.Diagnostics, System.Linq;
+  System.IO, System.Diagnostics, System.Collections.Generic, System.Linq;
 {$ENDIF}
 
 
@@ -707,35 +707,47 @@ end;
 
 method IntStartProcess(name: go.builtin.string; argv: go.builtin.Slice<go.builtin.string>; attr: go.builtin.Reference<ProcAttr>): tuple of (go.builtin.Reference<Process>, go.builtin.error);
 begin
-  {$IF ISLAND}
-  // TODO
-  {$ELSEIF ECHOES}
-  var lPSI := new System.Diagnostics.ProcessStartInfo(name);
+  var lArgv := new List<String>();
   if argv <> nil then begin
     for each el in argv do
-      if go.builtin.string.IsNullOrEmpty(lPSI.Arguments) then begin
-        lPSI.Arguments := '"'+el.Item2+'"';
-      end else begin
-        lPSI.Arguments := lPSI.Arguments+' "'+el.Item2+'"';
-      end;
+      lArgv.Add(el[1]);
   end;
-  lPSI.UseShellExecute := false;
+
+  var lEnv := new Dictionary<String, String>();
+  var lWorkingDir := '';
   if (attr <> nil) then begin
     var p := go.builtin.Reference<ProcAttr>.Get(attr);
     if p <> nil then begin
       if p.Dir <> nil then
-        lPSI.WorkingDirectory := p.Dir;
+        lWorkingDir := p.Dir;
       if p.Env <> nil then
         for each el in p.Env do begin
-          var n := go.strings.SplitN(el.Item2, '=', 2);
+          var n := go.strings.SplitN(el[1], '=', 2);
           if n.Length <> 2 then continue;
-          lPSI.EnvironmentVariables.Add(n[0], n[1]);
+          lEnv.Add(n[0], n[1]);
         end;
     end;
   end;
+  {$IF ECHOES}
+  var lPSI := new System.Diagnostics.ProcessStartInfo(name);
+  for each el in lArgv do
+    if go.builtin.string.IsNullOrEmpty(lPSI.Arguments) then begin
+      lPSI.Arguments := '"'+ el +'"';
+    end else begin
+      lPSI.Arguments := lPSI.Arguments+' "' + el + '"';
+    end;
+
+  lPSI.UseShellExecute := false;
+  lPSI.WorkingDirectory := lWorkingDir;
+
+  for each el in lEnv do
+    lPSI.EnvironmentVariables.Add(el.Key, el.Value);
+  {$ENDIF}
   try
     {$IF ISLAND}
-    exit (new Process(Process := ProcessType.Run(lPSI)), nil);
+    var lProcess := new ProcessType(name, lArgv, lEnv, lWorkingDir);
+    lProcess.Start;
+    exit (new Process(Process := lProcess), nil);
     {$ELSEIF ECHOES}
     exit (new Process(Process := ProcessType.Start(lPSI)), nil);
     {$ENDIF}
@@ -743,7 +755,6 @@ begin
     on e: Exception do
       exit (nil, go.errors.New(e.Message));
   end;
-  {$ENDIF}
 end;
 
 method StartProcess(name: go.builtin.string; argv: go.builtin.Slice<go.builtin.string>; attr: go.builtin.Reference<ProcAttr>): tuple of (go.builtin.Reference<Process>, go.builtin.error);
@@ -766,7 +777,6 @@ begin
     on e: Exception do
       exit (nil, go.errors.New(e.Message));
   end;
-  //exit (nil, errors.New('Not implemented'));
 end;
 
 end.
