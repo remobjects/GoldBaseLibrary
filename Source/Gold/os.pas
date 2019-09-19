@@ -746,6 +746,7 @@ begin
   try
     {$IF ISLAND}
     var lProcess := new ProcessType(name, lArgv, lEnv, lWorkingDir);
+    lProcess.RedirectOutput := true;
     lProcess.Start;
     exit (new Process(Process := lProcess), nil);
     {$ELSEIF ECHOES}
