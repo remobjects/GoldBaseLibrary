@@ -84,7 +84,8 @@ type
 
     class operator Implicit(aValue: string): Slice<byte>;
     begin
-      result := new Slice<byte>(aValue.Value);
+      var lData := aValue.Value.ToArray;
+      result := new Slice<byte>(lData);
     end;
 
     class operator Implicit(aValue: Char): string;
