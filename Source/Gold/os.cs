@@ -259,6 +259,14 @@ namespace go.os {
 				return null;
 			}
 
+			public builtin.error Run() {
+				var lRes = Start();
+				if (lRes != null)
+					return lRes;
+
+				return Wait();
+			}
+
 			public builtin.error Wait() {
 				try {
 					Process.Wait();
@@ -268,7 +276,11 @@ namespace go.os {
 			}
 
 			public (go.io.ReadCloser, go.builtin.error) StdoutPipe() {
-				return (null, go.errors.New("not implemented"));
+				#if ECHOES
+				return (new ReadCloserImpl(Process.Process.StandardOutput.BaseStream), null);
+				#else
+				return (new ReadCloserImpl(Process.Process.StandardOutputStream), null);
+				#endif
 			}
 
 			public (go.io.WriteCloser, go.builtin.error) StdinPipe() {
@@ -276,7 +288,17 @@ namespace go.os {
 			}
 
 			public (Slice<byte>, go.builtin.error) Output() {
-				return (null, go.errors.New("not implemented"));
+				var lRes = Run();
+				if (lRes != null)
+					return (null, lRes);
+
+				#if ECHOES
+				var lOutput = System.Text.Encoding.UTF8.GetBytes(Process.Process.StandardOutput.ReadToEnd());
+				#else
+				var lOutput = Encoding.UTF8.GetBytes(Process.Process.StandardOutput);
+				#endif
+
+				return (lOutput, null);
 			}
 		}
 
