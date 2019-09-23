@@ -319,34 +319,24 @@ type
   end;
 
   PlatformTimer = public {$IF ECHOES}System.Timers.Timer{$ELSEIF ISLAND}RemObjects.Elements.System.Timer{$ENDIF};
+  go.time.runtimeTimer = public partial class
+  assembly
+    property pt: PlatformTimer;
+  end;
   go.time.TimerPool = static class
   private
-    class var fIdles: List<PlatformTimer>;
-    class var fCurrentList: Dictionary<go.time.runtimeTimer, PlatformTimer>;
-    class var fMutex: go.sync.Mutex;
-
-    class constructor;
-    begin
-      fIdles := new List<PlatformTimer>();
-      fCurrentList := new Dictionary<go.time.runtimeTimer, PlatformTimer>();
-      fMutex := new go.sync.Mutex();
-    end;
 
   public
-    class method AddTimer(aTimer: go.time.runtimeTimer);
+    class method AddTimer(aTimer: go.builtin.Reference<go.time.runtimeTimer>);
     begin
-      var lTimer: PlatformTimer;
-      fMutex.Lock();
-      if fIdles.Count > 0 then begin
-        lTimer := fIdles[0];
-        fIdles.RemoveAt(0);
-      end
-      else
-        lTimer := new PlatformTimer();
-
       var lInterval := (aTimer.when - go.time.runtimeNano()) div 1000000; // ns to ms
       if lInterval < 0 then
         lInterval := go.math.MaxInt32;
+      var lTimer := aTimer.pt;
+      if lTimer = nil then begin
+        lTimer := new PlatformTimer;
+        aTimer.pt := lTimer;
+      end;
       {$IF ISLAND}
       lTimer.Repeat := false;
       lTimer.Interval := lInterval;
@@ -356,25 +346,18 @@ type
       lTimer.Interval := lInterval;
       lTimer.Elapsed += new System.Timers.ElapsedEventHandler((s, e)-> begin aTimer.f(aTimer.arg, aTimer.seq); end);
       {$ENDIF}
-      fCurrentList.Add(aTimer, lTimer);
-      fMutex.Unlock();
+      aTimer.pt := lTimer;
       lTimer.Start;
     end;
 
-    class method StopTimer(aTimer: go.time.runtimeTimer): Boolean;
+    class method StopTimer(aTimer: go.builtin.Reference<go.time.runtimeTimer>): Boolean;
     begin
-      var lTimer: PlatformTimer;
-      if not fCurrentList.TryGetValue(aTimer, out lTimer) then
-        exit false;
+      var lTimer := aTimer.pt;
+      if lTimer = nil then exit;
 
       var lRes := lTimer.Enabled;
       if lRes then
         lTimer.Stop;
-
-      fMutex.Lock();
-      fCurrentList.Remove(aTimer);
-      fIdles.Add(lTimer);
-      fMutex.Unlock();
       exit lRes;
     end;
   end;
