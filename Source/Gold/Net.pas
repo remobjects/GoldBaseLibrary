@@ -449,14 +449,19 @@ type
   IPConn = public partial class(Conn)
   private
     fSock: Socket;
-    method CreateNetOpError(aOp: string; aCall: string; e: SocketException): go.net.OpError;
+    method CreateNetOpError(aOp: string; aCall: string; e: Exception): go.net.OpError;
     begin
       result := new go.net.OpError();
       result.Op := aOp;
       result.Net := e.Message;
-      var err: go.syscall.Errno;
-      err := e.ErrorCode;
-      result.Err := new go.os.SyscallError(aCall, err);
+      {$IF ECHOES}
+      if e is SocketException then begin
+        var lE := SocketException(e);
+        var err: go.syscall.Errno;
+        err := lE.ErrorCode;
+        result.Err := new go.os.SyscallError(aCall, err);
+      end;
+      {$ENDIF}
     end;
   public
     constructor(aSock: Socket);
@@ -469,12 +474,8 @@ type
       try
         exit (fSock.Receive(b.fArray, b.fStart, b.fCount, SocketFlags.None), nil);
       except
-        on e: SocketException do begin
-          exit (0, CreateNetOpError('read', 'wsarecv', e));
-        end;
-
         on e: Exception do
-          exit (0, go.Errors.new(e.Message));
+          exit (0, CreateNetOpError('read', 'wsarecv', e));
       end;
     end;
 
@@ -484,12 +485,8 @@ type
         fSock.Send(b.fArray, b.fStart, b.fCount, SocketFlags.None);
         exit (b.fCount, nil);
       except
-        on e: SocketException do begin
-          exit (0, CreateNetOpError('write', 'wsasend', e));
-        end;
-
         on e: Exception do
-          exit (0, go.Errors.new(e.Message));
+          exit (0, CreateNetOpError('write', 'wsasend', e));
       end;
     end;
 
