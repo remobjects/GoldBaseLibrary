@@ -449,6 +449,15 @@ type
   IPConn = public partial class(Conn)
   private
     fSock: Socket;
+    method CreateNetOpError(aOp: string; aCall: string; e: SocketException): go.net.OpError;
+    begin
+      result := new go.net.OpError();
+      result.Op := aOp;
+      result.Net := e.Message;
+      var err: go.syscall.Errno;
+      err := e.ErrorCode;
+      result.Err := new go.os.SyscallError(aCall, err);
+    end;
   public
     constructor(aSock: Socket);
     begin
@@ -460,6 +469,10 @@ type
       try
         exit (fSock.Receive(b.fArray, b.fStart, b.fCount, SocketFlags.None), nil);
       except
+        on e: SocketException do begin
+          exit (0, CreateNetOpError('read', 'wsarecv', e));
+        end;
+
         on e: Exception do
           exit (0, go.Errors.new(e.Message));
       end;
@@ -471,6 +484,10 @@ type
         fSock.Send(b.fArray, b.fStart, b.fCount, SocketFlags.None);
         exit (b.fCount, nil);
       except
+        on e: SocketException do begin
+          exit (0, CreateNetOpError('write', 'wsasend', e));
+        end;
+
         on e: Exception do
           exit (0, go.Errors.new(e.Message));
       end;

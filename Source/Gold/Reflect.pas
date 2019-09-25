@@ -121,20 +121,37 @@ type
     method Int: Int64;
     begin
       var lValue := InternalGetValue;
+      if lValue is go.builtin.Reference<Object> then
+        lValue := go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue));
       {$IFDEF ISLAND}
-      exit RemObjects.Elements.System.Convert.ToInt64(if lValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue)) else lValue);
+      exit RemObjects.Elements.System.Convert.ToInt64(lValue);
       {$ELSE}
-      exit System.Convert.ToInt64(if lValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue)) else lValue);
-      {$endif}
+      if lValue is IConvertible then
+        exit System.Convert.ToInt64(lValue)
+      else
+        if lValue is System.IntPtr then
+          exit System.IntPtr(lValue).ToInt64
+        else
+          raise new Exception("Can not convert value");
+      {$ENDIF}
     end;
 
     method Uint: UInt64;
     begin
       var lValue := InternalGetValue;
+      if lValue is go.builtin.Reference<Object> then
+        lValue := go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue));
+
       {$IFDEF ISLAND}
-      exit RemObjects.Elements.System.Convert.ToUInt64(if lValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue)) else lValue);
+      exit RemObjects.Elements.System.Convert.ToUInt64(lValue);
       {$ELSE}
-      exit System.Convert.ToUInt64(if lValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue)) else lValue);
+      if lValue is IConvertible then
+        exit System.Convert.ToUInt64(lValue)
+      else
+        if lValue is System.UIntPtr then
+          exit System.UIntPtr(lValue).ToUInt64
+        else
+          raise new Exception("Can not convert value");
       {$ENDIF}
     end;
     method Float: Double;
@@ -864,10 +881,6 @@ type
       if fTrueType.IsInterface then
         exit go.reflect.Interface;
 
-      //if fRealType.IsPointer then
-      //if fRealType is builtin.Reference<Object> then
-      //if fRealType is sort.Interface then
-        //exit reflect.Slice;
       if fTrueType.BaseType = TypeOf(System.MulticastDelegate) then
         exit go.reflect.Func;
 
@@ -883,6 +896,9 @@ type
       if fTrueType.FullName = 'System.Object' then
         exit go.reflect.Interface;
 
+      if fTrueType.FullName = 'System.UIntPtr' then
+        exit go.reflect.Uintptr;
+
       case System.Type.GetTypeCode(fTrueType) of
         TypeCode.Boolean: result := go.reflect.Bool;
         TypeCode.Byte: result := go.reflect.UInt8;
@@ -897,7 +913,16 @@ type
         TypeCode.Double: result := go.reflect.Float64;
         TypeCode.String: result := go.reflect.String;
         TypeCode.Char: result := go.reflect.Uint16;
-        TypeCode.Object: result := go.reflect.Struct;
+        TypeCode.Object:
+        begin
+          // check ValueType
+          var lTrueType: PlatformType;
+          if fRealType.IsValueType {and (fRealType.GetConstructors().Count = 2)} and (fRealType.GetFields().Count = 1) then
+            lTrueType := fRealType.GetFields()[0].FieldType
+          else
+            exit go.reflect.Struct;
+          exit new &TypeImpl(lTrueType).Kind;
+        end;
         TypeCode.Empty: result := go.reflect.Invalid;
       end;
       {$ENDIF}
@@ -1165,7 +1190,6 @@ type
       exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType))
     else
       exit new Value(nil);
-      //exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType));
     {$ENDIF}
   end;
 
@@ -1245,8 +1269,6 @@ type
         var lNewType := DefaultGC.New(aType.RTTI, aType.SizeOfType);
         result := InternalCalls.Cast<Object>(lNewType);
         ^SliceAlias(lNewType)^.aVal := InstantiateSlice(lFields[0].Type, aCount);
-        //var lRealCtor2 := SliceObjectCtor(lCtor2.Pointer);
-        //lRealCtor2(result, InstantiateSlice(lFields[0].Type, aCount));
         exit;
       end;
     end;
@@ -1260,14 +1282,12 @@ type
     if aType.IsValueType and (aType.GetConstructors().Count = 2) and (aType.GetFields().Count = 1) then begin
       exit Activator.CreateInstance(aType, [InstantiateSlice(aType.GetFields()[0].FieldType, aCount)]);
     end;
-    //assert TypeOf(ISlice).AssignableTo(aMemberType)
     exit Activator.CreateInstance(aType, [aCount]);
     {$ENDIF}
   end;
 
   method MakeSlice(t: &Type; len, cap: Integer): Value;
   begin
-    //result := new Value(new builtin.Slice<Object>(len, cap), new TypeImpl(TypeImpl(t).fRealType));
     result := new Value(InstantiateSlice(TypeImpl(t).fRealType, cap), new TypeImpl(TypeImpl(t).fRealType));
   end;
 
