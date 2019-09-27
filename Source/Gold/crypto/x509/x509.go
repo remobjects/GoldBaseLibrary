@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -251,7 +251,7 @@ func (algo PublicKeyAlgorithm) String() string {
 // RFC 3279 2.2.3 ECDSA Signature Algorithm
 //
 // ecdsa-with-SHA1 OBJECT IDENTIFIER ::= {
-// 	  iso(1) member-body(2) us(840) ansi-x962(10045)
+//       iso(1) member-body(2) us(840) ansi-x962(10045)
 //    signatures(4) ecdsa-with-SHA1(1)}
 //
 //
@@ -1006,6 +1006,8 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{
 			return nil, errors.New("x509: RSA modulus is not a positive number")
 		}
 		if p.E <= 0 {
+			writeLn("p.E:")
+			writeLn(p.E)
 			return nil, errors.New("x509: RSA public exponent is not a positive number")
 		}
 

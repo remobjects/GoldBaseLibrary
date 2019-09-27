@@ -359,10 +359,14 @@ type
         raise new Exception('Can not set object to integer value');
 
       //builtin.IReference(fValue).Set(aVal);
+      {$IF ECHOES}
       if (aVal ≥ :go.math.MinInt32) and (aVal ≤ :go.math.MaxInt32) then // .net runtime fails if a Int64 value try to set in a Int32 field, even if fit.
         InternalSet(Integer(aVal))
       else
         InternalSet(aVal);
+      {$ELSE}
+      InternalSet(aVal);
+      {$endif}
     end;
 
     method &SetBool(aVal: Boolean);
