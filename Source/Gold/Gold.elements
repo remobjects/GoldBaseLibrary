@@ -78,6 +78,12 @@
     <DefineConstants>POSIX;math_big_pure_go</DefineConstants>
     <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.Android' ">
+    <Mode>Island</Mode>
+    <SubMode>Android</SubMode>
+    <DefineConstants>POSIX;math_big_pure_go</DefineConstants>
+    <OutputType>StaticLibrary</OutputType>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib">
       <Target>Echoes</Target>
@@ -177,6 +183,12 @@
     </Reference>
     <Reference Include="Island">
       <Target>Island.Darwin.watchOS</Target>
+    </Reference>
+    <Reference Include="gc">
+      <Target>Island.Android</Target>
+    </Reference>
+    <Reference Include="Island">
+      <Target>Island.Android</Target>
     </Reference>
     <ProjectReference Include="GoldAspect">
       <HintPath>..\GoldAspect\Bin\Debug\GoldAspect.dll</HintPath>

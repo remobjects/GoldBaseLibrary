@@ -109,29 +109,35 @@ type
   go.internal.poll.__Global = public partial class
   public
 
-    class var ErrNoDeadline := go.errors.New("file type does not support deadline");
+ class var ErrNoDeadline := go.errors.New("file type does not support deadline");
   end;
   __Global = public partial class
   public
     {$IF ISLAND AND WINDOWS}
-    class property Stdin: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_INPUT_HANDLE), FileAccess.Read)); lazy;
-    class property Stderr: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_ERROR_HANDLE), FileAccess.Write)); lazy;
-    class property Stdout: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_OUTPUT_HANDLE), FileAccess.Write)); lazy;
+    class property Stdin: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_INPUT_HANDLE), FileAccess.Read)); lazy; readonly;
+    class property Stderr: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_ERROR_HANDLE), FileAccess.Write)); lazy; readonly;
+    class property Stdout: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_OUTPUT_HANDLE), FileAccess.Write)); lazy; readonly;
+    {$ELSEIF ISLAND AND ANDROID}
+    class property Stdin: File := new File(fs := new NullStream()); lazy; readonly;
+    class property Stderr: File := new File(fs := new NullStream()); lazy; readonly;
+    class property Stdout: File := new File(fs := new NullStream()); lazy; readonly;
     {$ELSEIF ISLAND AND POSIX}
-    class property Stdin: File := new File(fs := new FileStream(rtl.stdin, FileAccess.Read)); lazy;
-    class property Stderr: File := new File(fs := new FileStream(rtl.stderr, FileAccess.Write)); lazy;
-    class property Stdout: File := new File(fs := new FileStream(rtl.stdout, FileAccess.Write)); lazy;
+    class property Stdin: File := new File(fs := new FileStream(rtl.stdin, FileAccess.Read)); lazy; readonly;
+    class property Stderr: File := new File(fs := new FileStream(rtl.stderr, FileAccess.Write)); lazy; readonly;
+    class property Stdout: File := new File(fs := new FileStream(rtl.stdout, FileAccess.Write)); lazy; readonly;
     {$ELSEIF ECHOES}
-    class property Stdin: File := new File(fs := Console.OpenStandardInput); lazy;
-    class property Stderr: File := new File(fs := Console.OpenStandardError); lazy;
-    class property Stdout: File := new File(fs := Console.OpenStandardOutput); lazy;
+    class property Stdin: File := new File(fs := Console.OpenStandardInput); lazy; readonly;
+    class property Stderr: File := new File(fs := Console.OpenStandardError); lazy; readonly;
+    class property Stdout: File := new File(fs := Console.OpenStandardOutput); lazy; readonly;
     {$ENDIF}
   end;
+
   File = public partial class(go.io.ReaderAt, go.io.Reader, go.io.Writer)
-  public
+  unit
     fs: Stream;
     path: String;
 
+  public
     method Name: String;
     begin
       exit path;
