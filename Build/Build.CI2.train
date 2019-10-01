@@ -55,7 +55,7 @@ function runEBuild(project, out, params)
 function compileGoBaseLibrary()
 {
 	msbuild.updateAssemblyVersion("../Source/Gold/Properties/AssemblyInfo.pas", elementsVersion);
-	runEBuild("../Source/GoBaseLibrary.sln", "../Bin", "--output-folder-uses-mode-name --output-folder-uses-sdk-name --setting:Architecture=Legacy");
+	runEBuild("../Source/GoBaseLibrary.sln", "../Bin", "--output-folder-uses-mode-name --output-folder-uses-sdk-name --setting:Architecture=Legacy --setting:GenerateDebugInfo=False");
 	file.remove("../Bin/Echoes/NET/GoldAspect.*"); // we don't need the Aspect
 	file.move("../Bin/Cooper/Plain/*.*", "../Bin/Cooper/"); // flatten
 }
