@@ -375,7 +375,7 @@ type
   go.net.http.http2noDialH2RoundTripper = public partial class(go.net.http.RoundTripper);
   go.net.http.http2connError = public partial class(go.builtin.error);
 
-  go.net.http.response = public partial class(go.net.http.writerOnly);
+  //go.net.http.response = public partial class(go.net.http.writerOnly);
   go.net.http.connReader = public partial class(go.io.Reader);
   go.net.http.badRequestError = public partial record(go.builtin.error);
   go.net.http.timeoutWriter = public partial class(go.io.Writer);
