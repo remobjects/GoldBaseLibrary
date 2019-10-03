@@ -12,7 +12,8 @@ type
     method &Read(p: Slice<byte>): tuple of (int, go.builtin.error);
     begin
       {$IF ISLAND}
-      fRandom.CryptoSafeRandom(p, p.fStart, p.Length);
+      // need 0 as array start parameter: Slice (Go) -> Array (.Net) and this one always starts on 0
+      fRandom.CryptoSafeRandom(p, 0, p.Length);
       exit(p.Length, nil);
       {$ELSEIF ECHOES}
       for i: Integer := 0 to p.Length - 1 do
