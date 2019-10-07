@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # RemObjects Water
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "GoldLibrary.Tests.Echoes", "GoldLibrary.Tests.Echoes.elements", "{90C713EA-2476-4620-9712-2D7F12C85451}"
 EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "GoldLibrary.Tests.Island.Linux", "GoldLibrary.Tests.Island.Linux\GoldLibrary.Tests.Island.Linux.elements", "{7B33B66D-7554-40E4-8B97-909FF7CC3300}"
+EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "GoldLibrary.Tests.Island.Windows", "GoldLibrary.Tests.Island.Windows.elements", "{62DD0286-9A6C-413B-BAEB-8386BF2456FA}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "GoldLibrary.Tests.Shared", "GoldLibrary.Tests.Shared.elements", "{1824FBA3-631E-4E54-9D33-4D90DD808F6D}"
@@ -17,6 +19,10 @@ Global
 		{90C713EA-2476-4620-9712-2D7F12C85451}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{90C713EA-2476-4620-9712-2D7F12C85451}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
 		{90C713EA-2476-4620-9712-2D7F12C85451}.Release|AnyCPU.Build.0 = Release|AnyCPU
+		{7B33B66D-7554-40E4-8B97-909FF7CC3300}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{7B33B66D-7554-40E4-8B97-909FF7CC3300}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{7B33B66D-7554-40E4-8B97-909FF7CC3300}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{7B33B66D-7554-40E4-8B97-909FF7CC3300}.Release|AnyCPU.Build.0 = Release|AnyCPU
 		{62DD0286-9A6C-413B-BAEB-8386BF2456FA}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
 		{62DD0286-9A6C-413B-BAEB-8386BF2456FA}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{62DD0286-9A6C-413B-BAEB-8386BF2456FA}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
