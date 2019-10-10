@@ -36,11 +36,7 @@ type
 
     method ECDSAVerify;
     begin
-      {$IF ECHOES}
       Assert.AreEqual(TestApplication2.DoECDSAVerify(), true); // T82197 array inside struct
-      {$ELSE}
-      raise new Exception('Fails for Island');
-      {$ENDIF}
     end;
 
     method DoMD5;

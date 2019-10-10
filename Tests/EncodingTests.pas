@@ -57,7 +57,9 @@ type
       Assert.AreEqual(lLines.Count, 4);
       Assert.AreEqual(lLines[0], '-----BEGIN MESSAGE-----');
       Assert.AreEqual(lLines[3], '-----END MESSAGE-----');
-      Assert.IsTrue(TestApplication2.DoDecodingPEMDecode());
+      var lRes := TestApplication2.DoDecodingPEMDecode();
+      Assert.IsTrue(lRes);
+      //Assert.IsTrue(TestApplication2.DoDecodingPEMDecode());
     end;
 
   end;
