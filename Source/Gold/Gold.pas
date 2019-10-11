@@ -132,6 +132,7 @@ type
     end;
 
     class var fZero: Map<K, V> := new Map<K, V>();
+    [published]
     class property Zero: Map<K, V> := fZero;
 
     class operator IsNil(aVal: Map<K, V>): Boolean;
@@ -327,6 +328,7 @@ type
     end;
 
     class var fZero: Slice<T> := new Slice<T>;
+    [published]
     class property Zero: Slice<T> := fZero;
 
     class operator IsNil(aVal: Slice<T>): Boolean;

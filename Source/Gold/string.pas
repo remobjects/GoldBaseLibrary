@@ -205,6 +205,7 @@ type
     end;
 
     class var fZero: string := new string();
+    [published]
     class property Zero: string := fZero; public;
 
     class method UTF8ToString(aValue: array of byte; aIndex: Integer; var aSize: Integer): rune;
