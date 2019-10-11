@@ -9,9 +9,7 @@ type
   public
     method Get;
     begin
-      {$IF NOT LINUX}
       TestApplication2.DoGetTest();
-      {$ENDIF}
     end;
 
     method SSLGet;
