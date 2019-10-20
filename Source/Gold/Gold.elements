@@ -669,6 +669,8 @@
     <Compile Include="encoding\xml\read.go" />
     <Compile Include="encoding\xml\typeinfo.go" />
     <Compile Include="encoding\xml\xml.go" />
+    <Compile Include="crypto\x509\root_linux.go" />
+    <Compile Include="crypto\x509\root_unix.go" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

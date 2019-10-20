@@ -20,6 +20,7 @@ namespace go.net {
 }
 namespace go.crypto {
 	namespace x509 {
+		#if ECHOES || (ISLAND && WINDOWS)
 		public partial class __Global {
 			public static (Reference<CertPool>, go.builtin.error) loadSystemRoots()
 			{
@@ -81,6 +82,7 @@ namespace go.crypto {
 				#endif
 			}
 		}
+		#endif
 	}
 	namespace tls {
 		public partial class Conn: go.net.Conn { }
