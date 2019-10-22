@@ -92,7 +92,7 @@ type
       var lTickCount := ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 
       var q := new DateTime(DateTime.UtcNow.Ticks - dtbase.Ticks);
-      exit (Int64(q.Ticks / DateTime.TicksPerSecond), (q.Ticks * 100) mod 1 000 000 000, lTickCount  * 100);
+      exit (Int64(q.Ticks / DateTime.TicksPerMillisecond), (q.Ticks * 100) mod 1 000 000 000, lTickCount  * 100);
       {$ELSEIF ECHOES}
       var q := DateTime.UtcNow - dtbase;
       exit (Int64(q.TotalSeconds), (q.Ticks * 100) mod 1 000 000 000, System.Diagnostics.StopWatch.GetTimestamp  * 100);
