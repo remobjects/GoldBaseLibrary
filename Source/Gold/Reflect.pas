@@ -82,6 +82,8 @@ const
 type
   PlatformExtendedType = {$IF ISLAND}RemObjects.Elements.System.MemberInfo{$ELSEIF ECHOES}System.Reflection.MemberInfo{$ENDIF};
 
+  ValueExtendedInfo = public (None, Slice);
+
   Value = public class
   private
   assembly
@@ -89,6 +91,8 @@ type
     fType: &Type;
     fPtr: Object;
     fExtended: PlatformExtendedType; // basically for struct fields
+    fExtendedInfo: ValueExtendedInfo;
+    fExtendedObject: Object;
   public
     constructor;
     begin
@@ -111,6 +115,14 @@ type
       constructor(aValue, aType);
       fPtr := aPtr;
       fExtended := aExtendedInfo;
+    end;
+
+    constructor(aValue: Object; aValueExtendedInfo: ValueExtendedInfo; aExtendedPtr: Object; aExtendedObject: Object);
+    begin
+      constructor(aValue);
+      fExtendedInfo := aValueExtendedInfo;
+      fExtendedObject := aExtendedObject;
+      fPtr := aExtendedPtr;
     end;
 
     method String: String;
@@ -322,25 +334,35 @@ type
         if not CanSet or not fType.AssignableTo(TypeOf(lValue)) then
           raise new Exception('Can not set object');
 
-      if fExtended <> nil then begin // struct field
-        (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, lValue);
-        fValue := lValue;
+      if fExtendedInfo = ValueExtendedInfo.Slice then begin
+        go.builtin.ISlice(fPtr).setAtIndex(Integer(fExtendedObject), lValue);
       end
       else begin
-        if fPtr is go.builtin.IReference then
-          go.builtin.IReference(fPtr).Set(lValue);
-        fValue := lValue;
+        if fExtended <> nil then begin // struct field
+          (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, lValue);
+          fValue := lValue;
+        end
+        else begin
+          if fPtr is go.builtin.IReference then
+            go.builtin.IReference(fPtr).Set(lValue);
+          fValue := lValue;
+        end;
       end;
     end;
 
     method InternalSet(aValue: Object); private;
     begin
-      if fExtended <> nil then begin // struct field
-        (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, aValue);
+      if fExtendedInfo = ValueExtendedInfo.Slice then begin
+        go.builtin.ISlice(fPtr).setAtIndex(Integer(fExtendedObject), aValue);
       end
       else begin
-        go.builtin.IReference(fPtr).Set(aValue);
-        fValue := aValue;
+        if fExtended <> nil then begin // struct field
+          (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, aValue);
+        end
+        else begin
+          go.builtin.IReference(fPtr).Set(aValue);
+          fValue := aValue;
+        end;
       end;
     end;
 
@@ -366,7 +388,7 @@ type
         InternalSet(aVal);
       {$ELSE}
       InternalSet(aVal);
-      {$endif}
+      {$ENDIF}
     end;
 
     method &SetBool(aVal: Boolean);
@@ -475,7 +497,7 @@ type
       // TODO need to create and return a reference here???
       case lKind of
         go.reflect.Slice:
-          result := new Value(go.builtin.ISlice(lValue).getAtIndex(i));
+          result := new Value(go.builtin.ISlice(lValue).getAtIndex(i), ValueExtendedInfo.Slice, lValue, i);
 
         go.reflect.String:
           result := new Value(go.builtin.string(lValue)[i]);
@@ -1254,7 +1276,13 @@ type
   method Copy(dst: Value; src: Value): Integer;
   begin
     // TODO check kind
-    var lDst := go.builtin.ISlice(InternalGetValue(dst));
+    var lDst: go.builtin.ISlice;
+    if dst.fExtendedInfo = ValueExtendedInfo.Slice then begin
+      var lTmp := go.builtin.ISlice(dst.fPtr).getAtIndex(Integer(dst.fExtendedObject));
+      lDst := go.builtin.ISlice(InternalGetValue(new Value(lTmp)));
+    end
+    else
+      lDst := go.builtin.ISlice(InternalGetValue(dst));
     var lSrc := go.builtin.ISlice(InternalGetValue(src));
 
     result := Math.Min(if lSrc = nil then 0 else lSrc.getLen, if lDst = nil then 0 else lDst.getLen);
