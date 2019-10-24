@@ -108,9 +108,9 @@ type
   end;
   go.internal.poll.__Global = public partial class
   public
-
- class var ErrNoDeadline := go.errors.New("file type does not support deadline");
+    class var ErrNoDeadline := go.errors.New("file type does not support deadline");
   end;
+
   __Global = public partial class
   public
     {$IF ISLAND AND WINDOWS}
@@ -785,5 +785,15 @@ begin
       exit (nil, go.errors.New(e.Message));
   end;
 end;
+
+{$IF ISLAND AND MACOS}
+type
+go.crypto.x509.__Global = public partial class
+  class method loadSystemRoots: tuple of (go.builtin.Reference<go.crypto.x509.CertPool>, go.builtin.error);
+  begin
+      // TODO
+  end;
+end;
+{$ENDIF}
 
 end.

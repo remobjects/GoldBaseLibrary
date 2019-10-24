@@ -151,6 +151,13 @@ namespace go.os {
 		throw new NotImplementedException();
 	}
 
+	public string UserHomeDir() {
+		#if ECHOES
+		return System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+		#else
+		return Environment.UserHomeFolder().FullName;
+		#endif
+	}
 
 
 	[ValueTypeSemantics]
