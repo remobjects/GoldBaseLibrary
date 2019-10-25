@@ -803,8 +803,8 @@ go.crypto.x509.__Global = public partial class
 
     var domains: array of SecTrustSettingsDomain := [SecTrustSettingsDomain.kSecTrustSettingsDomainSystem, SecTrustSettingsDomain.kSecTrustSettingsDomainAdmin,
                                                      SecTrustSettingsDomain.kSecTrustSettingsDomainUser];
-    var numDomains = sizeOf(domains)/sizeOf(SecTrustSettingsDomain);
-    if (pemRoots = nil) then
+    var numDomains := sizeOf(domains) / sizeOf(SecTrustSettingsDomain);
+    if pemRoots = nil then
       exit -1;
 
   end;
