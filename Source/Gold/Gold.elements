@@ -130,6 +130,9 @@
     <Reference Include="Foundation">
       <Target>Island.Darwin.macOS</Target>
     </Reference>
+    <Reference Include="Security">
+      <Target>Island.Darwin.macOS</Target>
+    </Reference>	
     <Reference Include="CoreFoundation">
       <Target>Island.Darwin.macOS</Target>
     </Reference>

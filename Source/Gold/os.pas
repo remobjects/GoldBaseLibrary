@@ -2,7 +2,11 @@
 
 {$IF ISLAND}
 uses
-  RemObjects.Elements.System;
+  RemObjects.Elements.System
+{$IF DARWIN}
+  , CoreFoundation, Security,
+{$ENDIF}
+  ;
 {$ELSEIF ECHOES}
 uses
   System.IO, System.Diagnostics, System.Collections.Generic, System.Linq;
@@ -134,7 +138,11 @@ type
 
   File = public partial class(go.io.ReaderAt, go.io.Reader, go.io.Writer)
   unit
+    {$IF ECHOES}
     fs: Stream;
+    {$ELSE}
+    fs: RemObjects.Elements.System.Stream;
+    {$ENDIF}
     path: String;
 
   public
@@ -786,12 +794,60 @@ begin
   end;
 end;
 
-{$IF ISLAND AND MACOS}
+{$IF ISLAND AND DARWIN}
 type
 go.crypto.x509.__Global = public partial class
+  class method FetchPEMRoots(pemRoots: ^CFDataRef; untrustedPemRoots: ^CFDataRef): Integer;
+  begin
+    // TODO
+
+    var domains: array of SecTrustSettingsDomain := [SecTrustSettingsDomain.kSecTrustSettingsDomainSystem, SecTrustSettingsDomain.kSecTrustSettingsDomainAdmin,
+                                                     SecTrustSettingsDomain.kSecTrustSettingsDomainUser];
+    var numDomains = sizeOf(domains)/sizeOf(SecTrustSettingsDomain);
+    if (pemRoots = nil) then
+      exit -1;
+
+  end;
+
   class method loadSystemRoots: tuple of (go.builtin.Reference<go.crypto.x509.CertPool>, go.builtin.error);
   begin
-      // TODO
+    var roots := NewCertPool();
+    var data: CFDataRef := 0;
+    var untrustedData: CFDataRef := 0;
+    var err := FetchPEMRoots(@data, @untrustedData);
+    if err = -1 then
+      exit (nil, go.errors.New("crypto/x509: failed to load darwin system roots with cgo"));
+
+    var buf := CFDataGetBytePtr(data);
+    var lTotal := CFDataGetLength(data);
+    var lSlice := new go.builtin.Slice<go.builtin.byte>(lTotal);
+    for i: Integer := 0 to lTotal - 1 do begin
+      lSlice[i] := buf^;
+      inc(buf);
+    end;
+
+    roots.AppendCertsFromPEM(lSlice);
+    if untrustedData = nil then begin
+      CFRelease(data);
+      exit (roots, nil);
+    end;
+    buf := CFDataGetBytePtr(untrustedData);
+    lTotal := CFDataGetLength(untrustedData);
+    var untrustedRoots := NewCertPool();
+    lSlice := new go.builtin.Slice<go.builtin.byte>(lTotal);
+    for i: Integer := 0 to lTotal - 1 do begin
+      lSlice[i] := buf^;
+      inc(buf);
+    end;
+    untrustedRoots.AppendCertsFromPEM(lSlice);
+    var trustedRoots := NewCertPool();
+    for lCert in roots.certs do
+      if not untrustedRoots.contains(lCert[1]) then
+        trustedRoots.AddCert(lCert[1]);
+
+    CFRelease(data);
+    CFRelease(untrustedData);
+    exit (trustedRoots, nil);
   end;
 end;
 {$ENDIF}
