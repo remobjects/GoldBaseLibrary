@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProductVersion>3.5</ProductVersion>
+    <RootNamespace>TestApplication2</RootNamespace>
+    <ProjectGuid>{C72DD60B-18D3-4CEE-8EAA-A7DD93E463DC}</ProjectGuid>
+    <OutputType>Executable</OutputType>
+    <AssemblyName>GoldLibrary.Tests.Island.Darwin</AssemblyName>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <Optimize>False</Optimize>
+    <OutputPath>.\Bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <GenerateDebugInfo>True</GenerateDebugInfo>
+    <CpuType>x86</CpuType>
+    <Architecture>x86_64</Architecture>
+    <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
+    <EnableAsserts>True</EnableAsserts>
+    <RootNamespace>TestApplication2</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>.\Bin\Release</OutputPath>
+    <CpuType>x86</CpuType>
+    <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
+    <RootNamespace>TestApplication2</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Island" />
+    <Reference Include="Go">
+      <HintPath>..\..\Source\Gold\Bin\Debug\macOS\x86_64\Go.fx</HintPath>
+    </Reference>
+    <Reference Include="rtl" />
+    <Reference Include="Elements" />
+    <Reference Include="EUnit" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.go" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Island.Darwin.targets" />
+  <Import Project="..\GoldLibrary.Tests.Shared.projitems" Label="Shared" />
+</Project>
