@@ -799,14 +799,122 @@ type
 go.crypto.x509.__Global = public partial class
   class method FetchPEMRoots(pemRoots: ^CFDataRef; untrustedPemRoots: ^CFDataRef): Integer;
   begin
-    // TODO
-
     var domains: array of SecTrustSettingsDomain := [SecTrustSettingsDomain.kSecTrustSettingsDomainSystem, SecTrustSettingsDomain.kSecTrustSettingsDomainAdmin,
                                                      SecTrustSettingsDomain.kSecTrustSettingsDomainUser];
     var numDomains := sizeOf(domains) / sizeOf(SecTrustSettingsDomain);
     if pemRoots = nil then
       exit -1;
 
+    var policy: CFStringRef := CFStringCreateWithCString(NULL, "kSecTrustSettingsResult", CFStringBuiltInEncodings.kCFStringEncodingUTF8);
+    var combinedData: CFMutableDataRef := CFDataCreateMutable(kCFAllocatorDefault, 0);
+    var combinedUntrustedData: CFMutableDataRef := CFDataCreateMutable(kCFAllocatorDefault, 0);
+    for i: Integer := 0 to numDomains - 1 do begin
+      var j: Integer;
+      var certs: CFArrayRef := nil;
+      var err: OSStatus := SecTrustSettingsCopyCertificates(domains[i], @certs);
+      if err <> rtl.noErr then
+        continue;
+
+      var numCerts: CFIndex := CFArrayGetCount(certs);
+      for j: Integer := 0 to  numCerts - 1 do begin
+        var data: CFDataRef := nil;
+        var errRef: CFErrorRef := nil;
+        var trustSettings: CFArrayRef := nil;
+        var cert: SecCertificateRef := SecCertificateRef(CFArrayGetValueAtIndex(certs, j));
+        if cert = nil then
+          continue;
+        // We only want trusted certs.
+        var untrusted: Integer := 0;
+        var trustAsRoot: Integer := 0;
+        var trustRoot: Integer := 0;
+        if i = 0 then
+          trustAsRoot := 1
+        else begin
+          var k: Integer;
+          var m: CFIndex;
+          // Certs found in the system domain are always trusted. If the user
+          // configures "Never Trust" on such a cert, it will also be found in the
+          // admin or user domain, causing it to be added to untrustedPemRoots. The
+          // Go code will then clean this up.
+
+          // Trust may be stored in any of the domains. According to Apple's
+          // SecTrustServer.c, "user trust settings overrule admin trust settings",
+          // so take the last trust settings array we find.
+          // Skip the system domain since it is always trusted.
+          for k := i to numDomains - 1 do begin
+            var domainTrustSettings: CFArrayRef := nil;
+            err := SecTrustSettingsCopyTrustSettings(cert, domains[k], @domainTrustSettings);
+            if (err = errSecSuccess) and (domainTrustSettings <> nil) then begin
+              if trustSettings ≠ nil then
+                CFRelease(trustSettings);
+              trustSettings := domainTrustSettings;
+            end;
+          end;
+
+          if trustSettings = nil then
+            // "this certificate must be verified to a known trusted certificate"; aka not a root.
+            continue;
+
+          for m := 0 to CFArrayGetCount(trustSettings) - 1 do begin
+            var cfNum: CFNumberRef;
+            var tSetting: CFDictionaryRef := CFDictionaryRef(CFArrayGetValueAtIndex(trustSettings, m));
+            if CFDictionaryGetValueIfPresent(tSetting, policy, @cfNum) then begin
+              var lResult: SecTrustSettingsResult := SecTrustSettingsResult.kSecTrustSettingsResultUnspecified;
+              CFNumberGetValue(cfNum, CFNumberType.kCFNumberSInt32Type, ^Void(@lResult));
+              // TODO: The rest of the dictionary specifies conditions for evaluation.
+              if lResult = SecTrustSettingsResult.kSecTrustSettingsResultDeny then
+                untrusted := 1
+              else
+                if lResult = SecTrustSettingsResult.kSecTrustSettingsResultTrustAsRoot then
+                  trustAsRoot := 1
+                else
+                  if lResult = SecTrustSettingsResult.kSecTrustSettingsResultTrustRoot then
+                    trustRoot := 1
+            end;
+          end;
+          CFRelease(trustSettings);
+        end;
+
+        if trustRoot > 0 then begin
+          // We only want to add Root CAs, so make sure Subject and Issuer Name match
+          var subjectName: CFDataRef := SecCertificateCopyNormalizedSubjectContent(cert, @errRef);
+          if errRef ≠ nil then begin
+            CFRelease(errRef);
+            continue;
+          end;
+          var issuerName: CFDataRef := SecCertificateCopyNormalizedIssuerContent(cert, @errRef);
+          if errRef ≠ nil then begin
+            CFRelease(subjectName);
+            CFRelease(errRef);
+            continue;
+          end;
+          var equal: Boolean := CFEqual(subjectName, issuerName);
+          CFRelease(subjectName);
+          CFRelease(issuerName);
+          if not equal then
+            continue;
+        end;
+
+        err := SecItemExport(cert, SecExternalFormat.kSecFormatX509Cert, SecItemImportExportFlags.kSecItemPemArmour, nil, @data);
+        if err ≠ rtl.noErr then
+          continue;
+
+        if data ≠ nil then begin
+          if (trustRoot = 0) and (trustAsRoot = 0) then
+            untrusted := 1;
+
+          var appendTo: CFMutableDataRef := if untrusted ≠ nil then combinedUntrustedData else combinedData;
+          CFDataAppendBytes(appendTo, CFDataGetBytePtr(data), CFDataGetLength(data));
+          CFRelease(data);
+        end;
+      end;
+      CFRelease(certs);
+    end;
+
+    CFRelease(policy);
+    pemRoots^ := combinedData;
+    untrustedPemRoots^ := combinedUntrustedData;
+    exit(0);
   end;
 
   class method loadSystemRoots: tuple of (go.builtin.Reference<go.crypto.x509.CertPool>, go.builtin.error);
