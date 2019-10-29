@@ -808,6 +808,7 @@ go.crypto.x509.__Global = public partial class
     var policy: CFStringRef := CFStringCreateWithCString(NULL, "kSecTrustSettingsResult", CFStringBuiltInEncodings.kCFStringEncodingUTF8);
     var combinedData: CFMutableDataRef := CFDataCreateMutable(kCFAllocatorDefault, 0);
     var combinedUntrustedData: CFMutableDataRef := CFDataCreateMutable(kCFAllocatorDefault, 0);
+    var appendTo: CFMutableDataRef;
     for i: Integer := 0 to numDomains - 1 do begin
       var j: Integer;
       var certs: CFArrayRef := nil;
@@ -815,7 +816,11 @@ go.crypto.x509.__Global = public partial class
       if err <> rtl.noErr then
         continue;
 
+      var untrusted: Integer := 0;
+      var trustAsRoot: Integer := 0;
+      var trustRoot: Integer := 0;
       var numCerts: CFIndex := CFArrayGetCount(certs);
+
       for j: Integer := 0 to  numCerts - 1 do begin
         var data: CFDataRef := nil;
         var errRef: CFErrorRef := nil;
@@ -824,9 +829,9 @@ go.crypto.x509.__Global = public partial class
         if cert = nil then
           continue;
         // We only want trusted certs.
-        var untrusted: Integer := 0;
-        var trustAsRoot: Integer := 0;
-        var trustRoot: Integer := 0;
+        untrusted := 0;
+        trustAsRoot := 0;
+        trustRoot := 0;
         if i = 0 then
           trustAsRoot := 1
         else begin
@@ -903,7 +908,7 @@ go.crypto.x509.__Global = public partial class
           if (trustRoot = 0) and (trustAsRoot = 0) then
             untrusted := 1;
 
-          var appendTo: CFMutableDataRef := if untrusted ≠ nil then combinedUntrustedData else combinedData;
+          appendTo := if untrusted = 1 then combinedUntrustedData else combinedData;
           CFDataAppendBytes(appendTo, CFDataGetBytePtr(data), CFDataGetLength(data));
           CFRelease(data);
         end;
@@ -950,8 +955,9 @@ go.crypto.x509.__Global = public partial class
     untrustedRoots.AppendCertsFromPEM(lSlice);
     var trustedRoots := NewCertPool();
     for lCert in roots.certs do
-      if not untrustedRoots.contains(lCert[1]) then
+      if not untrustedRoots.contains(lCert[1]) then begin
         trustedRoots.AddCert(lCert[1]);
+      end;
 
     CFRelease(data);
     CFRelease(untrustedData);
