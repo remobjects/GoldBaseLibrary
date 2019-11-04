@@ -173,11 +173,10 @@ type
 
     method GetHashCode: Integer; override; public;
     begin
-      // TODO optimize ECHOES
       {$IF ISLAND}
       result := Utilities.CalcHash(^Void(@Value.fArray[0]), Value.Length);
       {$ELSEIF ECHOES}
-      result := System.Text.Encoding.UTF8.GetString(Value).GetHashCode();
+      result := System.Collections.IStructuralEquatable(Value).GetHashCode(EqualityComparer<byte>.Default);
       {$ENDIF}
     end;
 
