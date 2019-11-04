@@ -270,27 +270,15 @@ type
     end;
   end;
 
-
   operator implicit(aVal: string): Slice<Char>; public;
   begin
-    // TODO optimize!!
-    {$IF ISLAND}
     var lString := Encoding.UTF8.GetString(aVal.Value);
     result := new Slice<Char>(lString.ToCharArray);
-    {$ELSEIF ECHOES}
-    var lString := System.Text.Encoding.UTF8.GetString(aVal.Value);
-    result := new Slice<Char>(lString.ToCharArray);
-    {$ENDIF}
   end;
 
   operator implicit(aVal: string): Slice<go.builtin.rune>; public;
   begin
-    // TODO optimize!!
-    {$IF ISLAND}
     var lString := Encoding.UTF8.GetString(aVal.Value);
-    {$ELSEIF ECHOES}
-    var lString := System.Text.Encoding.UTF8.GetString(aVal.Value);
-    {$ENDIF}
     result := new Slice<rune>(lString.Select(a -> rune(a)).ToArray());
   end;
 
