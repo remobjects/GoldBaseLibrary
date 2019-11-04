@@ -1,7 +1,7 @@
 ﻿namespace go.builtin;
 
 uses
-{$IFDEF ECHOES}  System.Linq, System.Collections.Generic{$ENDIF}
+{$IFDEF ECHOES}  System.Text, System.Linq, System.Collections.Generic{$ENDIF}
   ;
 
 type
@@ -20,20 +20,12 @@ type
 
     constructor(aValue: array of Char);
     begin
-      // TODO optimize!!
-      var lBytes := new List<byte>();
-      var z: array of byte;
-      for each lChar in aValue do begin
-        var lRune := uint32(lChar);
-        {$IFDEF ECHOES}
-        z := System.Text.Encoding.UTF8.GetBytes(chr(lRune));
-        {$ELSE}
-        z := Encoding.UTF8.GetBytes(chr(lRune));
-        {$ENDIF}
-        for i: Integer := 0 to z.Length - 1 do
-          lBytes.Add(z[i]);
-      end;
-      Value := lBytes.ToArray();
+      {$IF ECHOES}
+      Value := Encoding.UTF8.GetBytes(aValue);
+      {$ELSE}
+      var lString := PlatformString.FromCharArray(aValue);
+      Value := Encoding.UTF8.GetBytes(lString);
+      {$ENDIF}
     end;
 
     constructor(aValue: Slice<byte>);
@@ -44,19 +36,11 @@ type
 
     constructor(aValue: array of rune);
     begin
-      // TODO optimize!!
-      var lBytes := new List<byte>();
-      var z: array of byte;
-      for each lRune in aValue do begin
-        {$IFDEF ECHOES}
-        z := System.Text.Encoding.UTF8.GetBytes(chr(lRune));
-        {$ELSE}
-        z := Encoding.UTF8.GetBytes(chr(lRune));
-        {$ENDIF}
-        for i: Integer := 0 to z.Length - 1 do
-          lBytes.Add(z[i]);
-      end;
-      Value := lBytes.ToArray();
+      var lArray := new Char[aValue.Length];
+      for i: Integer := 0 to aValue.Length - 1 do
+        lArray[i] := chr(aValue[i]);
+
+      constructor(lArray);
     end;
 
     class operator Implicit(aValue: string): PlatformString;
