@@ -751,12 +751,14 @@ type
 
     method IsInteger: Boolean;
     begin
-      result := (Integer(self.Kind) ≥ Integer(go.reflect.Bool)) and (Integer(self.Kind) ≤ Integer(go.reflect.Uint64));
+      var lKind := self.Kind;
+      result := (Integer(lKind) ≥ Integer(go.reflect.Bool)) and (Integer(lKind) ≤ Integer(go.reflect.Uint64));
     end;
 
     method IsFloatOrComplex: Boolean;
     begin
-      result := (Integer(self.Kind) ≥ Integer(go.reflect.Float32)) and (Integer(self.Kind) ≤ Integer(go.reflect.Complex128));
+      var lKind := self.Kind;
+      result := (Integer(lKind) ≥ Integer(go.reflect.Float32)) and (Integer(lKind) ≤ Integer(go.reflect.Complex128));
     end;
 
   public
@@ -993,10 +995,11 @@ type
       if (IsInteger or IsFloatOrComplex) and (TypeImpl(u).IsInteger or TypeImpl(u).IsFloatOrComplex) then
         exit(true);
 
-      if (IsInteger or (Kind = go.reflect.String) or (Kind = go.reflect.Slice)) and (u.Kind = go.reflect.String) then
+      var lUKind := u.Kind;
+      if (IsInteger or (Kind = go.reflect.String) or (Kind = go.reflect.Slice)) and (lUKind = go.reflect.String) then
         exit(true);
 
-      if (Kind = go.reflect.String) and (TypeImpl(u).IsInteger or (u.Kind = go.reflect.String) or (u.Kind = go.reflect.Slice)) then
+      if (Kind = go.reflect.String) and (TypeImpl(u).IsInteger or (lUKind = go.reflect.String) or (lUKind = go.reflect.Slice)) then
         exit(true);
 
       exit(false);
@@ -1009,7 +1012,10 @@ type
 
     method Bits: Integer;
     begin
-      raise new NotImplementedException;
+      if IsInteger or IsFloatOrComplex then
+        result := sizeOf(fTrueType) * 8 // size in bits...
+      else
+        raise new Exception("Wrong type calling Bits method");
     end;
 
     method ChanDir: ChanDir;
