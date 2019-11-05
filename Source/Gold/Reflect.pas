@@ -380,7 +380,6 @@ type
       if (not CanSet) or not (Integer(Kind) in [Integer(go.reflect.Int)..Integer(go.reflect.Int64)])  then
         raise new Exception('Can not set object to integer value');
 
-      //builtin.IReference(fValue).Set(aVal);
       {$IF ECHOES}
       if (aVal ≥ :go.math.MinInt32) and (aVal ≤ :go.math.MaxInt32) then // .net runtime fails if a Int64 value try to set in a Int32 field, even if fit.
         InternalSet(Integer(aVal))
@@ -396,7 +395,6 @@ type
       if (not CanSet) or (Kind ≠ go.reflect.Bool) then
         raise new Exception('Can not set object to bool value');
 
-      //builtin.IReference(fValue).Set(aVal);
       InternalSet(aVal);
     end;
 
@@ -405,7 +403,6 @@ type
       if (not CanSet) or not (Integer(Kind) in [Integer(go.reflect.Uint)..Integer(go.reflect.Uint64)])  then
         raise new Exception('Can not set object to unsigned integer value');
 
-      //builtin.IReference(fValue).Set(aVal);
       InternalSet(aVal);
     end;
 
@@ -414,7 +411,6 @@ type
       if (not CanSet) or ((Kind ≠ go.reflect.Float32) and (Kind ≠ go.reflect.Float64)) then
         raise new Exception('Can not set object to float value');
 
-      //builtin.IReference(fPtr).Set(aVal);
       InternalSet(aVal);
     end;
 
@@ -428,7 +424,6 @@ type
       if (not CanSet) or (Kind ≠ go.reflect.String) then
         raise new Exception('Can not set object to string value');
 
-      //builtin.IReference(fValue).Set(aVal);
       InternalSet(aVal);
     end;
 
@@ -453,14 +448,25 @@ type
 
     method Len: Integer;
     begin
-      if Kind() = go.reflect.Slice then begin
-        var lValue := InternalGetValue;
-        exit go.builtin.ISlice(lValue).getLen();
-      end;
+      var lKind := Kind();
+      var lValue := InternalGetValue;
 
-      //if fValue is go.sort.Interface then
-        //exit go.sort.Interface(fValue).Len;
-      //TODO check other types?
+      case lKind of
+        go.reflect.Slice:
+          exit go.builtin.ISlice(lValue).getLen();
+
+        go.reflect.Map:
+          exit go.builtin.IMap(lValue).GetLen();
+
+        go.reflect.String:
+          exit go.builtin.string(lValue).Length;
+
+        go.reflect.Chan:
+          exit go.builtin.IChannel(lValue).Length;
+
+        else
+          raise new Exception("Wrong type calling reflect.Len method");
+      end;
     end;
 
     method InternalGetValue: Object; private;
@@ -1243,7 +1249,6 @@ type
 
   method Swapper(aslice: Object): Action<go.builtin.int, go.builtin.int>; public;
   begin
-    //exit new Action<Integer, Integer>(builtin.ISlice(aslice).Swap);
     exit new Action<go.builtin.int, go.builtin.int>(go.sort.Interface(aslice).Swap);
   end;
 
@@ -1275,7 +1280,12 @@ type
 
   method Copy(dst: Value; src: Value): Integer;
   begin
-    // TODO check kind
+    var lDstKind := dst.Kind;
+    var lSrcKind := src.Kind;
+    if not (((lDstKind = go.reflect.Slice) and (lSrcKind = go.reflect.Slice)) or ((lDstKind = go.reflect.Array) and (lSrcKind = go.reflect.Array))
+      or ((lDstKind = go.reflect.Slice) and (lSrcKind = go.reflect.String))) then
+        raise new Exception("Wrong type on reflect.copy method");
+
     var lDst: go.builtin.ISlice;
     if dst.fExtendedInfo = ValueExtendedInfo.Slice then begin
       var lTmp := go.builtin.ISlice(dst.fPtr).getAtIndex(Integer(dst.fExtendedObject));

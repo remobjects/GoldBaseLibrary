@@ -43,6 +43,7 @@ type
     method GetReflectValue(aKey: go.reflect.Value): go.reflect.Value;
     method GetReflectKeys: Slice<go.reflect.Value>;
     method SetReflectKeyValue(aKey: go.reflect.Value; aValue: go.reflect.Value);
+    method GetLen: Integer;
   end;
 
   [ValueTypeSemantics]
@@ -188,6 +189,11 @@ type
     method Delete(aKey: K);
     begin
       fDict.Remove(aKey);
+    end;
+
+    method GetLen: Integer;
+    begin
+      result := Length;
     end;
 
     property Length: Integer read fDict.Count;
@@ -476,6 +482,10 @@ type
   IWaitReceiveMessage<T> = public interface(IWaitMessage)
     method TryHandOff(aVal: T): Boolean;
     property Data: tuple of (T, Boolean) read;
+  end;
+
+  IChannel = public interface
+    property Length: Integer read;
   end;
 
   Channel<T> = public interface
