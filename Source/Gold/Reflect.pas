@@ -859,6 +859,9 @@ type
     method Kind: Kind;
     begin
       {$IF ISLAND}
+      if fTrueType = typeOf(go.builtin.string) then
+        exit go.reflect.String;
+
       if (fTrueType.GenericArguments <> nil) and (fTrueType.GenericArguments.Count > 0) then begin
         if fTrueType.Name.Contains('go.builtin.Slice') then
           exit go.reflect.Slice;
@@ -871,9 +874,6 @@ type
 
       if fTrueType.Name.Contains('<Projection>') then
         exit go.reflect.Func;
-
-      if fTrueType.Name.Contains('go.builtin.string') then
-        exit go.reflect.String;
 
       if fTrueType = TypeOf(Object) then
         exit go.reflect.Interface;
@@ -906,7 +906,7 @@ type
         end;
       end;
       {$ELSEIF ECHOES}
-      if fTrueType.AssemblyQualifiedName.StartsWith('go.builtin.string') then
+      if fTrueType = typeOf(go.builtin.string) then
         exit go.reflect.String;
 
       if fTrueType.IsArray then
@@ -927,10 +927,10 @@ type
           else
             exit go.reflect.Ptr;
 
-      if fTrueType.FullName = 'System.Object' then
+      if fTrueType = typeOf(System.Object) then
         exit go.reflect.Interface;
 
-      if fTrueType.FullName = 'System.UIntPtr' then
+      if fTrueType = typeOf(System.UIntPtr) then
         exit go.reflect.Uintptr;
 
       case System.Type.GetTypeCode(fTrueType) of
