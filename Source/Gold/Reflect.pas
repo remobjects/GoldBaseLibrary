@@ -964,9 +964,7 @@ type
 
     method Implements(u: &Type): Boolean;
     begin
-      {$IF ISLAND OR ECHOES}
       result := fRealType.isSubClassOf(TypeImpl(u).fRealType);
-      {$ENDIF}
     end;
 
     method AssignableTo(u: &Type): Boolean;
@@ -974,12 +972,10 @@ type
       if u = nil then
         raise new Exception('nil type in AssignableTo');
 
-      {$IF ISLAND OR ECHOES}
       if Kind = go.reflect.interface then
         result := true
       else
         result := TypeImpl(u).fRealType.IsAssignableFrom(self.fRealType);
-      {$ENDIF}
     end;
 
     method ConvertibleTo(u: &Type): Boolean;
@@ -1248,9 +1244,7 @@ type
 
   method TypeOf(v: Object): &Type;public;
   begin
-    {$IF ISLAND OR ECHOES}
     result := new TypeImpl(v.GetType());
-    {$ENDIF}
   end;
 
   method Swapper(aslice: Object): Action<go.builtin.int, go.builtin.int>; public;
