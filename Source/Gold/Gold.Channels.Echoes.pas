@@ -91,7 +91,7 @@ type
   end;
 
 
-  BidirectionalChannel<T> = public class(SendingChannel<T>, ReceivingChannel<T>)
+  BidirectionalChannel<T> = public class(SendingChannel<T>, ReceivingChannel<T>, IChannel)
   assembly
   {$IFDEF ISLAND}
     fLock: Monitor := new Monitor;
@@ -174,6 +174,7 @@ type
       fQueueSize := aQueueSize + 1;
     end;
 
+    property Length: Integer read fData.Count;
     property Capacity: Integer read fQueueSize -1;
 
     class var fZero: BidirectionalChannel<T> := new BidirectionalChannel<T>();
