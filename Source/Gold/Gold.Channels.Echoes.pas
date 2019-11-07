@@ -90,7 +90,7 @@ type
     end;
   end;
 
-
+  [ValueTypeSemantics]
   BidirectionalChannel<T> = public class(SendingChannel<T>, ReceivingChannel<T>, IChannel)
   assembly
   {$IFDEF ISLAND}
@@ -263,7 +263,7 @@ type
 
     method TryReceive: IWaitReceiveMessage<T>;
     begin
-      if fClosed <> 0 then exit nil;
+      if (fClosed <> 0) or (self = fZero) then exit nil;
       exit new ReceiveMessage<T>(self);
     end;
 

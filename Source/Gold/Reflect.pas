@@ -84,6 +84,7 @@ type
 
   ValueExtendedInfo = public (None, Slice);
 
+  [ValueTypeSemantics]
   Value = public class
   private
   assembly
@@ -124,6 +125,9 @@ type
       fExtendedObject := aExtendedObject;
       fPtr := aExtendedPtr;
     end;
+
+    class var fZero: Value := new Value();
+    class property Zero: Value := fZero; published;
 
     method String: String;
     begin
@@ -203,7 +207,7 @@ type
         exit false;
 
       var lValue := if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue;
-      result := lValue ≠ Zero(fType);
+      result := lValue ≠ go.reflect.Zero(fType);
     end;
 
     method CanSet: Boolean;
@@ -696,6 +700,7 @@ type
       end;
       {$ENDIF}
       Tag := new StructTag(lTag);
+      &Index := new go.builtin.Slice<Int64>();
     end;
 
     property Name: String read fField.Name;
