@@ -864,7 +864,7 @@ type
     method Kind: Kind;
     begin
       {$IF ISLAND}
-      if fTrueType = typeOf(go.builtin.string) then
+      if fTrueType = TypeOf(go.builtin.string) then
         exit go.reflect.String;
 
       if (fTrueType.GenericArguments <> nil) and (fTrueType.GenericArguments.Count > 0) then begin
@@ -1085,7 +1085,7 @@ type
     begin
       var lField: &PlatformField;
       {$IF ISLAND}
-      lField := fTrueType.Fields.Where(match).FirstOrDefault;
+      lField := fTrueType.Fields.Where(a -> match(a.Name)).FirstOrDefault;
       {$ELSEIF ECHOES}
       lField := TypeInfo(fTrueType).DeclaredFields.Where((a) -> match(a.Name)).FirstOrDefault;
       {$ENDIF}
@@ -1252,9 +1252,9 @@ type
     result := new TypeImpl(v.GetType());
   end;
 
-  method Swapper(aslice: Object): Action<go.builtin.int, go.builtin.int>; public;
+  method Swapper(aslice: Object): method(arg0: go.builtin.int; arg1: go.builtin.int); public;
   begin
-    exit new Action<go.builtin.int, go.builtin.int>(go.sort.Interface(aslice).Swap);
+    exit @go.sort.Interface(aslice).Swap;
   end;
 
   method MakeMap(t: &Type): Value; public;

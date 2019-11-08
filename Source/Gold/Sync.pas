@@ -186,7 +186,7 @@ type
     fLock: Object := new Object;
     {$ENDIF}
   public
-    method &Do(a: Action);
+    method &Do(a: method());
     begin
       if fDone = 1 then exit;
       locking fLock do begin
