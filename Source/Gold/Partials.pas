@@ -546,4 +546,5 @@ type
   go.math.rand.rngSource = public partial class(:go.math.rand.Source, :go.math.rand.Source64);
 
   go.crypto.ecdsa.PrivateKey = public partial class(:go.crypto.Signer);
+  go.crypto.rsa.PrivateKey = public partial class(:go.crypto.Signer);
 end.

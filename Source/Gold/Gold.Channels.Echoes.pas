@@ -185,6 +185,10 @@ type
       result := (Object(aVal) = nil) or (Object(aVal) = Object(fZero));
     end;
 
+    method __Clone: BidirectionalChannel<T>;
+    begin
+      exit self;
+    end;
 
     method Send(aVal: T);
     begin

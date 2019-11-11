@@ -447,7 +447,10 @@ type
 
     method Kind: Kind;
     begin
-      result := fType.Kind;
+      if fType = nil then
+        result := go.reflect.Invalid
+      else
+        result := fType.Kind;
     end;
 
     method Len: Integer;
@@ -863,9 +866,14 @@ type
 
     method Kind: Kind;
     begin
+      if fTrueType = nil then
+        exit go.reflect.Invalid;
       {$IF ISLAND}
       if fTrueType = TypeOf(go.builtin.string) then
         exit go.reflect.String;
+
+      if fTrueType.IsDelegate then
+        exit go.reflect.Func;
 
       if (fTrueType.GenericArguments <> nil) and (fTrueType.GenericArguments.Count > 0) then begin
         if fTrueType.Name.Contains('go.builtin.Slice') then
@@ -876,9 +884,6 @@ type
         else
           exit go.reflect.Ptr;
       end;
-
-      if fTrueType.Name.Contains('<Projection>') then
-        exit go.reflect.Func;
 
       if fTrueType = TypeOf(Object) then
         exit go.reflect.Interface;
