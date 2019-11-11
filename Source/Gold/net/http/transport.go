@@ -1,4 +1,4 @@
-// Copyright 2011 The Go Authors. All rights reserved.
+﻿// Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -30,8 +30,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"golang_org/x/net/http/httpguts"
-	"golang_org/x/net/http/httpproxy"
+	"golang.org/x/net/http/httpguts"
+	"golang.org/x/net/http/httpproxy"
 )
 
 // DefaultTransport is the default implementation of Transport and is
@@ -1380,17 +1380,17 @@ func (w persistConnWriter) Write(p []byte) (n int, err error) {
 //
 // A connect method may be of the following types:
 //
-//	connectMethod.key().String()      Description
-//	------------------------------    -------------------------
-//	|http|foo.com                     http directly to server, no proxy
-//	|https|foo.com                    https directly to server, no proxy
-//	|https,h1|foo.com                 https directly to server w/o HTTP/2, no proxy
-//	http://proxy.com|https|foo.com    http to proxy, then CONNECT to foo.com
-//	http://proxy.com|http             http to proxy, http to anywhere after that
-//	socks5://proxy.com|http|foo.com   socks5 to proxy, then http to foo.com
-//	socks5://proxy.com|https|foo.com  socks5 to proxy, then https to foo.com
-//	https://proxy.com|https|foo.com   https to proxy, then CONNECT to foo.com
-//	https://proxy.com|http            https to proxy, http to anywhere after that
+//    connectMethod.key().String()      Description
+//    ------------------------------    -------------------------
+//    |http|foo.com                     http directly to server, no proxy
+//    |https|foo.com                    https directly to server, no proxy
+//    |https,h1|foo.com                 https directly to server w/o HTTP/2, no proxy
+//    http://proxy.com|https|foo.com    http to proxy, then CONNECT to foo.com
+//    http://proxy.com|http             http to proxy, http to anywhere after that
+//    socks5://proxy.com|http|foo.com   socks5 to proxy, then http to foo.com
+//    socks5://proxy.com|https|foo.com  socks5 to proxy, then https to foo.com
+//    https://proxy.com|https|foo.com   https to proxy, then CONNECT to foo.com
+//    https://proxy.com|http            https to proxy, http to anywhere after that
 //
 type connectMethod struct {
 	proxyURL     *url.URL // nil for no proxy, else full proxy URL

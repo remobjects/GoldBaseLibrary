@@ -916,7 +916,7 @@ type
         end;
       end;
       {$ELSEIF ECHOES}
-      if fTrueType = typeOf(go.builtin.string) then
+      if fTrueType = TypeOf(go.builtin.string) then
         exit go.reflect.String;
 
       if fTrueType.IsArray then
@@ -937,10 +937,10 @@ type
           else
             exit go.reflect.Ptr;
 
-      if fTrueType = typeOf(System.Object) then
+      if fTrueType = TypeOf(System.Object) then
         exit go.reflect.Interface;
 
-      if fTrueType = typeOf(System.UIntPtr) then
+      if fTrueType = TypeOf(System.UIntPtr) then
         exit go.reflect.Uintptr;
 
       case System.Type.GetTypeCode(fTrueType) of

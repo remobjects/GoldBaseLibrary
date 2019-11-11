@@ -1,4 +1,4 @@
-// Copyright 2016 The Go Authors. All rights reserved.
+﻿// Copyright 2016 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -11,7 +11,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"golang_org/x/net/http/httpguts"
+	"golang.org/x/net/http/httpguts"
 )
 
 // maxInt64 is the effective "infinite" value for the Server and

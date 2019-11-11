@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"sort"
 
-	"golang_org/x/net/dns/dnsmessage"
+	"golang.org/x/net/dns/dnsmessage"
 )
 
 // reverseaddr returns the in-addr.arpa. or ip6.arpa. hostname of the IP

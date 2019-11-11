@@ -138,6 +138,20 @@ namespace go.path
 
 namespace go.os {
 
+	public go.builtin.error Rename(go.builtin.string oldpath, go.builtin.string newpath)
+	{
+		try
+		{
+			#if ECHOES
+			global::System.IO.File.Move(oldpath, newpath);
+			#else
+			new global::System.File(oldpath).Rename(newpath);
+			#endif
+		} catch(Exception e) {
+			return go.errors.New(e.Message);
+		}
+	}
+
 	bool isExist(error err){
 		throw new NotImplementedException();
 	}
