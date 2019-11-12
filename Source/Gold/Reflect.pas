@@ -1243,7 +1243,7 @@ type
       exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType))
     else
       if TypeImpl(aType).fTrueType.IsValueType then
-        new Value(Activator.CreateInstance(TypeImpl(aType).fTrueType))
+        exit new Value(Activator.CreateInstance(TypeImpl(aType).fTrueType))
       else
         exit new Value(nil);
     {$ENDIF}
