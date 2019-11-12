@@ -703,7 +703,13 @@ type
       end;
       {$ENDIF}
       Tag := new StructTag(lTag);
-      &Index := new go.builtin.Slice<Int64>();
+      &Index := new go.builtin.Slice<Int64>(1);
+    end;
+
+    constructor(aField: PlatformField; aIndex: Integer);
+    begin
+      constructor(aField);
+      &Index[0] := aIndex;
     end;
 
     property Name: String read fField.Name;
@@ -1060,7 +1066,7 @@ type
       if i ≥ lFields.Length then
         raise new IndexOutOfRangeException('Index out of range');
       {$ENDIF}
-      result := new StructFieldImpl(lFields[i]);
+      result := new StructFieldImpl(lFields[i], i);
     end;
 
     method FieldByIndex(i: go.builtin.Slice<Int64>): StructField;
@@ -1083,6 +1089,7 @@ type
       {$ELSEIF ECHOES}
       lField := System.Reflection.TypeInfo(fTrueType).DeclaredFields.Where(a->a.Name = aname).FirstOrDefault;
       {$ENDIF}
+      // TODO field index
       exit(new StructFieldImpl(lField), lField ≠ nil);
     end;
 
@@ -1094,6 +1101,7 @@ type
       {$ELSEIF ECHOES}
       lField := TypeInfo(fTrueType).DeclaredFields.Where((a) -> match(a.Name)).FirstOrDefault;
       {$ENDIF}
+      // TODO field index
       exit(new StructFieldImpl(lField), lField ≠ nil);
     end;
 
@@ -1219,7 +1227,8 @@ type
     if not TypeImpl(aType).RealType.IsValueType and (TypeImpl(aType).RealType.Methods.Any(a -> a.Name = '__Set')) then
       exit new Value(TypeImpl(aType).RealType.Instantiate())
     else
-      exit new Value(nil);
+      exit new Value(default(TypeImpl(aType).fTrueType));
+      //exit new Value(nil);
     //exit new Value(TypeImpl(aType).RealType.Instantiate());
     {$ELSE}
     if TypeImpl(aType).fRealType = System.Type.GetType('go.builtin.string') then
@@ -1233,7 +1242,10 @@ type
     if not TypeImpl(aType).RealType.IsValueType and (TypeImpl(aType).RealType.GetMethods.Any(a -> a.Name = '__Set')) then
       exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType))
     else
-      exit new Value(nil);
+      if TypeImpl(aType).fTrueType.IsValueType then
+        new Value(Activator.CreateInstance(TypeImpl(aType).fTrueType))
+      else
+        exit new Value(nil);
     {$ENDIF}
   end;
 
@@ -1385,7 +1397,9 @@ type
 
   method Append(s: Value; params x: array of Value): Value;
   begin
-    raise new NotImplementedException;
+    var lSlice := go.builtin.ISlice(s.fValue);
+    for each lValue in x do
+      lSlice.AppendObject(lValue.fValue);
   end;
 
   method Append(s: Value; x: go.builtin.Slice<Value>): Value;
@@ -1397,6 +1411,5 @@ type
   begin
     raise new NotImplementedException;
   end;
-
 
 end.
