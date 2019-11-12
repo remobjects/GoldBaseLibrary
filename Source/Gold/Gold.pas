@@ -251,7 +251,7 @@ type
     method setLen(aValue: Integer): Integer;
     method setFrom(aSrc: ISlice);
     method getReflectSlice(i: Integer; j: Integer): go.reflect.Value;
-    method AppendObject(aObject: Object);
+    method AppendObject(aObject: Object): go.reflect.Value;
   end;
 
 
@@ -362,9 +362,9 @@ type
       result := get_Item(i);
     end;
 
-    method AppendObject(aObject: Object);
+    method AppendObject(aObject: Object): go.reflect.Value;
     begin
-      append(self, T(aObject));
+      exit new go.reflect.Value(append(self, T(aObject)));
     end;
 
     method setAtIndex(i: Integer; aValue: Object);

@@ -1242,8 +1242,8 @@ type
     if not TypeImpl(aType).RealType.IsValueType and (TypeImpl(aType).RealType.GetMethods.Any(a -> a.Name = '__Set')) then
       exit new Value(Activator.CreateInstance(TypeImpl(aType).RealType))
     else
-      if TypeImpl(aType).fTrueType.IsValueType then
-        exit new Value(Activator.CreateInstance(TypeImpl(aType).fTrueType))
+      if TypeImpl(aType).fRealType.IsValueType then
+        exit new Value(Activator.CreateInstance(TypeImpl(aType).fRealType))
       else
         exit new Value(nil);
     {$ENDIF}
@@ -1398,8 +1398,11 @@ type
   method Append(s: Value; params x: array of Value): Value;
   begin
     var lSlice := go.builtin.ISlice(s.fValue);
+    var lNewValue: go.reflect.Value;
     for each lValue in x do
-      lSlice.AppendObject(lValue.fValue);
+      lNewValue := lSlice.AppendObject(lValue.fValue);
+
+    exit lNewValue;
   end;
 
   method Append(s: Value; x: go.builtin.Slice<Value>): Value;

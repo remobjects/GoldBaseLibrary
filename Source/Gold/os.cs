@@ -54,6 +54,7 @@ namespace go.crypto {
 				var lHasDNSName = (opts != null) && (opts.DNSName.Length > 0);
 				X509Certificate2 lCert = new X509Certificate2(this.Raw);
 				X509Chain lChain = new X509Chain();
+				lChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
 				if (lChain.Build(lCert))
 				{
 					var lResult = new Slice<Slice<Reference<go.crypto.x509.Certificate>>>(1);
