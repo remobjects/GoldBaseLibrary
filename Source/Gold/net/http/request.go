@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -26,7 +26,7 @@ import (
 	"strings"
 	"sync"
 
-	"golang_org/x/net/idna"
+	"golang.org/x/net/idna"
 )
 
 const (
@@ -140,19 +140,19 @@ type Request struct {
 	//
 	// If a server received a request with header lines,
 	//
-	//	Host: example.com
-	//	accept-encoding: gzip, deflate
-	//	Accept-Language: en-us
-	//	fOO: Bar
-	//	foo: two
+	//    Host: example.com
+	//    accept-encoding: gzip, deflate
+	//    Accept-Language: en-us
+	//    fOO: Bar
+	//    foo: two
 	//
 	// then
 	//
-	//	Header = map[string][]string{
-	//		"Accept-Encoding": {"gzip, deflate"},
-	//		"Accept-Language": {"en-us"},
-	//		"Foo": {"Bar", "two"},
-	//	}
+	//    Header = map[string][]string{
+	//        "Accept-Encoding": {"gzip, deflate"},
+	//        "Accept-Language": {"en-us"},
+	//        "Foo": {"Bar", "two"},
+	//    }
 	//
 	// For incoming requests, the Host header is promoted to the
 	// Request.Host field and removed from the Header map.
@@ -481,13 +481,13 @@ const defaultUserAgent = "Go-http-client/1.1"
 
 // Write writes an HTTP/1.1 request, which is the header and body, in wire format.
 // This method consults the following fields of the request:
-//	Host
-//	URL
-//	Method (defaults to "GET")
-//	Header
-//	ContentLength
-//	TransferEncoding
-//	Body
+//    Host
+//    URL
+//    Method (defaults to "GET")
+//    Header
+//    ContentLength
+//    TransferEncoding
+//    Body
 //
 // If Body is present, Content-Length is <= 0 and TransferEncoding
 // hasn't been set to "identity", Write adds "Transfer-Encoding:
@@ -757,17 +757,17 @@ func ParseHTTPVersion(vers string) (major, minor int, ok bool) {
 
 func validMethod(method string) bool {
 	/*
-	     Method         = "OPTIONS"                ; Section 9.2
-	                    | "GET"                    ; Section 9.3
-	                    | "HEAD"                   ; Section 9.4
-	                    | "POST"                   ; Section 9.5
-	                    | "PUT"                    ; Section 9.6
-	                    | "DELETE"                 ; Section 9.7
-	                    | "TRACE"                  ; Section 9.8
-	                    | "CONNECT"                ; Section 9.9
-	                    | extension-method
+		 Method         = "OPTIONS"                ; Section 9.2
+						| "GET"                    ; Section 9.3
+						| "HEAD"                   ; Section 9.4
+						| "POST"                   ; Section 9.5
+						| "PUT"                    ; Section 9.6
+						| "DELETE"                 ; Section 9.7
+						| "TRACE"                  ; Section 9.8
+						| "CONNECT"                ; Section 9.9
+						| extension-method
 	   extension-method = token
-	     token          = 1*<any CHAR except CTLs or separators>
+		 token          = 1*<any CHAR except CTLs or separators>
 	*/
 	return len(method) > 0 && strings.IndexFunc(method, isNotToken) == -1
 }
@@ -1010,11 +1010,11 @@ func readRequest(b *bufio.Reader, deleteHostHeader bool) (req *Request, err erro
 	req.Header = Header(mimeHeader)
 
 	// RFC 7230, section 5.3: Must treat
-	//	GET /index.html HTTP/1.1
-	//	Host: www.google.com
+	//    GET /index.html HTTP/1.1
+	//    Host: www.google.com
 	// and
-	//	GET http://www.google.com/index.html HTTP/1.1
-	//	Host: doesntmatter
+	//    GET http://www.google.com/index.html HTTP/1.1
+	//    Host: doesntmatter
 	// the same. In the second case, any Host line is ignored.
 	req.Host = req.URL.Host
 	if req.Host == "" {

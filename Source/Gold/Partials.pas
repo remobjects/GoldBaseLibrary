@@ -228,7 +228,7 @@ type
   go.crypto.x509.UnknownAuthorityError = public partial class(go.builtin.error) end;
   go.crypto.x509.HostnameError = public partial class(go.builtin.error) end;
   go.crypto.x509.UnhandledCriticalExtension = public partial class(go.builtin.error) end;
-  go.golang_org.x.net.http2.hpack.DecodingError = public partial class(go.builtin.error) end;
+  go.golang.org.x.net.http2.hpack.DecodingError = public partial class(go.builtin.error) end;
   go.strings.Reader = public partial class(go.io.ByteScanner) end;
   go.net.http.internal.chunkedWriter =public partial class(go.io.WriteCloser) end;
   go.net.http.internal.chunkedReader =public partial class(go.io.Reader) end;
@@ -289,7 +289,7 @@ type
   go.net.http.noBody = public partial class(go.io.ReadCloser);
   go.net.http.body = public partial class(go.io.ReadCloser);
 
-  go.golang_org.x.net.idna.labelError = public partial class(go.builtin.error);
+  go.golang.org.x.net.idna.labelError = public partial class(go.builtin.error);
   go.builtin.rune = public partial record
     public
     class operator Implicit(c: Char): go.builtin.rune;
@@ -342,19 +342,19 @@ type
   go.fmt.pp = public partial class(go.fmt.State);
   go.fmt.ss = public partial class(go.fmt.ScanState);
 
-  go.golang_org.x.net.idna.runeError = public partial record(go.builtin.error);
-  //golang_org.x.net.idna.rune = public class(go.builtin.error);
-  go.golang_org.x.text.transform.discard = public partial class(go.golang_org.x.text.transform.Transformer);
-  go.golang_org.x.text.transform.nop = public partial class(go.golang_org.x.text.transform.Transformer);
-  go.golang_org.x.text.transform.chain = public partial class(go.golang_org.x.text.transform.Transformer);
-  //golang_org.x.text.transform.rune = public partial class(go.golang_org.x.text.transform.Transformer);
+  go.golang.org.x.net.idna.runeError = public partial record(go.builtin.error);
+  //golang.org.x.net.idna.rune = public class(go.builtin.error);
+  go.golang.org.x.text.transform.discard = public partial class(go.golang.org.x.text.transform.Transformer);
+  go.golang.org.x.text.transform.nop = public partial class(go.golang.org.x.text.transform.Transformer);
+  go.golang.org.x.text.transform.chain = public partial class(go.golang.org.x.text.transform.Transformer);
+  //golang.org.x.text.transform.rune = public partial class(go.golang.org.x.text.transform.Transformer);
 
   go.math.big.byteReader = public partial class(go.io.ByteScanner);
   go.bytes.Reader = public partial class(go.io.ByteScanner);
   go.mime.multipart.part = public partial class(go.io.Writer);
   go.net.http.fakeLocker = public partial class(go.sync.Locker);
-  go.golang_org.x.text.unicode.norm.normWriter = public partial class(go.io.WriteCloser);
-  go.golang_org.x.text.unicode.norm.normReader = public partial class(go.io.Reader);
+  go.golang.org.x.text.unicode.norm.normWriter = public partial class(go.io.WriteCloser);
+  go.golang.org.x.text.unicode.norm.normReader = public partial class(go.io.Reader);
 
 
 
@@ -401,13 +401,13 @@ type
   go.net.IPConn = public partial class(go.net.http.closeWriter);
   go.net.http.Dir = public partial record(go.net.http.FileSystem);
 
-  go.golang_org.x.text.unicode.bidi.bracketPairs = public partial record(go.sort.Interface);
+  go.golang.org.x.text.unicode.bidi.bracketPairs = public partial record(go.sort.Interface);
   go.net.http.http2sorter = public partial class(go.sort.Interface);
   go.net.http.headerSorter = public partial class(go.sort.Interface);
   go.net.http.http2headerFieldValueError = public partial record(go.builtin.error);
   go.net.http.http2headerFieldNameError = public partial record(go.builtin.error);
   go.net.http.http2pseudoHeaderError = public partial record(go.builtin.error);
-  go.golang_org.x.net.http2.hpack.InvalidIndexError = public partial record(go.builtin.error);
+  go.golang.org.x.net.http2.hpack.InvalidIndexError = public partial record(go.builtin.error);
 
   go.net.http.http2HeadersFrame = public partial class(go.net.http.http2headersOrContinuation);
   go.net.http.http2ContinuationFrame = public partial class(go.net.http.http2headersOrContinuation);
@@ -435,8 +435,8 @@ type
   go.crypto.tls.ecdheKeyAgreement = public partial class(go.crypto.tls.keyAgreement);
   go.net.http.fcgi.streamWriter = public partial class(go.io.Closer);
 
-  go.golang_org.x.crypto.chacha20poly1305.chacha20poly1305 = public partial class(go.crypto.cipher.AEAD);
-  go.golang_org.x.crypto.internal.chacha20.Cipher = public partial class(go.crypto.cipher.Stream);
+  go.golang.org.x.crypto.chacha20poly1305.chacha20poly1305 = public partial class(go.crypto.cipher.AEAD);
+  go.golang.org.x.crypto.internal.chacha20.Cipher = public partial class(go.crypto.cipher.Stream);
 
   go.crypto.tls.lruSessionCache = public partial class(go.crypto.tls.ClientSessionCache);
   go.net.http.httputil.delegateReader = public partial class(go.io.Reader);
@@ -504,8 +504,8 @@ type
 
 
   go.fmt.readRune = public partial class(go.io.RuneScanner);
-  go.golang_org.x.text.transform.nop = public partial class(go.golang_org.x.text.transform.SpanningTransformer);
-  go.golang_org.x.text.transform.removeF = public partial record(go.golang_org.x.text.transform.Transformer);
+  go.golang.org.x.text.transform.nop = public partial class(go.golang.org.x.text.transform.SpanningTransformer);
+  go.golang.org.x.text.transform.removeF = public partial record(go.golang.org.x.text.transform.Transformer);
 
   go.net.mail.charsetError = public partial record(go.builtin.error);
   go.net.http.persistConn = public partial class(go.io.Reader);
@@ -547,4 +547,9 @@ type
 
   go.crypto.ecdsa.PrivateKey = public partial class(:go.crypto.Signer);
   go.crypto.rsa.PrivateKey = public partial class(:go.crypto.Signer);
+
+  go.golang.org.x.net.websocket.Addr = public partial class(:go.net.Addr);
+  go.golang.org.x.net.internal.socks.Addr = public partial class(:go.net.Addr);
+  go.golang.org.x.net.webdav.internal.xml.Name = public partial class(go.encoding.xml.Name);
+  go.golang.org.x.net.webdav.memFileInfo = public partial class(:go.os.FileInfo);
 end.
