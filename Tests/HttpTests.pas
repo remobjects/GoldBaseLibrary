@@ -14,9 +14,7 @@ type
 
     method SSLGet;
     begin
-      {$IF NOT LINUX}
       TestApplication2.DoSSLGetTest();
-      {$ENDIF}
     end;
 
   end;
