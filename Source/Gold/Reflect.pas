@@ -1227,7 +1227,10 @@ type
     if not TypeImpl(aType).RealType.IsValueType and (TypeImpl(aType).RealType.Methods.Any(a -> a.Name = '__Set')) then
       exit new Value(TypeImpl(aType).RealType.Instantiate())
     else
-      exit new Value(default(TypeImpl(aType).fTrueType));
+      if TypeImpl(aType).fRealType.IsValueType then
+        exit new Value(TypeImpl(aType).RealType.Instantiate())
+      else
+        exit new Value(nil);
       //exit new Value(nil);
     //exit new Value(TypeImpl(aType).RealType.Instantiate());
     {$ELSE}
