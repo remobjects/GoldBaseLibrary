@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProductVersion>3.5</ProductVersion>
@@ -56,7 +56,7 @@
     <DefineConstants>POSIX;math_big_pure_go</DefineConstants>
     <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
-  <!--
+
   <PropertyGroup Condition=" '$(Target)' == 'Island.Darwin.iOS' ">
     <Mode>Island</Mode>
     <SubMode>Darwin</SubMode>
@@ -78,7 +78,8 @@
     <SDK>watchOS</SDK>
     <DefineConstants>POSIX;math_big_pure_go</DefineConstants>
     <OutputType>StaticLibrary</OutputType>
-  </PropertyGroup>-->
+  </PropertyGroup> 
+
   <PropertyGroup Condition=" '$(Target)' == 'Island.Android' ">
     <Mode>Island</Mode>
     <SubMode>Android</SubMode>
@@ -142,7 +143,8 @@
     </Reference>
     <Reference Include="Island">
       <Target>Island.Darwin.macOS</Target>
-    </Reference>
+    </Reference> 
+
     <Reference Include="rtl">
       <Target>Island.Darwin.iOS</Target>
     </Reference>
@@ -196,7 +198,8 @@
     </Reference>
     <Reference Include="Security">
       <Target>Island.Darwin.watchOS</Target>
-    </Reference>
+    </Reference> 
+
     <Reference Include="gc">
       <Target>Island.Android</Target>
     </Reference>

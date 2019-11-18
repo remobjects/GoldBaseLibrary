@@ -794,9 +794,9 @@ begin
   end;
 end;
 
-{$IF ISLAND AND DARWIN}
 type
 go.crypto.x509.__Global = public partial class
+{$IF ISLAND AND DARWIN AND NOT (IOS OR TVOS OR WATCHOS)}
   class method FetchPEMRoots(pemRoots: ^CFDataRef; untrustedPemRoots: ^CFDataRef): Integer;
   begin
     var domains: array of SecTrustSettingsDomain := [SecTrustSettingsDomain.kSecTrustSettingsDomainSystem, SecTrustSettingsDomain.kSecTrustSettingsDomainAdmin,
@@ -963,7 +963,12 @@ go.crypto.x509.__Global = public partial class
     CFRelease(untrustedData);
     exit (trustedRoots, nil);
   end;
-end;
+{$ELSEIF ISLAND AND DARWIN AND (IOS OR TVOS OR WATCHOS)}
+  class method loadSystemRoots: tuple of (go.builtin.Reference<go.crypto.x509.CertPool>, go.builtin.error);
+  begin
+    exit (nil, nil);
+  end;
 {$ENDIF}
+end;
 
 end.
