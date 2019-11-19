@@ -2,7 +2,7 @@
 
 uses
   go.builtin
-{$IFDEF ECHOES}  , System.Linq, System.Collections.Generic{$ENDIF}
+{$IFDEF ECHOES}  , System.Linq, System.Collections, System.Collections.Generic{$ENDIF}
 
   ;
 
@@ -36,6 +36,14 @@ type
         IsVT := true;
       {$ENDIF}
     end;
+  end;
+
+  CloneHelper<T> = class
+    {$IF ISLAND}
+    class var CloneMethod: MethodInfo := typeOf(T).Methods.FirstOrDefault(a -> a.Name = '__Clone'); readonly;
+    {$ELSE}
+    class var CloneMethod: System.Reflection.MethodInfo := typeOf(T).GetMethods.FirstOrDefault(a -> a.Name = '__Clone'); readonly;
+    {$ENDIF}
   end;
 
   IMap = public interface
@@ -252,6 +260,7 @@ type
     method setFrom(aSrc: ISlice);
     method getReflectSlice(i: Integer; j: Integer): go.reflect.Value;
     method AppendObject(aObject: Object): go.reflect.Value;
+    method CloneElems: Object;
   end;
 
 
@@ -445,6 +454,22 @@ type
         aDest[i] := aSource[i];
     end;
 
+    method CloneElems: Object;
+    begin
+      if CloneHelper<T>.CloneMethod <> nil then begin
+        var lNewArray := new T[Capacity];
+        for i: Integer := 0 to fArray.Length -1 do
+          if fArray[i] <> nil then
+            lNewArray[i] := T(CloneHelper<T>.CloneMethod.Invoke(fArray[i], []))
+          else
+            lNewArray[i] := nil;
+
+        exit new Slice<T>(lNewArray, fStart, fCount);
+      end
+      else
+        exit self;
+    end;
+
     method Grow(aNewLen: Integer): Slice<T>;
     begin
       if aNewLen > Capacity then raise new ArgumentException('Length larger than capacity!');
@@ -607,7 +632,41 @@ type
     var lNew := new T[slc + 1];
     for i: Integer := 0 to slc -1 do
       lNew[i] := sl[i];
-      lNew[slc] := elems;
+
+    if (elems is IList) then begin
+      {$IF ECHOES}
+      var lType := typeOf(T);
+      var lElementsType := lType.GetElementType();
+      var CloneMethod: System.Reflection.MethodInfo := lElementsType.GetMethods.FirstOrDefault(a -> a.Name = '__Clone');
+      var lTmp := Array.CreateInstance(lElementsType, IList(elems).Count);
+      for i: Integer := 0 to IList(elems).Count - 1 do begin
+        if CloneMethod <> nil then
+          lTmp.SetValue(CloneMethod.Invoke(IList(elems)[i], []), i)
+        else
+          lTmp.SetValue(IList(elems)[i], i);
+      end;
+      {$ELSE}
+      var lType := typeOf(sl);
+      var lGeneric := lType.GenericArguments.First;
+      var lElementsType := lGeneric.GenericArguments.First;
+      var CloneMethod: MethodInfo := lElementsType.Methods.FirstOrDefault(a -> a.Name = '__Clone');
+      var lTmp := InternalCalls.Cast<&Array>(Utilities.NewArray(lGeneric.RTTI, lElementsType.SizeOfType, IList(elems).Count));
+      for i: Integer := 0 to IList(elems).Count - 1 do begin
+        if CloneMethod <> nil then
+          IList(lTmp)[i] := CloneMethod.Invoke(IList(elems)[i], [])
+        else
+          IList(lTmp)[i]:= IList(elems)[i];
+        end;
+      {$ENDIF}
+      lNew[slc] := T(lTmp);
+    end
+    else
+      if (elems is go.builtin.ISlice) then begin
+        lNew[slc] := T(go.builtin.ISlice(elems).CloneElems);
+      end
+      else
+          lNew[slc] := elems;
+
     exit lNew;
   end;
 
