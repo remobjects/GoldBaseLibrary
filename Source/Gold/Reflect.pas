@@ -1226,13 +1226,12 @@ type
 
     if not TypeImpl(aType).RealType.IsValueType and (TypeImpl(aType).RealType.Methods.Any(a -> a.Name = '__Set')) then
       exit new Value(TypeImpl(aType).RealType.Instantiate())
-    else
-      if TypeImpl(aType).RealType.IsValueType then
-        exit new Value(TypeImpl(aType).RealType.Instantiate())
+    else begin
+      if TypeImpl(aType).fRealType.IsValueType then
+        exit new Value(InternalCalls.Cast<Object>(DefaultGC.New(TypeImpl(aType).RealType.RTTI, sizeOf(^Void) + TypeImpl(aType).RealType.SizeOfType)))
       else
         exit new Value(nil);
-      //exit new Value(nil);
-    //exit new Value(TypeImpl(aType).RealType.Instantiate());
+    end;
     {$ELSE}
     if TypeImpl(aType).fRealType = System.Type.GetType('go.builtin.string') then
       exit new Value(go.builtin.string.Zero) // String .net does not have a constructor with no arguments.
