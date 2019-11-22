@@ -661,10 +661,10 @@ type
       lNew[slc] := T(lTmp);
     end
     else
-      if (elems is go.builtin.ISlice) then begin
-        lNew[slc] := T(go.builtin.ISlice(elems).CloneElems);
-      end
-      else
+      //if (elems is go.builtin.ISlice) then begin
+        //lNew[slc] := T(go.builtin.ISlice(elems).CloneElems);
+      //end
+      //else
           lNew[slc] := elems;
 
     exit lNew;

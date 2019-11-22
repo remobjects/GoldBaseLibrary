@@ -18,6 +18,11 @@ type
       {$ENDIF}
     end;
 
+    constructor;
+    begin
+      Value := new Slice<Byte>(0);
+    end;
+
     constructor(aValue: array of Char);
     begin
       {$IF ECHOES}
@@ -174,7 +179,10 @@ type
     method GetHashCode: Integer; override; public;
     begin
       {$IF ISLAND}
-      result := Utilities.CalcHash(^Void(@Value.fArray[0]), Value.Length);
+      if (Value.fArray ≠ nil) and (Value.fArray.Length > 0) then
+        result := Utilities.CalcHash(^Void(@Value.fArray[0]), Value.Length)
+      else
+        result := 0;
       {$ELSEIF ECHOES}
       result := System.Collections.IStructuralEquatable(Value).GetHashCode(EqualityComparer<byte>.Default);
       {$ENDIF}
