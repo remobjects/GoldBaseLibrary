@@ -334,7 +334,6 @@
     <Compile Include="bufio\scan.go" />
     <Compile Include="bytes\buffer.go" />
     <Compile Include="bytes\bytes.go" />
-    <Compile Include="bytes\bytes_decl.go" />
     <Compile Include="bytes\reader.go" />
     <Compile Include="encoding\binary\binary.go" />
     <Compile Include="encoding\binary\varint.go" />
@@ -789,6 +788,18 @@
     <Compile Include="golang.org\x\text\runes\runes.go" />
     <Compile Include="golang.org\x\net\context\go17.go" />
     <Compile Include="crypto\x509\root_darwin_armx_elements.go" />
+    <Compile Include="reflectlite.pas" />
+    <Compile Include="internal\fmtsort\sort.go" />
+    <Compile Include="fmt\errors.go" />
+    <Compile Include="index\suffixarray\gen.go" />
+    <Compile Include="index\suffixarray\sais.go" />
+    <Compile Include="index\suffixarray\sais2.go" />
+    <Compile Include="math\bits\bits_errors.go" />
+    <Compile Include="internal\oserror\errors.go" />
+    <Compile Include="os\error_errno.go" />
+    <Compile Include="os\removeall_at.go" />
+    <Compile Include="os\removeall_noat.go" />
+    <Compile Include="sort\slice_go18_elements.go" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

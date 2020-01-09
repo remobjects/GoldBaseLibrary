@@ -144,10 +144,31 @@ type
     begin
       self.Value := aValue;
     end;
+
     method Error: go.builtin.string;
     begin
       exit Value.ToString;
     end;
+
+    method &Is(target: go.builtin.error): boolean;
+    begin
+      // TODO
+    end;
+  /*func (e Errno) Is(target error) bool {
+    switch target {
+    case oserror.ErrPermission:
+      return e == ERROR_ACCESS_DENIED
+    case oserror.ErrExist:
+      return e == ERROR_ALREADY_EXISTS ||
+        e == ERROR_DIR_NOT_EMPTY ||
+        e == ERROR_FILE_EXISTS
+    case oserror.ErrNotExist:
+      return e == ERROR_FILE_NOT_FOUND ||
+        e == _ERROR_BAD_NETPATH ||
+        e == ERROR_PATH_NOT_FOUND
+    }
+    return false
+  }*/
   end;
 
 
@@ -289,7 +310,9 @@ type
       O_CLOEXEC  = $80000;
 
 
-    class var  ENOTDIR :go.syscall.Errno := new go.syscall.Errno(2); readonly;
+    class var ENOTDIR: go.syscall.Errno := new go.syscall.Errno(2); readonly;
+
+    class var EINVAL: go.syscall.Errno := new go.syscall.Errno(22); readonly; //NewError("bad arg in system call")
 
 
     class method Setenv(key: String; value: String): go.builtin.error;
@@ -471,7 +494,7 @@ type
 
   go.bytes.__Global = public partial class
   public
-    class method IndexByte(b: go.builtin.Slice<Byte>; c: Byte): Integer;
+    /*class method IndexByte(b: go.builtin.Slice<Byte>; c: Byte): Integer;
     begin
       for i: Integer := 0 to b.Length -1 do
         if b[i] = c then exit i;
@@ -503,7 +526,7 @@ type
       if a.Length > b.Length then
         exit 1;
       exit 0;
-    end;
+    end;*/
 
   end;
 

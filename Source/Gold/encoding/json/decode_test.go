@@ -45,6 +45,15 @@ type W struct {
 	S SS
 }
 
+type P struct {
+	PP PP
+}
+
+type PP struct {
+	T  T
+	Ts []T
+}
+
 type SS string
 
 func (*SS) UnmarshalJSON(data []byte) error {
@@ -265,6 +274,10 @@ type XYZ struct {
 	Y interface{}
 	Z interface{}
 }
+
+type unexportedWithMethods struct{}
+
+func (unexportedWithMethods) F() {}
 
 func sliceAddr(x []int) *[]int                 { return &x }
 func mapAddr(x map[string]int) *map[string]int { return &x }
@@ -554,6 +567,16 @@ var unmarshalTests = []unmarshalTest{
 		ptr: new(map[uint8]string),
 		err: &UnmarshalTypeError{Value: "number -1", Type: reflect.TypeOf(uint8(0)), Offset: 2},
 	},
+	{
+		in:  `{"F":{"a":2,"3":4}}`,
+		ptr: new(map[string]map[int]int),
+		err: &UnmarshalTypeError{Value: "number a", Type: reflect.TypeOf(int(0)), Offset: 7},
+	},
+	{
+		in:  `{"F":{"a":2,"3":4}}`,
+		ptr: new(map[string]map[uint]int),
+		err: &UnmarshalTypeError{Value: "number a", Type: reflect.TypeOf(uint(0)), Offset: 7},
+	},
 
 	// Map keys can be encoding.TextUnmarshalers.
 	{in: `{"x:y":true}`, ptr: &ummapType, out: ummapXY},
@@ -802,7 +825,7 @@ var unmarshalTests = []unmarshalTest{
 		err: &UnmarshalTypeError{
 			Value:  "string",
 			Struct: "V",
-			Field:  "F2",
+			Field:  "V.F2",
 			Type:   reflect.TypeOf(int32(0)),
 			Offset: 20,
 		},
@@ -813,7 +836,7 @@ var unmarshalTests = []unmarshalTest{
 		err: &UnmarshalTypeError{
 			Value:  "string",
 			Struct: "V",
-			Field:  "F2",
+			Field:  "V.F2",
 			Type:   reflect.TypeOf(int32(0)),
 			Offset: 30,
 		},
@@ -908,6 +931,29 @@ var unmarshalTests = []unmarshalTest{
 		in:  `{"foo": "bar"}`,
 		ptr: new(MustNotUnmarshalText),
 		err: &UnmarshalTypeError{Value: "object", Type: reflect.TypeOf(&MustNotUnmarshalText{}), Offset: 1},
+	},
+	// #22369
+	{
+		in:  `{"PP": {"T": {"Y": "bad-type"}}}`,
+		ptr: new(P),
+		err: &UnmarshalTypeError{
+			Value:  "string",
+			Struct: "T",
+			Field:  "PP.T.Y",
+			Type:   reflect.TypeOf(int(0)),
+			Offset: 29,
+		},
+	},
+	{
+		in:  `{"Ts": [{"Y": 1}, {"Y": 2}, {"Y": "bad-type"}]}`,
+		ptr: new(PP),
+		err: &UnmarshalTypeError{
+			Value:  "string",
+			Struct: "T",
+			Field:  "Ts.Y",
+			Type:   reflect.TypeOf(int(0)),
+			Offset: 29,
+		},
 	},
 }
 
@@ -1007,12 +1053,22 @@ func TestMarshalEmbeds(t *testing.T) {
 	}
 }
 
+func equalError(a, b error) bool {
+	if a == nil {
+		return b == nil
+	}
+	if b == nil {
+		return a == nil
+	}
+	return a.Error() == b.Error()
+}
+
 func TestUnmarshal(t *testing.T) {
 	for i, tt := range unmarshalTests {
 		var scan scanner
 		in := []byte(tt.in)
 		if err := checkValid(in, &scan); err != nil {
-			if !reflect.DeepEqual(err, tt.err) {
+			if !equalError(err, tt.err) {
 				t.Errorf("#%d: checkValid: %#v", i, err)
 				continue
 			}
@@ -1030,7 +1086,7 @@ func TestUnmarshal(t *testing.T) {
 		if tt.disallowUnknownFields {
 			dec.DisallowUnknownFields()
 		}
-		if err := dec.Decode(v.Interface()); !reflect.DeepEqual(err, tt.err) {
+		if err := dec.Decode(v.Interface()); !equalError(err, tt.err) {
 			t.Errorf("#%d: %v, want %v", i, err, tt.err)
 			continue
 		} else if err != nil {
@@ -1194,6 +1250,8 @@ var wrongStringTests = []wrongStringTest{
 	{`{"result":"foo"}`, `json: invalid use of ,string struct tag, trying to unmarshal "foo" into string`},
 	{`{"result":"123"}`, `json: invalid use of ,string struct tag, trying to unmarshal "123" into string`},
 	{`{"result":123}`, `json: invalid use of ,string struct tag, trying to unmarshal unquoted value into string`},
+	{`{"result":"\""}`, `json: invalid use of ,string struct tag, trying to unmarshal "\"" into string`},
+	{`{"result":"\"foo"}`, `json: invalid use of ,string struct tag, trying to unmarshal "\"foo" into string`},
 }
 
 // If people misuse the ,string modifier, the error message should be
@@ -2141,6 +2199,9 @@ func TestInvalidStringOption(t *testing.T) {
 //
 // (Issue 24152) If the embedded struct is given an explicit name,
 // ensure that the normal unmarshal logic does not panic in reflect.
+//
+// (Issue 28145) If the embedded struct is given an explicit name and has
+// exported methods, don't cause a panic trying to get its value.
 func TestUnmarshalEmbeddedUnexported(t *testing.T) {
 	type (
 		embed1 struct{ Q int }
@@ -2179,6 +2240,9 @@ func TestUnmarshalEmbeddedUnexported(t *testing.T) {
 			embed1 `json:"embed1"`
 			embed2 `json:"embed2"`
 			Q      int
+		}
+		S9 struct {
+			unexportedWithMethods `json:"embed"`
 		}
 	)
 
@@ -2241,11 +2305,16 @@ func TestUnmarshalEmbeddedUnexported(t *testing.T) {
 		in:  `{"embed1": {"Q": 1}, "embed2": {"Q": 2}, "Q": 3}`,
 		ptr: new(S8),
 		out: &S8{embed1{1}, embed2{2}, 3},
+	}, {
+		// Issue 228145, similar to the cases above.
+		in:  `{"embed": {}}`,
+		ptr: new(S9),
+		out: &S9{},
 	}}
 
 	for i, tt := range tests {
 		err := Unmarshal([]byte(tt.in), tt.ptr)
-		if !reflect.DeepEqual(err, tt.err) {
+		if !equalError(err, tt.err) {
 			t.Errorf("#%d: %v, want %v", i, err, tt.err)
 		}
 		if !reflect.DeepEqual(tt.ptr, tt.out) {
@@ -2266,4 +2335,16 @@ func TestUnmarshalPanic(t *testing.T) {
 	}()
 	Unmarshal([]byte("{}"), &unmarshalPanic{})
 	t.Fatalf("Unmarshal should have panicked")
+}
+
+// The decoder used to hang if decoding into an interface pointing to its own address.
+// See golang.org/issues/31740.
+func TestUnmarshalRecursivePointer(t *testing.T) {
+	var v interface{}
+	v = &v
+	data := []byte(`{"a": "b"}`)
+
+	if err := Unmarshal(data, v); err != nil {
+		t.Fatal(err)
+	}
 }
