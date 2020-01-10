@@ -267,6 +267,11 @@ type
       end;
     end;
 
+    method Slice3(i, j, k: Integer): Value;
+    begin
+      // TODO
+    end;
+
     method &Method(i: Int64): Value;
     begin
       raise new NotImplementedException;
