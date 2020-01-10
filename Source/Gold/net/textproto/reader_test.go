@@ -188,11 +188,10 @@ func TestLargeReadMIMEHeader(t *testing.T) {
 	}
 }
 
-// Test that we read slightly-bogus MIME headers seen in the wild,
-// with spaces before colons, and spaces in keys.
+// TestReadMIMEHeaderNonCompliant checks that we don't normalize headers
+// with spaces before colons, and accept spaces in keys.
 func TestReadMIMEHeaderNonCompliant(t *testing.T) {
-	// Invalid HTTP response header as sent by an Axis security
-	// camera: (this is handled by IE, Firefox, Chrome, curl, etc.)
+	// These invalid headers will be rejected by net/http according to RFC 7230.
 	r := reader("Foo: bar\r\n" +
 		"Content-Language: en\r\n" +
 		"SID : 0\r\n" +
@@ -202,9 +201,9 @@ func TestReadMIMEHeaderNonCompliant(t *testing.T) {
 	want := MIMEHeader{
 		"Foo":              {"bar"},
 		"Content-Language": {"en"},
-		"Sid":              {"0"},
-		"Audio Mode":       {"None"},
-		"Privilege":        {"127"},
+		"SID ":             {"0"},
+		"Audio Mode ":      {"None"},
+		"Privilege ":       {"127"},
 	}
 	if !reflect.DeepEqual(m, want) || err != nil {
 		t.Fatalf("ReadMIMEHeader =\n%v, %v; want:\n%v", m, err, want)
@@ -332,12 +331,13 @@ func TestReadMultiLineError(t *testing.T) {
 	if msg != wantMsg {
 		t.Errorf("ReadResponse: msg=%q, want %q", msg, wantMsg)
 	}
-	if err.Error() != "550 "+wantMsg {
+	if err != nil && err.Error() != "550 "+wantMsg {
 		t.Errorf("ReadResponse: error=%q, want %q", err.Error(), "550 "+wantMsg)
 	}
 }
 
 func TestCommonHeaders(t *testing.T) {
+	commonHeaderOnce.Do(initCommonHeader)
 	for h := range commonHeader {
 		if h != CanonicalMIMEHeaderKey(h) {
 			t.Errorf("Non-canonical header %q in commonHeader", h)

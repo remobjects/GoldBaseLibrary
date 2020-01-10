@@ -937,6 +937,11 @@ type
       end;
     end;
 
+    method lookupIPAddr(ctx: go.context.Context; net: string; host: string): tuple of (Slice<IPAddr>, go.builtin.error);
+    begin
+      // TODO
+    end;
+
     class var &Default: Resolver := new Resolver;
   end;
 
