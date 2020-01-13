@@ -800,6 +800,14 @@
     <Compile Include="os\removeall_at.go" />
     <Compile Include="os\removeall_noat.go" />
     <Compile Include="sort\slice_go18_elements.go" />
+    <Compile Include="net\http\clone.go" />
+    <Compile Include="crypto\ed25519\ed25519.go" />
+    <Compile Include="crypto\ed25519\internal\edwards25519\const.go" />
+    <Compile Include="crypto\ed25519\internal\edwards25519\edwards25519.go" />
+    <Compile Include="crypto\tls\handshake_client_tls13.go" />
+    <Compile Include="crypto\tls\handshake_server_tls13.go" />
+    <Compile Include="crypto\tls\key_schedule.go" />
+    <Compile Include="golang.org\x\crypto\hkdf\hkdf.go" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

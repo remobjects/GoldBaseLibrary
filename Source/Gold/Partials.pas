@@ -426,7 +426,7 @@ type
   go.net.http.byteReader = public partial class(go.io.Reader);
   go.net.http.bodyLocked = public partial class(go.io.Reader);
   go.net.http.finishAsyncByteRead = public partial class(go.io.Reader);
-  go.net.http.transferBodyReader = public partial class(go.io.Reader);
+  //go.net.http.transferBodyReader = public partial class(go.io.Reader);
   go.encoding.asn1.SyntaxError = public partial class(go.builtin.error);
 
   go.net.http.fcgi.streamWriter = public partial class(go.io.Writer);
@@ -469,7 +469,7 @@ type
   go.net.http.gzipReader = public partial class(go.io.ReadCloser);
 
 
-  go.crypto.tls.fixedNonceAEAD = public partial class(go.crypto.cipher.AEAD, go.crypto.tls.aead);
+  //go.crypto.tls.fixedNonceAEAD = public partial class(go.crypto.cipher.AEAD, go.crypto.tls.aead);
   go.crypto.tls.xorNonceAEAD = public partial class(go.crypto.cipher.AEAD, go.crypto.tls.aead);
   go.crypto.tls.cthWrapper = public partial class(go.hash.Hash);
 

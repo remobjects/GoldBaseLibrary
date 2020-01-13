@@ -1,4 +1,4 @@
-﻿// Copyright 2016 The Go Authors. All rights reserved.
+// Copyright 2016 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -19,7 +19,7 @@ import (
 const maxInt64 = 1<<63 - 1
 
 // aLongTimeAgo is a non-zero time, far in the past, used for
-// immediate cancelation of network operations.
+// immediate cancellation of network operations.
 var aLongTimeAgo = time.Unix(1, 0)
 
 // TODO(bradfitz): move common stuff here. The other files have accumulated
@@ -57,6 +57,17 @@ func isASCII(s string) bool {
 		}
 	}
 	return true
+}
+
+// stringContainsCTLByte reports whether s contains any ASCII control character.
+func stringContainsCTLByte(s string) bool {
+	for i := 0; i < len(s); i++ {
+		b := s[i]
+		if b < ' ' || b == 0x7f {
+			return true
+		}
+	}
+	return false
 }
 
 func hexEscapeNonASCII(s string) string {

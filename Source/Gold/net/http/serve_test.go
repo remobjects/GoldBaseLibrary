@@ -1556,6 +1556,32 @@ func TestServeTLS(t *testing.T) {
 	}
 }
 
+// Test that the HTTPS server nicely rejects plaintext HTTP/1.x requests.
+func TestTLSServerRejectHTTPRequests(t *testing.T) {
+	setParallel(t)
+	defer afterTest(t)
+	ts := httptest.NewTLSServer(HandlerFunc(func(w ResponseWriter, r *Request) {
+		t.Error("unexpected HTTPS request")
+	}))
+	var errBuf bytes.Buffer
+	ts.Config.ErrorLog = log.New(&errBuf, "", 0)
+	defer ts.Close()
+	conn, err := net.Dial("tcp", ts.Listener.Addr().String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	io.WriteString(conn, "GET / HTTP/1.1\r\nHost: foo\r\n\r\n")
+	slurp, err := ioutil.ReadAll(conn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const wantPrefix = "HTTP/1.0 400 Bad Request\r\n"
+	if !strings.HasPrefix(string(slurp), wantPrefix) {
+		t.Errorf("response = %q; wanted prefix %q", slurp, wantPrefix)
+	}
+}
+
 // Issue 15908
 func TestAutomaticHTTP2_Serve_NoTLSConfig(t *testing.T) {
 	testAutomaticHTTP2_Serve(t, nil, true)
@@ -2381,6 +2407,7 @@ func TestTimeoutHandlerRace(t *testing.T) {
 }
 
 // See issues 8209 and 8414.
+// Both issues involved panics in the implementation of TimeoutHandler.
 func TestTimeoutHandlerRaceHeader(t *testing.T) {
 	setParallel(t)
 	defer afterTest(t)
@@ -2408,7 +2435,9 @@ func TestTimeoutHandlerRaceHeader(t *testing.T) {
 			defer func() { <-gate }()
 			res, err := c.Get(ts.URL)
 			if err != nil {
-				t.Error(err)
+				// We see ECONNRESET from the connection occasionally,
+				// and that's OK: this test is checking that the server does not panic.
+				t.Log(err)
 				return
 			}
 			defer res.Body.Close()
@@ -4247,7 +4276,7 @@ func testServerEmptyBodyRace(t *testing.T, h2 bool) {
 	var n int32
 	cst := newClientServerTest(t, h2, HandlerFunc(func(rw ResponseWriter, req *Request) {
 		atomic.AddInt32(&n, 1)
-	}))
+	}), optQuietLog)
 	defer cst.close()
 	var wg sync.WaitGroup
 	const reqs = 20
@@ -4671,6 +4700,10 @@ func TestServerHandlersCanHandleH2PRI(t *testing.T) {
 	defer afterTest(t)
 	ts := httptest.NewServer(HandlerFunc(func(w ResponseWriter, r *Request) {
 		conn, br, err := w.(Hijacker).Hijack()
+		if err != nil {
+			t.Error(err)
+			return
+		}
 		defer conn.Close()
 		if r.Method != "PRI" || r.RequestURI != "*" {
 			t.Errorf("Got method/target %q %q; want PRI *", r.Method, r.RequestURI)
@@ -4722,6 +4755,10 @@ func TestServerValidatesHeaders(t *testing.T) {
 		{"foo\xffbar: foo\r\n", 400},                         // binary in header
 		{"foo\x00bar: foo\r\n", 400},                         // binary in header
 		{"Foo: " + strings.Repeat("x", 1<<21) + "\r\n", 431}, // header too large
+		// Spaces between the header key and colon are not allowed.
+		// See RFC 7230, Section 3.2.4.
+		{"Foo : bar\r\n", 400},
+		{"Foo\t: bar\r\n", 400},
 
 		{"foo: foo foo\r\n", 200},    // LWS space is okay
 		{"foo: foo\tfoo\r\n", 200},   // LWS tab is okay
@@ -5477,19 +5514,23 @@ func TestServerSetKeepAlivesEnabledClosesConns(t *testing.T) {
 	if a1 != a2 {
 		t.Fatal("expected first two requests on same connection")
 	}
-	var idle0 int
-	if !waitCondition(2*time.Second, 10*time.Millisecond, func() bool {
-		idle0 = tr.IdleConnKeyCountForTesting()
-		return idle0 == 1
-	}) {
-		t.Fatalf("idle count before SetKeepAlivesEnabled called = %v; want 1", idle0)
+	addr := strings.TrimPrefix(ts.URL, "http://")
+
+	// The two requests should have used the same connection,
+	// and there should not have been a second connection that
+	// was created by racing dial against reuse.
+	// (The first get was completed when the second get started.)
+	n := tr.IdleConnCountForTesting("http", addr)
+	if n != 1 {
+		t.Fatalf("idle count for %q after 2 gets = %d, want 1", addr, n)
 	}
 
+	// SetKeepAlivesEnabled should discard idle conns.
 	ts.Config.SetKeepAlivesEnabled(false)
 
 	var idle1 int
 	if !waitCondition(2*time.Second, 10*time.Millisecond, func() bool {
-		idle1 = tr.IdleConnKeyCountForTesting()
+		idle1 = tr.IdleConnCountForTesting("http", addr)
 		return idle1 == 0
 	}) {
 		t.Fatalf("idle count after SetKeepAlivesEnabled called = %v; want 0", idle1)
@@ -5719,8 +5760,12 @@ func TestServerDuplicateBackgroundRead(t *testing.T) {
 	setParallel(t)
 	defer afterTest(t)
 
-	const goroutines = 5
-	const requests = 2000
+	goroutines := 5
+	requests := 2000
+	if testing.Short() {
+		goroutines = 3
+		requests = 100
+	}
 
 	hts := httptest.NewServer(HandlerFunc(NotFound))
 	defer hts.Close()
@@ -5993,6 +6038,176 @@ func TestStripPortFromHost(t *testing.T) {
 	if response != "OK" {
 		t.Errorf("Response gotten was %q", response)
 	}
+}
+
+func TestServerContexts(t *testing.T) {
+	setParallel(t)
+	defer afterTest(t)
+	type baseKey struct{}
+	type connKey struct{}
+	ch := make(chan context.Context, 1)
+	ts := httptest.NewUnstartedServer(HandlerFunc(func(rw ResponseWriter, r *Request) {
+		ch <- r.Context()
+	}))
+	ts.Config.BaseContext = func(ln net.Listener) context.Context {
+		if strings.Contains(reflect.TypeOf(ln).String(), "onceClose") {
+			t.Errorf("unexpected onceClose listener type %T", ln)
+		}
+		return context.WithValue(context.Background(), baseKey{}, "base")
+	}
+	ts.Config.ConnContext = func(ctx context.Context, c net.Conn) context.Context {
+		if got, want := ctx.Value(baseKey{}), "base"; got != want {
+			t.Errorf("in ConnContext, base context key = %#v; want %q", got, want)
+		}
+		return context.WithValue(ctx, connKey{}, "conn")
+	}
+	ts.Start()
+	defer ts.Close()
+	res, err := ts.Client().Get(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	ctx := <-ch
+	if got, want := ctx.Value(baseKey{}), "base"; got != want {
+		t.Errorf("base context key = %#v; want %q", got, want)
+	}
+	if got, want := ctx.Value(connKey{}), "conn"; got != want {
+		t.Errorf("conn context key = %#v; want %q", got, want)
+	}
+}
+
+func TestServerContextsHTTP2(t *testing.T) {
+	setParallel(t)
+	defer afterTest(t)
+	type baseKey struct{}
+	type connKey struct{}
+	ch := make(chan context.Context, 1)
+	ts := httptest.NewUnstartedServer(HandlerFunc(func(rw ResponseWriter, r *Request) {
+		if r.ProtoMajor != 2 {
+			t.Errorf("unexpected HTTP/1.x request")
+		}
+		ch <- r.Context()
+	}))
+	ts.Config.BaseContext = func(ln net.Listener) context.Context {
+		if strings.Contains(reflect.TypeOf(ln).String(), "onceClose") {
+			t.Errorf("unexpected onceClose listener type %T", ln)
+		}
+		return context.WithValue(context.Background(), baseKey{}, "base")
+	}
+	ts.Config.ConnContext = func(ctx context.Context, c net.Conn) context.Context {
+		if got, want := ctx.Value(baseKey{}), "base"; got != want {
+			t.Errorf("in ConnContext, base context key = %#v; want %q", got, want)
+		}
+		return context.WithValue(ctx, connKey{}, "conn")
+	}
+	ts.TLS = &tls.Config{
+		NextProtos: []string{"h2", "http/1.1"},
+	}
+	ts.StartTLS()
+	defer ts.Close()
+	ts.Client().Transport.(*Transport).ForceAttemptHTTP2 = true
+	res, err := ts.Client().Get(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	ctx := <-ch
+	if got, want := ctx.Value(baseKey{}), "base"; got != want {
+		t.Errorf("base context key = %#v; want %q", got, want)
+	}
+	if got, want := ctx.Value(connKey{}), "conn"; got != want {
+		t.Errorf("conn context key = %#v; want %q", got, want)
+	}
+}
+
+// Issue 35750: check ConnContext not modifying context for other connections
+func TestConnContextNotModifyingAllContexts(t *testing.T) {
+	setParallel(t)
+	defer afterTest(t)
+	type connKey struct{}
+	ts := httptest.NewUnstartedServer(HandlerFunc(func(rw ResponseWriter, r *Request) {
+		rw.Header().Set("Connection", "close")
+	}))
+	ts.Config.ConnContext = func(ctx context.Context, c net.Conn) context.Context {
+		if got := ctx.Value(connKey{}); got != nil {
+			t.Errorf("in ConnContext, unexpected context key = %#v", got)
+		}
+		return context.WithValue(ctx, connKey{}, "conn")
+	}
+	ts.Start()
+	defer ts.Close()
+
+	var res *Response
+	var err error
+
+	res, err = ts.Client().Get(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+
+	res, err = ts.Client().Get(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+}
+
+// Issue 30710: ensure that as per the spec, a server responds
+// with 501 Not Implemented for unsupported transfer-encodings.
+func TestUnsupportedTransferEncodingsReturn501(t *testing.T) {
+	cst := httptest.NewServer(HandlerFunc(func(w ResponseWriter, r *Request) {
+		w.Write([]byte("Hello, World!"))
+	}))
+	defer cst.Close()
+
+	serverURL, err := url.Parse(cst.URL)
+	if err != nil {
+		t.Fatalf("Failed to parse server URL: %v", err)
+	}
+
+	unsupportedTEs := []string{
+		"fugazi",
+		"foo-bar",
+		"unknown",
+	}
+
+	for _, badTE := range unsupportedTEs {
+		http1ReqBody := fmt.Sprintf(""+
+			"POST / HTTP/1.1\r\nConnection: close\r\n"+
+			"Host: localhost\r\nTransfer-Encoding: %s\r\n\r\n", badTE)
+
+		gotBody, err := fetchWireResponse(serverURL.Host, []byte(http1ReqBody))
+		if err != nil {
+			t.Errorf("%q. unexpected error: %v", badTE, err)
+			continue
+		}
+
+		wantBody := fmt.Sprintf("" +
+			"HTTP/1.1 501 Not Implemented\r\nContent-Type: text/plain; charset=utf-8\r\n" +
+			"Connection: close\r\n\r\nUnsupported transfer encoding")
+
+		if string(gotBody) != wantBody {
+			t.Errorf("%q. body\ngot\n%q\nwant\n%q", badTE, gotBody, wantBody)
+		}
+	}
+}
+
+// fetchWireResponse is a helper for dialing to host,
+// sending http1ReqBody as the payload and retrieving
+// the response as it was sent on the wire.
+func fetchWireResponse(host string, http1ReqBody []byte) ([]byte, error) {
+	conn, err := net.Dial("tcp", host)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	if _, err := conn.Write(http1ReqBody); err != nil {
+		return nil, err
+	}
+	return ioutil.ReadAll(conn)
 }
 
 func BenchmarkResponseStatusLine(b *testing.B) {
