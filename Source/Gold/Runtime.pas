@@ -560,7 +560,19 @@ type
 
     class method Compare(a, b: go.builtin.Slice<Byte>): Integer;
     begin
-      exit go.bytes.Compare(a, b);
+      //exit go.bytes.Compare(a, b);
+      if a = nil then a := new go.builtin.Slice<Byte>;
+      if b = nil then b := new go.builtin.Slice<Byte>;
+      for i: Integer := 0 to Math.Min(a.Length, b.Length) -1 do begin
+        if a[i] < b[i] then exit -1;
+        if a[i] > b[i] then exit 1;
+      end;
+      if a.Length < b.Length then
+        exit -1;
+
+      if a.Length > b.Length then
+        exit 1;
+      exit 0;
     end;
     class method Count(b: go.builtin.Slice<Byte>; c: Byte): Integer;
     begin
