@@ -233,6 +233,7 @@ type
   go.net.http.internal.chunkedWriter =public partial class(go.io.WriteCloser) end;
   go.net.http.internal.chunkedReader =public partial class(go.io.Reader) end;
   go.net.http.ResponseWriter = public partial interface(go.io.Writer) end;
+  go.net.http.timeoutWriter = public partial class(go.net.http.Pusher) end;
   go.net.smtp.cramMD5Auth = public partial class(go.net.smtp.Auth) end;
   go.net.smtp.plainAuth = public partial class(go.net.smtp.Auth) end;
   go.net.OpError = public partial class(go.builtin.error) end;
@@ -509,7 +510,7 @@ type
 
   go.net.mail.charsetError = public partial record(go.builtin.error);
   go.net.http.persistConn = public partial class(go.io.Reader);
-  go.net.http.persistConnWriter = public partial class(go.io.Writer);
+  go.net.http.persistConnWriter = public partial class(go.io.Writer, go.io.ReaderFrom);
   go.mime.multipart.sectionReadCloser = public partial class(go.mime.multipart.File);
   go.crypto.cipher.cbcDecrypter= public partial record(go.crypto.cipher.BlockMode);
   go.os.File = public partial class(go.mime.multipart.File, go.net.http.File);
