@@ -288,10 +288,10 @@ type
       {$ENDIF}
     end;
 
-  class method Getgroups: tuple of (go.builtin.Slice<Integer>, go.builtin.error);
-  begin
-    exit (new go.builtin.Slice<Integer>, go.Errors.New('Not supported'));
-  end;
+    class method Getgroups: tuple of (go.builtin.Slice<Integer>, go.builtin.error);
+    begin
+      exit (new go.builtin.Slice<Integer>, go.Errors.New('Not supported'));
+    end;
 
     class var
       ENOENT : go.syscall.Errno := new go.syscall.Errno(1); readonly;

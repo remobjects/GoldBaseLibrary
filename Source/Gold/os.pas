@@ -134,6 +134,13 @@ type
     class property Stderr: File := new File(fs := Console.OpenStandardError); lazy; readonly;
     class property Stdout: File := new File(fs := Console.OpenStandardOutput); lazy; readonly;
     {$ENDIF}
+
+    {$IF (NOT ECHOES) AND NOT (ISLAND AND WINDOWS)}
+    class method removeAll(path: String): go.builtin.error;
+    begin
+      // TODO
+    end;
+    {$ENDIF}
   end;
 
   File = public partial class(go.io.ReaderAt, go.io.Reader, go.io.Writer)

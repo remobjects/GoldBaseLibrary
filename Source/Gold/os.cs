@@ -166,11 +166,11 @@ namespace go.os {
 		throw new NotImplementedException();
 	}
 
-	public string UserHomeDir() {
+	public (string, go.builtin.error) UserHomeDir() {
 		#if ECHOES
-		return System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+		return (System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), null);
 		#else
-		return Environment.UserHomeFolder().FullName;
+		return (Environment.UserHomeFolder().FullName, null);
 		#endif
 	}
 

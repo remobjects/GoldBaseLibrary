@@ -797,7 +797,6 @@
     <Compile Include="math\bits\bits_errors.go" />
     <Compile Include="internal\oserror\errors.go" />
     <Compile Include="os\error_errno.go" />
-    <Compile Include="os\removeall_at.go" />
     <Compile Include="os\removeall_noat.go" />
     <Compile Include="sort\slice_go18_elements.go" />
     <Compile Include="net\http\clone.go" />
