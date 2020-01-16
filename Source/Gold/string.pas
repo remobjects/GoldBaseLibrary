@@ -73,8 +73,12 @@ type
 
     class operator Implicit(aValue: string): Slice<byte>;
     begin
-      var lData := aValue.Value.ToArray;
-      result := new Slice<byte>(lData);
+      if aValue.Value ≠ nil then begin
+        var lData := aValue.Value.ToArray;
+        result := new Slice<byte>(lData);
+      end
+      else
+        result := new Slice<byte>(0);
     end;
 
     class operator Implicit(aValue: Char): string;
@@ -148,7 +152,7 @@ type
       result := Value[aIndex];
     end; default; inline;
 
-    property Length: Integer read Value.Length;
+    property Length: Integer read if Value ≠ nil then Value.Length else 0;
 
     method GetSequence: sequence of tuple of (Integer, rune); iterator;
     begin
