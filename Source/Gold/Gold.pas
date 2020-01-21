@@ -729,7 +729,8 @@ type
 
   method len(v: string): Integer; public;
   begin
-    exit v.Value.Length;
+    //exit v.Value.Length;
+    exit v.Length;
   end;
 
   method len<T>(v: array of T): Integer; public;
