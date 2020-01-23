@@ -2,8 +2,7 @@
 
 method TypeOf(v: Object): go.reflect.Type; public;
 begin
-    //TODO
-    //result := new TypeImpl(v.GetType());
+    result := new go.reflect.TypeImpl(v.GetType());
 end;
 
 
