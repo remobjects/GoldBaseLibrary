@@ -807,6 +807,13 @@
     <Compile Include="crypto\tls\handshake_server_tls13.go" />
     <Compile Include="crypto\tls\key_schedule.go" />
     <Compile Include="golang.org\x\crypto\hkdf\hkdf.go" />
+    <Compile Include="encoding\ascii85\ascii85.go" />
+    <Compile Include="encoding\base32\base32.go" />
+    <Compile Include="encoding\csv\fuzz.go" />
+    <Compile Include="encoding\csv\reader.go" />
+    <Compile Include="encoding\csv\writer.go" />
+    <Compile Include="image\gif\reader.go" />
+    <Compile Include="image\gif\writer.go" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
