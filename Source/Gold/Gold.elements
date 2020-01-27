@@ -814,6 +814,19 @@
     <Compile Include="encoding\csv\writer.go" />
     <Compile Include="image\gif\reader.go" />
     <Compile Include="image\gif\writer.go" />
+    <Compile Include="encoding\gob\debug.go" />
+    <Compile Include="encoding\gob\dec_helpers.go" />
+    <Compile Include="encoding\gob\decgen.go" />
+    <Compile Include="encoding\gob\decode.go" />
+    <Compile Include="encoding\gob\decoder.go" />
+    <Compile Include="encoding\gob\doc.go" />
+    <Compile Include="encoding\gob\dump.go" />
+    <Compile Include="encoding\gob\enc_helpers.go" />
+    <Compile Include="encoding\gob\encgen.go" />
+    <Compile Include="encoding\gob\encode.go" />
+    <Compile Include="encoding\gob\encoder.go" />
+    <Compile Include="encoding\gob\error.go" />
+    <Compile Include="encoding\gob\type.go" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

@@ -1286,6 +1286,11 @@ type
     raise new NotImplementedException;
   end;
 
+  method MakeMapWithSize(t: &Type;n: Integer): Value; public;
+  begin
+    raise new NotImplementedException;
+  end;
+
   method InternalGetValue(aVal: Value): Object;
   begin
     var lType := TypeImpl(aVal.fType).RealType;
