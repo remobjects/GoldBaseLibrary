@@ -269,5 +269,10 @@ type
 
       fMutex.Unlock;
     end;
+
+    method __Clone: WaitGroup;
+    begin
+      exit self;
+    end;
   end;
 end.
