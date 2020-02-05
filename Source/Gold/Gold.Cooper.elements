@@ -5,8 +5,9 @@
     <ProjectGuid>{9068B27E-56B6-4E4A-ADFF-86159E789AE2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
-    <RootNamespace>Gold.Cooper</RootNamespace>
-    <BinaryName>gold</BinaryName>
+    <RootNamespace>go</RootNamespace>
+    <BinaryName>go</BinaryName>
+    <OutputPathUsesModes>True</OutputPathUsesModes>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
