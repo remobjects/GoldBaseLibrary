@@ -32,6 +32,11 @@ type
       System.Threading.Monitor.Exit(fMutex);
       {$ENDIF}
     end;
+
+    method __Clone: Mutex;
+    begin
+      exit self;
+    end;
   end;
 
   [ValueTypeSemantics]
@@ -75,6 +80,11 @@ type
       {$ELSE}
       System.Threading.Monitor.Pulse(Mutex(fMutex).fMutex);
       {$ENDIF}
+    end;
+
+    method __Clone: Cond;
+    begin
+      exit self;
     end;
   end;
 
@@ -125,6 +135,11 @@ type
     method RLocker: Locker;
     begin
       exit fLocker;
+    end;
+
+    method __Clone: RWMutex;
+    begin
+      exit self;
     end;
   end;
   [ValueTypeSemantics]

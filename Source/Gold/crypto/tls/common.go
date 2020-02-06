@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -826,10 +826,11 @@ var tls13Support struct {
 // isTLS13Supported returns whether the program enabled TLS 1.3 by not opting
 // out with GODEBUG=tls13=0. It's cached after the first execution.
 func isTLS13Supported() bool {
-	tls13Support.Do(func() {
+	/*tls13Support.Do(func() {
 		tls13Support.cached = goDebugString("tls13") != "0"
 	})
-	return tls13Support.cached
+	return tls13Support.cached*/
+	return false
 }
 
 // goDebugString returns the value of the named GODEBUG key.
