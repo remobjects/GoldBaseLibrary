@@ -143,6 +143,11 @@ type
     class var fZero: Map<K, V> := new Map<K, V>();
     class property Zero: Map<K, V> := fZero; published;
 
+    method __Clone: Map<K, V>;
+    begin
+      exit self;
+    end;
+
     class operator IsNil(aVal: Map<K, V>): Boolean;
     begin
       result := (Object(aVal) = nil) or (Object(aVal) = Object(fZero));
