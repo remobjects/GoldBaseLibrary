@@ -221,6 +221,7 @@ type
   go.net.textproto.Error = public partial class(go.builtin.error) end;
   go.strings.Reader = public partial class(go.io.Reader) end;
   go.crypto.rsa.PSSOptions = public partial class(go.crypto.SignerOpts);
+  //go.crypto.rsa.OAEPOptions = public partial class(go.crypto.SignerOpts);
   //crypto.tls.Conn = public partial class(go.net.Conn);
   go.crypto.x509.ConstraintViolationError = public partial class(go.builtin.error) end;
   go.crypto.x509.CertificateInvalidError = public partial class(go.builtin.error) end;
@@ -329,10 +330,13 @@ type
 
 
   go.crypto.sha256.digest = public partial class(go.hash.Hash, :go.encoding.BinaryMarshaler, :go.encoding.BinaryUnmarshaler);
-  go.crypto.sha512.digest = public partial class(go.hash.Hash);
-  go.crypto.sha1.digest = public partial class(go.hash.Hash);
+  go.crypto.sha512.digest = public partial class(go.hash.Hash, :go.encoding.BinaryMarshaler, :go.encoding.BinaryUnmarshaler);
+  go.crypto.sha1.digest = public partial class(go.hash.Hash, :go.encoding.BinaryMarshaler, :go.encoding.BinaryUnmarshaler);
   go.crypto.tls.tls10MAC = public partial class(go.crypto.tls.macFunction);
   go.crypto.tls.ssl30MAC = public partial class(go.crypto.tls.macFunction);
+  go.crypto.tls.prefixNonceAEAD = public partial class(go.crypto.cipher.AEAD, go.crypto.tls.aead);
+  go.crypto.tls.xorNonceAEAD = public partial class(go.crypto.cipher.AEAD, go.crypto.tls.aead);
+
 
   //net.http.ResponseWriter = public partial interface(go.net.http.Handler);
   go.net.http.redirectHandler= public partial class(go.net.http.Handler);
@@ -420,7 +424,11 @@ type
   go.crypto.aes.aesCipher = public partial class(go.crypto.cipher.Block);
   go.crypto.cipher.ctr = public partial class(go.crypto.cipher.Stream);
   go.crypto.cipher.ofb = public partial class(go.crypto.cipher.Stream);
+  go.crypto.cipher.cfb = public partial class(go.crypto.cipher.Stream);
+  go.crypto.rc4.Cipher = public partial class(go.crypto.cipher.Stream);
+
   go.crypto.cipher.gcm = public partial class(go.crypto.cipher.AEAD);
+  //go.crypto.cipher.gcmAsm = public partial class(go.crypto.cipher.AEAD);
 
   go.net.http.http2MetaHeadersFrame =public partial class(go.net.http.http2Frame);
   go.net.http.socksAddr = public partial class(go.net.Addr);
@@ -435,6 +443,8 @@ type
   go.crypto.tls.rsaKeyAgreement = public partial class(go.crypto.tls.keyAgreement);
   go.crypto.tls.ecdheKeyAgreement = public partial class(go.crypto.tls.keyAgreement);
   go.net.http.fcgi.streamWriter = public partial class(go.io.Closer);
+  go.crypto.tls.nistParameters = public partial class(go.crypto.tls.ecdheParameters);
+  go.crypto.tls.x25519Parameters = public partial class(go.crypto.tls.ecdheParameters);
 
   go.golang.org.x.crypto.chacha20poly1305.chacha20poly1305 = public partial class(go.crypto.cipher.AEAD);
   go.golang.org.x.crypto.internal.chacha20.Cipher = public partial class(go.crypto.cipher.Stream);
@@ -547,7 +557,10 @@ type
   go.math.rand.rngSource = public partial class(:go.math.rand.Source, :go.math.rand.Source64);
 
   go.crypto.ecdsa.PrivateKey = public partial class(:go.crypto.Signer);
-  go.crypto.rsa.PrivateKey = public partial class(:go.crypto.Signer);
+  go.crypto.rsa.PublicKey = public partial class(:go.crypto.PublicKey);
+  //go.crypto.rsa.PrivateKey = public partial class(:go.crypto.rsa.PublicKey);
+  go.crypto.rsa.PrivateKey = public partial class(:go.crypto.PrivateKey, :go.crypto.Signer, :go.crypto.Decrypter);
+  go.crypto.ed25519.PrivateKey = public partial record(:go.crypto.Signer);
 
   go.golang.org.x.net.websocket.Addr = public partial class(:go.net.Addr);
   go.golang.org.x.net.internal.socks.Addr = public partial class(:go.net.Addr);
