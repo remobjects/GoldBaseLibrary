@@ -553,6 +553,20 @@ type
       {$ENDIF}
     end;
 
+    method FieldByName(name: String): tuple of (StructField, Boolean);
+    begin
+      var lField: &PlatformField;
+      {$IF ISLAND}
+      lField := TypeImpl(fType).fTrueType.Fields.Where(a->a.Name = name).FirstOrDefault;
+      {$ELSEIF ECHOES}
+      lField := System.Reflection.TypeInfo(TypeImpl(fType).fTrueType).DeclaredFields.Where(a->a.Name = name).FirstOrDefault;
+      {$ENDIF}
+      if lField ≠ nil then
+        exit(new StructFieldImpl(lField), true)
+      else
+        exit(nil, false);
+    end;
+
     method CanAddr: Boolean;
     begin
       result := true;
