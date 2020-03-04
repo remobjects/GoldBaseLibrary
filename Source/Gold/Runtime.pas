@@ -29,6 +29,11 @@ type
 
   end;
 
+method SetFinalizer(aObj: Object; aFinalizer: Object);
+begin
+  // empty
+end;
+
 method Callers(&skip: Integer; pc: go.builtin.Slice<go.builtin.uintptr>): Integer;
 begin
   exit 0;
