@@ -691,6 +691,8 @@ type
   end;
 
   StructField = public interface
+    method IsValid: Boolean;
+    method &Interface: Object;
     property Name: String read;
     property PkgPath: String read;
     property &Type: &Type read;
@@ -710,18 +712,20 @@ type
       fField := aField;
       PkgPath := '';
       var lTag := '';
-      {$IF ISLAND}
-      var lAttrs := aField.Attributes.Where(b->b.Type = TypeOf(go.builtin.TagAttribute)).ToList;
-      if (lAttrs ≠ nil) and (lAttrs.Count > 0) then
-        lTag := go.builtin.PlatformString(lAttrs[0].Arguments[0].Value);
-      {$ELSEIF ECHOES}
-      var lAttrs := aField.GetCustomAttributes(true);
-      if lAttrs.Length > 0 then begin
-        if lAttrs[0] is go.builtin.TagAttribute then
-          lTag := (lAttrs[0] as go.builtin.TagAttribute).Tag;
+      if aField ≠ nil then begin
+        {$IF ISLAND}
+        var lAttrs := aField.Attributes.Where(b->b.Type = TypeOf(go.builtin.TagAttribute)).ToList;
+        if (lAttrs ≠ nil) and (lAttrs.Count > 0) then
+          lTag := go.builtin.PlatformString(lAttrs[0].Arguments[0].Value);
+        {$ELSEIF ECHOES}
+        var lAttrs := aField.GetCustomAttributes(true);
+        if lAttrs.Length > 0 then begin
+          if lAttrs[0] is go.builtin.TagAttribute then
+            lTag := (lAttrs[0] as go.builtin.TagAttribute).Tag;
+        end;
+        {$ENDIF}
+        Tag := new StructTag(lTag);
       end;
-      {$ENDIF}
-      Tag := new StructTag(lTag);
       &Index := new go.builtin.Slice<Int64>(1);
     end;
 
@@ -729,6 +733,16 @@ type
     begin
       constructor(aField);
       &Index[0] := aIndex;
+    end;
+
+    method IsValid: Boolean;
+    begin
+      result := (fField ≠ nil) and (fField.Name ≠ '');
+    end;
+
+    method &Interface: Object;
+    begin
+      result := self;
     end;
 
     property Name: String read fField.Name;
