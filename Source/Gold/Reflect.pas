@@ -724,8 +724,8 @@ type
             lTag := (lAttrs[0] as go.builtin.TagAttribute).Tag;
         end;
         {$ENDIF}
-        Tag := new StructTag(lTag);
       end;
+      Tag := new StructTag(lTag);
       &Index := new go.builtin.Slice<Int64>(1);
     end;
 
