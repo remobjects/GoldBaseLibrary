@@ -445,7 +445,26 @@ begin
   {$ENDIF}
 end;
 
-var Args: go.builtin.Slice<go.builtin.string> := {$IF ISLAND}new go.builtin.Slice<go.builtin.string>(''){raise new NotImplementedException}{$ELSEIF ECHOES}go.builtin.string.PlatformStringArrayToGoSlice(Environment.GetCommandLineArgs){$ENDIF};
+{$IF ISLAND}
+method GetArgs: array of String;
+begin
+  {$IF WINDOWS}
+  var lTotal: Int32;
+  var lRawArgs := rtl.CommandLineToArgvW(rtl.GetCommandLineW(), @lTotal);
+  var lArgs := new String[lTotal - 1];
+  for i: Integer := 1 to lTotal - 1 do
+    lArgs[i-1] := String.FromPChar(lRawArgs[i]);
+  exit lArgs;
+  {$ELSE}
+  var lArgs := new String[ExternalCalls.nargs];
+  for i: Integer := 0 to ExternalCalls.nargs - 1 do
+    lArgs[i] := String.FromPAnsiChars(ExternalCalls.args[i]);
+  exit lArgs;
+  {$ENDIF}
+end;
+{$ENDIF}
+
+var Args: go.builtin.Slice<go.builtin.string> := go.builtin.string.PlatformStringArrayToGoSlice({$IF ISLAND}GetArgs{$ELSEIF ECHOES}Environment.GetCommandLineArgs{$ENDIF});
 
 method &Exit(i: Integer);
 begin
