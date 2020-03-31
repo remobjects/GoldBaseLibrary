@@ -90,7 +90,7 @@ type
     begin
       {$IF ISLAND AND WINDOWS}
       var q := new DateTime(DateTime.UtcNow.Ticks - dtbase.Ticks);
-      exit (Int64(q.Ticks / DateTime.TicksPerSecond), (q.Ticks * 100) mod 1 000 000 000, rtl.GetTickCount  * 100);
+      exit (Int64(q.Ticks / DateTime.TicksPerSecond), (q.Ticks * 100) mod 1 000 000 000, rtl.GetTickCount  * DateTime.TicksPerMillisecond * 100);
       {$ELSEIF ISLAND AND POSIX}
       var ts: rtl.__struct_timespec;
       rtl.clock_gettime({$IF ISLAND AND DARWIN}rtl.clockid_t._CLOCK_MONOTONIC{$ELSE}rtl.CLOCK_MONOTONIC{$ENDIF}, @ts);
