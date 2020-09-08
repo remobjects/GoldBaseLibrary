@@ -10,6 +10,7 @@
     <AllowUnsafeCode>True</AllowUnsafeCode>
     <TargetFramework>.NETFramework4.5</TargetFramework>
     <RootNamespace>go</RootNamespace>
+    <DefaultGlobalsToPublic>True</DefaultGlobalsToPublic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
@@ -22,7 +23,6 @@
     <RuntimeVersion>v25</RuntimeVersion>
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
     <GenerateDebugInfo>True</GenerateDebugInfo>
-	<DefaultGlobalsToPublic>True</DefaultGlobalsToPublic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>math_big_pure_go</DefineConstants>
@@ -30,7 +30,6 @@
     <CpuType>anycpu</CpuType>
     <RuntimeVersion>v25</RuntimeVersion>
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
-	<DefaultGlobalsToPublic>True</DefaultGlobalsToPublic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Target)' == 'Echoes' ">
     <Mode>Echoes</Mode>
@@ -87,123 +86,6 @@
     <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="mscorlib">
-      <Target>Echoes</Target>
-    </Reference>
-    <Reference Include="System">
-      <Target>Echoes</Target>
-    </Reference>
-    <Reference Include="System.Core">
-      <Target>Echoes</Target>
-    </Reference>
-    <Reference Include="Echoes">
-      <Target>Echoes</Target>
-    </Reference>
-    <Reference Include="Echoes">
-      <Target>Echoes.Standard</Target>
-    </Reference>
-    <Reference Include="rt">
-      <Target>Cooper</Target>
-    </Reference>
-    <Reference Include="cooper">
-      <Target>Cooper</Target>
-    </Reference>
-    <Reference Include="rtl">
-      <Target>Island.Windows</Target>
-    </Reference>
-    <Reference Include="gc">
-      <Target>Island.Windows</Target>
-    </Reference>
-    <Reference Include="Island">
-      <Target>Island.Windows</Target>
-    </Reference>
-    <Reference Include="rtl">
-      <Target>Island.Linux</Target>
-    </Reference>
-    <Reference Include="gc">
-      <Target>Island.Linux</Target>
-    </Reference>
-    <Reference Include="Island">
-      <Target>Island.Linux</Target>
-    </Reference>
-    <Reference Include="rtl">
-      <Target>Island.Darwin.macOS</Target>
-    </Reference>
-    <Reference Include="Foundation">
-      <Target>Island.Darwin.macOS</Target>
-    </Reference>
-    <Reference Include="Security">
-      <Target>Island.Darwin.macOS</Target>
-    </Reference>
-    <Reference Include="CoreFoundation">
-      <Target>Island.Darwin.macOS</Target>
-    </Reference>
-    <Reference Include="gc">
-      <Target>Island.Darwin.macOS</Target>
-    </Reference>
-    <Reference Include="Island">
-      <Target>Island.Darwin.macOS</Target>
-    </Reference>
-    <Reference Include="rtl">
-      <Target>Island.Darwin.iOS</Target>
-    </Reference>
-    <Reference Include="Foundation">
-      <Target>Island.Darwin.iOS</Target>
-    </Reference>
-    <Reference Include="CoreFoundation">
-      <Target>Island.Darwin.iOS</Target>
-    </Reference>
-    <Reference Include="gc">
-      <Target>Island.Darwin.iOS</Target>
-    </Reference>
-    <Reference Include="Island">
-      <Target>Island.Darwin.iOS</Target>
-    </Reference>
-    <Reference Include="Security">
-      <Target>Island.Darwin.iOS</Target>
-    </Reference>
-    <Reference Include="rtl">
-      <Target>Island.Darwin.tvOS</Target>
-    </Reference>
-    <Reference Include="Foundation">
-      <Target>Island.Darwin.tvOS</Target>
-    </Reference>
-    <Reference Include="CoreFoundation">
-      <Target>Island.Darwin.tvOS</Target>
-    </Reference>
-    <Reference Include="gc">
-      <Target>Island.Darwin.tvOS</Target>
-    </Reference>
-    <Reference Include="Island">
-      <Target>Island.Darwin.tvOS</Target>
-    </Reference>
-    <Reference Include="Security">
-      <Target>Island.Darwin.tvOS</Target>
-    </Reference>
-    <Reference Include="rtl">
-      <Target>Island.Darwin.watchOS</Target>
-    </Reference>
-    <Reference Include="Foundation">
-      <Target>Island.Darwin.watchOS</Target>
-    </Reference>
-    <Reference Include="CoreFoundation">
-      <Target>Island.Darwin.watchOS</Target>
-    </Reference>
-    <Reference Include="gc">
-      <Target>Island.Darwin.watchOS</Target>
-    </Reference>
-    <Reference Include="Island">
-      <Target>Island.Darwin.watchOS</Target>
-    </Reference>
-    <Reference Include="Security">
-      <Target>Island.Darwin.watchOS</Target>
-    </Reference>
-    <Reference Include="gc">
-      <Target>Island.Android</Target>
-    </Reference>
-    <Reference Include="Island">
-      <Target>Island.Android</Target>
-    </Reference>
     <ProjectReference Include="GoldAspect">
       <HintPath>..\GoldAspect\Bin\Debug\GoldAspect.dll</HintPath>
       <Project>{631D3965-3D71-4DFD-9864-EBF841EA6192}</Project>
@@ -212,11 +94,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="fmt.pas"></None>
-    <Compile Include="Gold.pas"></Compile>
+    <None Include="fmt.pas" />
+    <Compile Include="Gold.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
     <Compile Include="Gold.Channels.Echoes.pas" />
-    <Compile Include="Reflect.pas"></Compile>
+    <Compile Include="Reflect.pas" />
     <Compile Include="Aliases.pas" />
     <Compile Include="Partials.pas" />
     <Compile Include="database\sql\convert.go">
@@ -832,6 +714,61 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Target)' == 'Echoes'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Echoes" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Target)' == 'Echoes.Standard'">
+    <Reference Include="Echoes" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Target)' == 'Island.Windows'">
+    <Reference Include="rtl" />
+    <Reference Include="gc" />
+    <Reference Include="Island" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Target)' == 'Island.Linux'">
+    <Reference Include="rtl" />
+    <Reference Include="gc" />
+    <Reference Include="Island" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Target)' == 'Island.Darwin.macOS'">
+    <Reference Include="rtl" />
+    <Reference Include="Foundation" />
+    <Reference Include="Security" />
+    <Reference Include="CoreFoundation" />
+    <Reference Include="gc" />
+    <Reference Include="Island" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Target)' == 'Island.Darwin.iOS'">
+    <Reference Include="rtl" />
+    <Reference Include="Foundation" />
+    <Reference Include="CoreFoundation" />
+    <Reference Include="gc" />
+    <Reference Include="Island" />
+    <Reference Include="Security" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Target)' == 'Island.Darwin.tvOS'">
+    <Reference Include="rtl" />
+    <Reference Include="Foundation" />
+    <Reference Include="CoreFoundation" />
+    <Reference Include="gc" />
+    <Reference Include="Island" />
+    <Reference Include="Security" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Target)' == 'Island.Darwin.watchOS'">
+    <Reference Include="rtl" />
+    <Reference Include="Foundation" />
+    <Reference Include="CoreFoundation" />
+    <Reference Include="gc" />
+    <Reference Include="Island" />
+    <Reference Include="Security" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Target)' == 'Island.Android'">
+    <Reference Include="gc" />
+    <Reference Include="Island" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.targets" />
 </Project>
