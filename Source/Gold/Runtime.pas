@@ -59,7 +59,7 @@ end;
 
 method StartTrace: go.builtin.error;
 begin
-  exit go.Errors.new('Not supported');
+  exit go.Errors.New('Not supported');
 end;
 
 method StopTrace;
@@ -155,7 +155,7 @@ type
       exit Value.ToString;
     end;
 
-    method &Is(target: go.builtin.error): boolean;
+    method &Is(target: go.builtin.error): Boolean;
     begin
       // TODO
     end;

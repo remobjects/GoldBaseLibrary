@@ -20,7 +20,7 @@ type
 
     constructor;
     begin
-      Value := new Slice<Byte>(0);
+      Value := new Slice<byte>(0);
     end;
 
     constructor(aValue: array of Char);

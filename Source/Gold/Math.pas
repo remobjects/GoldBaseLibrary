@@ -128,7 +128,7 @@ begin
   var exponent: Integer;
   var resmmantissa: Double;
 
-  if Double.isNaN(value) or
+  if Double.IsNaN(value) or
   (value + value = value) or
   Double.IsInfinity(value) then begin
     exponent := 0;

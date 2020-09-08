@@ -519,7 +519,7 @@ type
     fFile: String;
   public
     constructor(aFile: String); begin fFile := aFile; end;
-    method Name: go.builtin.string; begin exit Path.GetFilename(fFile); end;
+    method Name: go.builtin.string; begin exit Path.GetFileName(fFile); end;
     method Size: go.builtin.int64; begin {$IF ISLAND}exit new RemObjects.Elements.System.File(fFile).Length;{$ELSEIF ECHOES}exit new System.IO.FileInfo(fFile).Length;{$ENDIF} end;
     method Mode: FileMode;
     begin

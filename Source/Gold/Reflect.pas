@@ -323,7 +323,7 @@ type
       var lKind := Kind;
       if (lKind <> &Array) and (lKind <> go.reflect.Slice) then
         raise new Exception("Wrong type, need array or slice");
-      go.builtin.ISlice(fValue).SetLen(n);
+      go.builtin.ISlice(fValue).setLen(n);
     end;
 
     method Cap: Integer;
@@ -1013,7 +1013,7 @@ type
 
     method Implements(u: &Type): Boolean;
     begin
-      result := fRealType.isSubClassOf(TypeImpl(u).fRealType);
+      result := fRealType.IsSubclassOf(TypeImpl(u).fRealType);
     end;
 
     method AssignableTo(u: &Type): Boolean;
