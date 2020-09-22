@@ -566,4 +566,12 @@ type
   go.golang.org.x.net.internal.socks.Addr = public partial class(:go.net.Addr);
   go.golang.org.x.net.webdav.internal.xml.Name = public partial class(go.encoding.xml.Name);
   go.golang.org.x.net.webdav.memFileInfo = public partial class(:go.os.FileInfo);
+
+  go.types.PkgName = public partial class(:go.types.object);
+  go.types.Func = public partial class(:go.types.object);
+  go.types.TypeName = public partial class(:go.types.object);
+  go.types.Pointer = public partial class(:go.types.Type);
+  //go.ast.Expr = public partial interface(:go.ast.Node);
+  go.constant.int64Val = public partial record(:go.constant.Value);
+  go.constant.intVal = public partial class(:go.constant.Value);
 end.
