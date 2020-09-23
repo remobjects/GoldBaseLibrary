@@ -58,14 +58,17 @@ func (check *Checker) assignment(x *operand, T Type, context string) {
 	}
 
 	// ElementsChange!!!
-	/*if reason := ""; !x.assignableTo(check, T, &reason) {
+	// T84972
+	//if reason := ""; !x.assignableTo(check, T, &reason) {
+	var reason string = ""
+	if !x.assignableTo(check, T, &reason) {
 		if reason != "" {
 			check.errorf(x.pos(), "cannot use %s as %s value in %s: %s", x, T, context, reason)
 		} else {
 			check.errorf(x.pos(), "cannot use %s as %s value in %s", x, T, context)
 		}
 		x.mode = invalid
-	}*/
+	}
 }
 
 func (check *Checker) initConst(lhs *Const, x *operand) {
