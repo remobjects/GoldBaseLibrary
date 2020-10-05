@@ -553,7 +553,7 @@ type
       {$ENDIF}
     end;
 
-    method FieldByName(name: String): tuple of (StructField, Boolean);
+    /*method FieldByName(name: String): tuple of (StructField, Boolean);
     begin
       var lField: &PlatformField;
       {$IF ISLAND}
@@ -565,6 +565,11 @@ type
         exit(new StructFieldImpl(lField), true)
       else
         exit(nil, false);
+    end;*/
+
+    method FieldByName(name: go.builtin.string): Value;
+    begin
+      raise new NotImplementedException;
     end;
 
     method CanAddr: Boolean;
@@ -1451,6 +1456,16 @@ type
   end;
 
   method AppendSlice(s: Value; x: Value): Value;
+  begin
+    raise new NotImplementedException;
+  end;
+
+  method SliceOf(t: &Type): &Type;
+  begin
+    raise new NotImplementedException;
+  end;
+
+  method NewAt(t: &Type; p: go.unsafe.Pointer): Value;
   begin
     raise new NotImplementedException;
   end;

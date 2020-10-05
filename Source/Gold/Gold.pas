@@ -500,6 +500,23 @@ type
 
       exit aVal.ToArray();
     end;
+
+    /*method Get(idxs: Slice<go.builtin.int32>; idx1: go.builtin.int32; idx2: go.builtin.int32): T;
+    begin
+      raise new NotImplementedException;
+    end;
+
+    method Get(idxs: Slice<go.builtin.int32>; idx1: go.builtin.int32): T;
+    begin
+      raise new NotImplementedException;
+    end;*/
+
+    method Get(idx1: go.builtin.int32; idx2: go.builtin.int32): T;
+    begin
+      raise new NotImplementedException;
+    end;
+
+
   end;
 
   error = public soft interface
