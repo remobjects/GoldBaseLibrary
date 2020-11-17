@@ -762,7 +762,8 @@
     <Compile Include="constant\value.go" />
     <Compile Include="scanner\errors.go" />
     <Compile Include="scanner\scanner.go" />
-    <Compile Include="unsafe\unsafe.go" />
+    <None Include="unsafe\unsafe.go" />
+    <Compile Include="unsafe.pas" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

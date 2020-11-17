@@ -73,6 +73,11 @@ begin
   {$ENDIF}
 end;
 
+method CompareAndSwapPointer(addr: go.builtin.Reference<go.unsafe.Pointer>; aold, anew: go.unsafe.Pointer): bool; public; unsafe;
+begin
+  // TODO
+end;
+
 
 method LoadInteger(var addr: int): int; public;
 begin
@@ -119,6 +124,11 @@ begin
   {$ENDIF}
 end;
 
+method LoadPointer(addr: go.builtin.Reference<go.unsafe.Pointer>): go.unsafe.Pointer; public;
+begin
+  // TODO
+end;
+
 method StoreInt64(var addr: int64; val: int64);
 begin
   {$IFDEF ISLAND}
@@ -163,6 +173,11 @@ begin
   {$ELSE}
   System.Threading.&Volatile.Write(var addr.Value, val.Value);
   {$ENDIF}
+end;
+
+method StorePointer(addr: go.builtin.Reference<go.unsafe.Pointer>; val: go.unsafe.Pointer);
+begin
+  // TODO
 end;
 
 method SwapInt32(var addr: int64; anew: int64): int64; public;

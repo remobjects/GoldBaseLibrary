@@ -250,6 +250,11 @@ type
       else
         Delete(aKey.fValue as K);
     end;
+
+    class operator Implicit(aVal: go.unsafe.Pointer): Map<K, V>;
+    begin
+      // TODO
+    end;
   end;
 
 {$IFDEF ISLAND}
@@ -501,6 +506,12 @@ type
       exit aVal.ToArray();
     end;
 
+    class operator Implicit(aVal: go.unsafe.Pointer): Slice<T>;
+    begin
+      // TODO
+      raise new NotImplementedException;
+    end;
+
     /*method Get(idxs: Slice<go.builtin.int32>; idx1: go.builtin.int32; idx2: go.builtin.int32): T;
     begin
       raise new NotImplementedException;
@@ -513,6 +524,7 @@ type
 
     method Get(idx1: go.builtin.int32; idx2: go.builtin.int32): T;
     begin
+      // TODO
       raise new NotImplementedException;
     end;
 
@@ -577,6 +589,7 @@ type
       &Read := -> lValue;
       &Write := a -> begin lValue := a; end;
     end;
+
     method Get: Object;
     begin
       if self = nil then
@@ -620,6 +633,28 @@ type
     begin
       exit new Reference<T>(aVal);
     end;
+
+    class operator Explicit(aVal: go.unsafe.Pointer): Reference<T>;
+    begin
+      // TODO
+    end;
+
+    class operator Explicit(aVal: Reference<T>): go.unsafe.Pointer;
+    begin
+      // TODO
+    end;
+
+    class operator Implicit(aVal: Reference<T>): go.unsafe.Pointer;
+    begin
+      // TODO
+    end;
+
+    class operator Implicit(aVal: go.unsafe.Pointer): Reference<T>;
+    begin
+      // TODO
+    end;
+
+
   end;
 
   GoException = public class(Exception)
@@ -988,7 +1023,5 @@ type
     end;
     exit 'Unknown';
   end;
-
-
 
 end.

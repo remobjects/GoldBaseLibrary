@@ -1,0 +1,279 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProjectGuid>{9F4B53FE-9A67-4394-AF28-8029FD7170BB}</ProjectGuid>
+    <OutputType>StaticLibrary</OutputType>
+    <RootNamespace>go</RootNamespace>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>.\Bin\Debug</OutputPath>
+    <EnableAsserts>True</EnableAsserts>
+    <Optimize>False</Optimize>
+    <GenerateDebugInfo>True</GenerateDebugInfo>
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <RootNamespace>go</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>.\Bin\Release</OutputPath>
+    <RootNamespace>go</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Echoes.Full' ">
+    <Mode>Echoes</Mode>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Echoes.Core' ">
+    <Mode>Echoes</Mode>
+    <TargetFrameworkVersion>.NET5.0</TargetFrameworkVersion>
+    <ConditionalDefines>NETCORE</ConditionalDefines>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Echoes.Standard' ">
+    <Mode>Echoes</Mode>
+    <TargetFramework>.NETStandard2.0</TargetFramework>
+    <ConditionalDefines>NETSTANDARD</ConditionalDefines>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Cooper' ">
+    <Mode>Cooper</Mode>
+    <SubMode>Java</SubMode>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.Windows' ">
+    <Mode>Island</Mode>
+    <SubMode>Windows</SubMode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.Linux' ">
+    <Mode>Island</Mode>
+    <SubMode>Linux</SubMode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.Darwin.macOS' ">
+    <Mode>Island</Mode>
+    <SubMode>Darwin</SubMode>
+    <SDK>macOS</SDK>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.Darwin.iOS' ">
+    <Mode>Island</Mode>
+    <SubMode>Darwin</SubMode>
+    <SDK>iOS</SDK>
+    <SupportMacCatalyst>True</SupportMacCatalyst>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.Darwin.tvOS' ">
+    <Mode>Island</Mode>
+    <SubMode>Darwin</SubMode>
+    <SDK>tvOS</SDK>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.Darwin.watchOS' ">
+    <Mode>Island</Mode>
+    <SubMode>Darwin</SubMode>
+    <SDK>watchOS</SDK>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.Android' ">
+    <Mode>Island</Mode>
+    <SubMode>Android</SubMode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Island.WebAssembly' ">
+    <Mode>Island</Mode>
+    <SubMode>WebAssembly</SubMode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Toffee.iOS' ">
+    <Mode>Toffee</Mode>
+    <SDK>iOS</SDK>
+    <SupportMacCatalyst>True</SupportMacCatalyst>
+    <DefaultUses>Foundation;RemObjects.Elements.Linq</DefaultUses>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Toffee.macOS' ">
+    <Mode>Toffee</Mode>
+    <SDK>macOS</SDK>
+    <DefaultUses>Foundation;RemObjects.Elements.Linq</DefaultUses>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Toffee.tvOS' ">
+    <Mode>Toffee</Mode>
+    <SDK>tvOS</SDK>
+    <DefaultUses>Foundation;RemObjects.Elements.Linq</DefaultUses>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Target)' == 'Toffee.watchOS' ">
+    <Mode>Toffee</Mode>
+    <SDK>watchOS</SDK>
+    <DefaultUses>Foundation;RemObjects.Elements.Linq</DefaultUses>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="#" />
+    <Reference Include="Elements">
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="google.golang.org\protobuf\types\pluginpb\plugin.pb.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protoreflect\methods.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protoreflect\proto.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protoreflect\source.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protoreflect\source_gen.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protoreflect\type.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protoreflect\value.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protoreflect\value_pure.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protoreflect\value_union.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protoreflect\value_unsafe.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protoregistry\registry.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protodesc\desc.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protodesc\desc_init.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protodesc\desc_resolve.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protodesc\desc_validate.go" />
+    <Compile Include="google.golang.org\protobuf\reflect\protodesc\proto.go" />
+    <Compile Include="google.golang.org\protobuf\types\known\wrapperspb\wrappers.pb.go" />
+    <Compile Include="google.golang.org\protobuf\types\known\typepb\type.pb.go" />
+    <Compile Include="google.golang.org\protobuf\types\known\timestamppb\timestamp.pb.go" />
+    <Compile Include="google.golang.org\protobuf\types\known\structpb\struct.pb.go" />
+    <Compile Include="google.golang.org\protobuf\types\known\sourcecontextpb\source_context.pb.go" />
+    <Compile Include="google.golang.org\protobuf\types\known\fieldmaskpb\field_mask.pb.go" />
+    <Compile Include="google.golang.org\protobuf\types\known\emptypb\empty.pb.go" />
+    <Compile Include="google.golang.org\protobuf\types\known\durationpb\duration.pb.go" />
+    <Compile Include="google.golang.org\protobuf\types\known\apipb\api.pb.go" />
+    <Compile Include="google.golang.org\protobuf\types\known\anypb\any.pb.go" />
+    <Compile Include="google.golang.org\protobuf\types\dynamicpb\dynamic.go" />
+    <Compile Include="google.golang.org\protobuf\types\descriptorpb\descriptor.pb.go" />
+    <Compile Include="google.golang.org\protobuf\runtime\protoimpl\impl.go" />
+    <Compile Include="google.golang.org\protobuf\runtime\protoimpl\version.go" />
+    <Compile Include="google.golang.org\protobuf\runtime\protoiface\legacy.go" />
+    <Compile Include="google.golang.org\protobuf\runtime\protoiface\methods.go" />
+    <Compile Include="google.golang.org\protobuf\proto\checkinit.go" />
+    <Compile Include="google.golang.org\protobuf\proto\decode.go" />
+    <Compile Include="google.golang.org\protobuf\proto\decode_gen.go" />
+    <Compile Include="google.golang.org\protobuf\proto\doc.go" />
+    <Compile Include="google.golang.org\protobuf\proto\encode.go" />
+    <Compile Include="google.golang.org\protobuf\proto\encode_gen.go" />
+    <Compile Include="google.golang.org\protobuf\proto\equal.go" />
+    <Compile Include="google.golang.org\protobuf\proto\extension.go" />
+    <Compile Include="google.golang.org\protobuf\proto\merge.go" />
+    <Compile Include="google.golang.org\protobuf\proto\merge_test.go" />
+    <Compile Include="google.golang.org\protobuf\proto\messageset.go" />
+    <Compile Include="google.golang.org\protobuf\proto\nil_test.go" />
+    <Compile Include="google.golang.org\protobuf\proto\proto.go" />
+    <Compile Include="google.golang.org\protobuf\proto\proto_methods.go" />
+    <Compile Include="google.golang.org\protobuf\proto\proto_reflect.go" />
+    <Compile Include="google.golang.org\protobuf\proto\reset.go" />
+    <Compile Include="google.golang.org\protobuf\proto\size.go" />
+    <Compile Include="google.golang.org\protobuf\proto\size_gen.go" />
+    <Compile Include="google.golang.org\protobuf\proto\wrappers.go" />
+    <Compile Include="google.golang.org\protobuf\internal\descfmt\stringer.go" />
+    <Compile Include="google.golang.org\protobuf\internal\descopts\options.go" />
+    <Compile Include="google.golang.org\protobuf\internal\detrand\rand.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\defval\default.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\json\decode.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\json\decode_number.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\json\decode_string.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\json\decode_token.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\json\encode.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\messageset\messageset.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\tag\tag.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\text\decode.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\text\decode_number.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\text\decode_string.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\text\decode_token.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\text\doc.go" />
+    <Compile Include="google.golang.org\protobuf\internal\encoding\text\encode.go" />
+    <Compile Include="google.golang.org\protobuf\internal\errors\errors.go" />
+    <Compile Include="google.golang.org\protobuf\internal\errors\is_go113.go" />
+    <Compile Include="google.golang.org\protobuf\internal\filedesc\build.go" />
+    <Compile Include="google.golang.org\protobuf\internal\filedesc\desc.go" />
+    <Compile Include="google.golang.org\protobuf\internal\filedesc\desc_init.go" />
+    <Compile Include="google.golang.org\protobuf\internal\filedesc\desc_lazy.go" />
+    <Compile Include="google.golang.org\protobuf\internal\filedesc\desc_list.go" />
+    <Compile Include="google.golang.org\protobuf\internal\filedesc\desc_list_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\filedesc\placeholder.go" />
+    <Compile Include="google.golang.org\protobuf\internal\filetype\build.go" />
+    <Compile Include="google.golang.org\protobuf\internal\flags\flags.go" />
+    <Compile Include="google.golang.org\protobuf\internal\flags\proto_legacy_disable.go" />
+    <Compile Include="google.golang.org\protobuf\internal\flags\proto_legacy_enable.go" />
+    <Compile Include="google.golang.org\protobuf\internal\fuzz\jsonfuzz\fuzz.go" />
+    <Compile Include="google.golang.org\protobuf\internal\fuzz\textfuzz\fuzz.go" />
+    <Compile Include="google.golang.org\protobuf\internal\fuzz\wirefuzz\fuzz.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\any_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\api_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\descriptor_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\doc.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\duration_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\empty_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\field_mask_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\goname.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\map_entry.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\source_context_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\struct_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\timestamp_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\type_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\wrappers.go" />
+    <Compile Include="google.golang.org\protobuf\internal\genid\wrappers_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\api_export.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\checkinit.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\codec_extension.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\codec_field.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\codec_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\codec_map.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\codec_map_go111.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\codec_map_go112.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\codec_message.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\codec_messageset.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\codec_reflect.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\codec_tables.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\codec_unsafe.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\convert.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\convert_list.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\convert_map.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\decode.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\encode.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\enum.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\enum_test.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\extension.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\lazy_test.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\legacy_enum.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\legacy_export.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\legacy_extension.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\legacy_file.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\legacy_message.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\merge.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\merge_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\message.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\message_reflect.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\message_reflect_field.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\message_reflect_gen.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\pointer_reflect.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\pointer_unsafe.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\validate.go" />
+    <Compile Include="google.golang.org\protobuf\internal\impl\weak.go" />
+    <Compile Include="google.golang.org\protobuf\internal\msgfmt\format.go" />
+    <Compile Include="google.golang.org\protobuf\internal\order\order.go" />
+    <Compile Include="google.golang.org\protobuf\internal\order\range.go" />
+    <Compile Include="google.golang.org\protobuf\internal\pragma\pragma.go" />
+    <Compile Include="google.golang.org\protobuf\internal\protobuild\build.go" />
+    <Compile Include="google.golang.org\protobuf\internal\protolegacy\proto.go" />
+    <Compile Include="google.golang.org\protobuf\internal\set\ints.go" />
+    <Compile Include="google.golang.org\protobuf\internal\strs\strings.go" />
+    <Compile Include="google.golang.org\protobuf\internal\strs\strings_pure.go" />
+    <Compile Include="google.golang.org\protobuf\internal\strs\strings_unsafe.go" />
+    <Compile Include="google.golang.org\protobuf\internal\version\version.go" />
+    <Compile Include="google.golang.org\protobuf\internal\weakdeps\doc.go" />
+    <Compile Include="google.golang.org\protobuf\internal\weakdeps\weakdeps.go" />
+    <Compile Include="google.golang.org\protobuf\encoding\protowire\wire.go" />
+    <Compile Include="google.golang.org\protobuf\encoding\prototext\decode.go" />
+    <Compile Include="google.golang.org\protobuf\encoding\prototext\doc.go" />
+    <Compile Include="google.golang.org\protobuf\encoding\prototext\encode.go" />
+    <Compile Include="google.golang.org\protobuf\encoding\protojson\decode.go" />
+    <Compile Include="google.golang.org\protobuf\encoding\protojson\doc.go" />
+    <Compile Include="google.golang.org\protobuf\encoding\protojson\encode.go" />
+    <Compile Include="google.golang.org\protobuf\encoding\protojson\well_known_types.go" />
+    <Compile Include="google.golang.org\protobuf\compiler\protogen\protogen.go" />
+    <Compile Include="partials_protobuf.pas" />
+    <Compile Include="globals.pas" />
+    <Compile Include="google.golang.org\protobuf\internal\testprotos\fuzz\fuzz.pb.go" />
+    <Compile Include="google.golang.org\protobuf\internal\testprotos\test\test.pb.go" />
+    <Compile Include="google.golang.org\protobuf\internal\testprotos\test3\test.pb.go" />
+    <Compile Include="protobuf_pointer.pas" />
+    <Compile Include="google.golang.org\protobuf\internal\testprotos\test\test_import.pb.go" />
+    <Compile Include="google.golang.org\protobuf\internal\testprotos\test\test_public.pb.go" />
+    <Compile Include="google.golang.org\protobuf\internal\testprotos\test3\test_extension.pb.go" />
+    <Compile Include="google.golang.org\protobuf\internal\testprotos\test3\test_import.pb.go" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.targets" />
+</Project>

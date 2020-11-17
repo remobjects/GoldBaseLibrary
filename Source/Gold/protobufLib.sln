@@ -1,0 +1,20 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# RemObjects Water
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "protobufLib", "protobufLib.elements", "{9F4B53FE-9A67-4394-AF28-8029FD7170BB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AnyCPU = Debug|AnyCPU
+		Release|AnyCPU = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9F4B53FE-9A67-4394-AF28-8029FD7170BB}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{9F4B53FE-9A67-4394-AF28-8029FD7170BB}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{9F4B53FE-9A67-4394-AF28-8029FD7170BB}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{9F4B53FE-9A67-4394-AF28-8029FD7170BB}.Release|AnyCPU.Build.0 = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

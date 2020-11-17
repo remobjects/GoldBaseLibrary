@@ -277,7 +277,7 @@ type
       raise new NotImplementedException;
     end;
 
-    method Pointer(): UInt64;
+    method Pointer(): go.builtin.int;
     begin
       var lValue := InternalGetValue;
       {$IF ISLAND}
