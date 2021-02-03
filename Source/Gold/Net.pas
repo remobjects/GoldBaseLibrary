@@ -55,7 +55,7 @@ errNoSuitableAddress := go.errors.New("no suitable address found");
 
 type
   buffersWriter = public interface
-    method writeBuffers(v: Reference<Buffers>): tuple of (int64, go.builtin.error);
+    method writeBuffers(v: Memory<Buffers>): tuple of (int64, go.builtin.error);
   end;
   Error = public partial interface (go.builtin.error)
     method Timeout(): Boolean;
@@ -548,7 +548,7 @@ type
     end;
 
 
-    method File(): tuple of (Reference<go.os.File>, go.builtin.error);
+    method File(): tuple of (Memory<go.os.File>, go.builtin.error);
     begin
       exit (nil, go.Errors.New('Not supported'));
     end;
@@ -569,7 +569,7 @@ type
           exit (0, nil, go.Errors.New(e.Message));
       end;
     end;
-    method ReadFromUDP(b: Slice<byte>): tuple of  (int, Reference<UDPAddr>, go.builtin.error);
+    method ReadFromUDP(b: Slice<byte>): tuple of  (int, Memory<UDPAddr>, go.builtin.error);
     begin
       try
         var ep: EndPoint;
@@ -585,7 +585,7 @@ type
       end;
     end;
 
-    method ReadFromIP(b: Slice<byte>): tuple of  (int, Reference<IPAddr>, go.builtin.error);
+    method ReadFromIP(b: Slice<byte>): tuple of  (int, Memory<IPAddr>, go.builtin.error);
     begin
       try
         var ep: EndPoint;
@@ -704,13 +704,13 @@ type
     end;
 
     /*
-    method WriteToIP(b: Slice<byte>; addr: Reference<IPAddr>): tuple of  (int, builtin.error);
+    method WriteToIP(b: Slice<byte>; addr: Memory<IPAddr>): tuple of  (int, builtin.error);
     method WriteTo(b: Slice<byte>; addr: Addr): tuple of  (int, builtin.error);
 
-    method ReadFromUnix(b: Slice<byte>): tuple of  (int, Reference<UnixAddr>, builtin.error)
-    method ReadMsgUnix(b: Slice<byte>; oob: Slice<byte>): tuple of  (n, oobn, flags int, Reference<UnixAddr>, err builtin.error)
-    method WriteMsgUnix(b: Slice<byte>; oob: Slice<byte>; addr Reference<UnixAddr>): tuple of  (n, oobn int, err builtin.error) ;
-    method WriteToUnix(b: Slice<byte>;addr Reference<UnixAddr>): tuple of  (int, builtin.error) ;*/
+    method ReadFromUnix(b: Slice<byte>): tuple of  (int, Memory<UnixAddr>, builtin.error)
+    method ReadMsgUnix(b: Slice<byte>; oob: Slice<byte>): tuple of  (n, oobn, flags int, Memory<UnixAddr>, err builtin.error)
+    method WriteMsgUnix(b: Slice<byte>; oob: Slice<byte>; addr Memory<UnixAddr>): tuple of  (n, oobn int, err builtin.error) ;
+    method WriteToUnix(b: Slice<byte>;addr Memory<UnixAddr>): tuple of  (int, builtin.error) ;*/
   end;
 
 method ParseAddress(s: string): tuple of (string, Integer);
@@ -821,7 +821,7 @@ type
     KeepAlive: go.time.Duration; // Go 1.3
 
     // Resolver optionally specifies an alternate resolver to use.
-    Resolver: Reference<Resolver>; // Go 1.8
+    Resolver: Memory<Resolver>; // Go 1.8
 
     // If Control is not nil, it is called after creating the network
     // connection but before actually dialing.

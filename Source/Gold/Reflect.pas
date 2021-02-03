@@ -19,6 +19,14 @@ type
     VMT: IntPtr;
     aVal: Object;
   end;
+  
+  MemoryExt<T> = extension record(Memory<T>)
+  public 
+    class method Get(aVal: Memory<T>): T;
+    begin 
+      exit aVal^;
+    end;
+  end;
 
   [ValueTypeSemantics]
   MapIter = public class
@@ -131,14 +139,14 @@ type
 
     method String: String;
     begin
-      exit (if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue).ToString;
+      exit (if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue).ToString;
     end;
 
     method Int: Int64;
     begin
       var lValue := InternalGetValue;
-      if lValue is go.builtin.Reference<Object> then
-        lValue := go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue));
+      if lValue is Memory<Object> then
+        lValue := Memory<Object>.Get(Memory<Object>(lValue));
       {$IFDEF ISLAND}
       exit RemObjects.Elements.System.Convert.ToInt64(lValue);
       {$ELSE}
@@ -155,8 +163,8 @@ type
     method Uint: UInt64;
     begin
       var lValue := InternalGetValue;
-      if lValue is go.builtin.Reference<Object> then
-        lValue := go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(lValue));
+      if lValue is Memory<Object> then
+        lValue := Memory<Object>.Get(Memory<Object>(lValue));
 
       {$IFDEF ISLAND}
       exit RemObjects.Elements.System.Convert.ToUInt64(lValue);
@@ -172,14 +180,14 @@ type
     end;
     method Float: Double;
     begin
-      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToDouble(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
+      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToDouble(if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue);
     end;
 
     method IsNil: Boolean;
     begin
       case fType.Kind of
         Chan, Func, Map, go.reflect.Interface, UnsafePointer, __Global.Slice: // missing &Interface Kind(20) --> &Interface
-          exit (if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue) = nil;
+          exit (if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue) = nil;
 
         else
           raise new Exception('Wrong value type');
@@ -188,12 +196,12 @@ type
 
     method Complex: go.builtin.complex128;
     begin
-      exit go.builtin.complex128(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
+      exit go.builtin.complex128(if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue);
     end;
 
     method Bool: Boolean;
     begin
-      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToBoolean(if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue);
+      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToBoolean(if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue);
     end;
 
     method Convert(aTo: &Type): Value;
@@ -206,7 +214,7 @@ type
       if fValue = nil then
         exit false;
 
-      var lValue := if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue;
+      var lValue := if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue;
       result := lValue ≠ go.reflect.Zero(fType);
     end;
 
@@ -228,13 +236,13 @@ type
       result := go.builtin.IMap(fValue).GetReflectValue(key);
     end;
 
-    method MapIter: go.builtin.Reference<MapIter>;
+    method MapIter: Memory<MapIter>;
     begin
       if fType.Kind ≠ Map then
         raise new Exception('Wrong type, need a map');
 
       var lIter := new MapIter(go.builtin.IMap(fValue).GetReflectSequence().GetEnumerator());
-      result := new go.builtin.Reference<MapIter>(lIter);
+      result := new Memory<MapIter>(lIter);
     end;
 
     method MapKeys: go.builtin.Slice<Value>;
@@ -510,7 +518,7 @@ type
       if (lKind <> &Array) and (lKind <> go.reflect.Slice) and (lKind <> go.reflect.String) then
         raise new Exception("Wrong type, need array, slice or string");
 
-      //var lValue := if fValue is go.builtin.Reference<Object> then go.builtin.Reference<Object>.Get(go.builtin.Reference<Object>(fValue)) else fValue;
+      //var lValue := if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue;
       var lValue := InternalGetValue;
       // TODO need to create and return a reference here???
       case lKind of
@@ -545,11 +553,11 @@ type
       {$IF ISLAND}
       var lFields := TypeImpl(fType).fTrueType.Fields.ToArray();
       var lValue := InternalGetValue;
-      result := new Value(lFields[i].GetValue(lValue), new TypeImpl(lFields[i].Type), new go.builtin.Reference<Object>(lValue), lFields[i]);
+      result := new Value(lFields[i].GetValue(lValue), new TypeImpl(lFields[i].Type), new Memory<Object>(lValue), lFields[i]);
       {$ELSEIF ECHOES}
       var lFields := System.Reflection.TypeInfo(TypeImpl(fType).fTrueType).DeclaredFields.ToArray();
       var lValue := InternalGetValue;
-      result := new Value(lFields[i].GetValue(lValue), new TypeImpl(lFields[i].FieldType), new go.builtin.Reference<Object>(lValue), lFields[i]);
+      result := new Value(lFields[i].GetValue(lValue), new TypeImpl(lFields[i].FieldType), new Memory<Object>(lValue), lFields[i]);
       {$ENDIF}
     end;
 
@@ -586,16 +594,16 @@ type
 
     method Addr: Value;
     begin
-      result := new go.builtin.Reference<Value>(fValue);
+      result := new Memory<Value>(fValue);
     end;
 
-    method MapRange() :go.builtin.Reference<MapIter>;
+    method MapRange() :Memory<MapIter>;
     begin
       if fType.Kind ≠ Map then
         raise new Exception('Wrong type, need a map');
 
       var lIter := new MapIter(go.builtin.IMap(fValue).GetReflectSequence().GetEnumerator());
-      result := new go.builtin.Reference<MapIter>(lIter);
+      result := new Memory<MapIter>(lIter);
     end;
 
     method &Interface: Object;
@@ -605,7 +613,7 @@ type
 
     method Elem: Value;
     begin
-      if fValue is go.builtin.Reference<Object> then begin
+      if fValue is Memory<Object> then begin
         var lType := TypeImpl(fType).RealType;
         var lRealType: PlatformType;
         {$IF ISLAND}
@@ -1080,7 +1088,7 @@ type
 
     method Elem: &Type;
     begin
-      if fRealType is go.builtin.Reference<Object> then begin
+      if fRealType is Memory<Object> then begin
         var lRealType: PlatformType;
         {$IF ISLAND}
         lRealType := fTrueType.GenericArguments.FirstOrDefault;
@@ -1249,7 +1257,7 @@ type
 
   Method &New(aType: &Type): Value;public;
   begin
-    exit new Value(new go.builtin.Reference<Object>(Zero(aType)), aType);
+    exit new Value(new Memory<Object>(Zero(aType)), aType);
   end;
 
   method Zero(aType: &Type): Value;public;
@@ -1291,7 +1299,7 @@ type
 
   method PtrTo(t: &Type): &Type; public;
   begin
-    result := new go.builtin.Reference<&Type>(t);
+    result := new Memory<&Type>(t);
   end;
 
   method ValueOf(i: Object): Value;public;
@@ -1301,7 +1309,7 @@ type
 
   method Indirect(v: Value): Value;public;
   begin
-    exit new Value(new go.builtin.Reference<Object>(v.fValue), v.fType);
+    exit new Value(new Memory<Object>(v.fValue), v.fType);
   end;
 
   method TypeOf(v: Object): &Type;public;

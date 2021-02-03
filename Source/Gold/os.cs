@@ -22,7 +22,7 @@ namespace go.crypto {
 	namespace x509 {
 		#if ECHOES || (ISLAND && WINDOWS)
 		public partial class __Global {
-			public static (Reference<CertPool>, go.builtin.error) loadSystemRoots()
+			public static (Memory<CertPool>, go.builtin.error) loadSystemRoots()
 			{
 				#if ECHOES
 				var lRoots = go.crypto.x509.NewCertPool();
@@ -48,7 +48,7 @@ namespace go.crypto {
 			}
 		}
 		public partial class Certificate {
-			public (Slice<Slice<Reference<crypto.x509.Certificate>>>, go.builtin.error) systemVerify(Reference<go.crypto.x509.VerifyOptions> opts)
+			public (Slice<Slice<Memory<crypto.x509.Certificate>>>, go.builtin.error) systemVerify(Memory<go.crypto.x509.VerifyOptions> opts)
 			{
 				#if ECHOES
 				var lHasDNSName = (opts != null) && (opts.DNSName.Length > 0);
@@ -57,8 +57,8 @@ namespace go.crypto {
 				lChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
 				if (lChain.Build(lCert))
 				{
-					var lResult = new Slice<Slice<Reference<go.crypto.x509.Certificate>>>(1);
-					var lNewChain = new Slice<Reference<go.crypto.x509.Certificate>>(lChain.ChainElements.Count);
+					var lResult = new Slice<Slice<Memory<go.crypto.x509.Certificate>>>(1);
+					var lNewChain = new Slice<Memory<go.crypto.x509.Certificate>>(lChain.ChainElements.Count);
 					for (var i = 0; i < lChain.ChainElements.Count; i++)
 					{
 						var lCertificate = lChain.ChainElements[i].Certificate;
@@ -250,7 +250,7 @@ namespace go.os {
 				#endif
 				return ("", go.errors.New("Could not find file"));
 			}
-			public static Reference<Cmd> Command(string name, params go.builtin.string[] args) {
+			public static Memory<Cmd> Command(string name, params go.builtin.string[] args) {
 				return new Cmd {
 					Path = name,
 					Args = args
@@ -268,9 +268,9 @@ namespace go.os {
 			public io.Writer Stdout;
 			public io.Writer Stderr;
 
-			public Slice<Reference<os.File>> ExtraFiles; // not used!
-			public Reference<os.Process> Process;
-			public Reference<os.ProcessState> ProcessState;
+			public Slice<Memory<os.File>> ExtraFiles; // not used!
+			public Memory<os.Process> Process;
+			public Memory<os.ProcessState> ProcessState;
 
 			public builtin.error Start() {
 				var pp = StartProcess(Path, Args, new ProcAttr {
@@ -279,7 +279,7 @@ namespace go.os {
 				});
 				if (pp.Item2 != null) return pp.Item2;
 				Process = pp.Item1;
-				ProcessState = new Reference<os.ProcessState>(new os.ProcessState(pp.Item1.Process));
+				ProcessState = new Memory<os.ProcessState>(new os.ProcessState(pp.Item1.Process));
 				return null;
 			}
 

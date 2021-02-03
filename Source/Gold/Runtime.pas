@@ -10,7 +10,7 @@ type
   Frame = public partial class
   public
     PC: go.builtin.uintptr;
-    Func: go.builtin.Reference<Func>;
+    Func: Memory<Func>;
     &Function: String;
     File: String;
     Line: Integer;
@@ -39,9 +39,9 @@ begin
   exit 0;
 end;
 
-method CallersFrames(acallers: go.builtin.Slice<go.builtin.uintptr>): go.builtin.Reference<Frames>;
+method CallersFrames(acallers: go.builtin.Slice<go.builtin.uintptr>): Memory<Frames>;
 begin
-  exit new go.builtin.Reference<Frames>(new Frames);
+  exit new Memory<Frames>(new Frames);
 end;
 
 method Stack(buf: go.builtin.Slice<Byte>; all: Boolean): Integer; public;
@@ -355,7 +355,7 @@ type
   private
 
   public
-    class method AddTimer(aTimer: go.builtin.Reference<go.time.runtimeTimer>);
+    class method AddTimer(aTimer: Memory<go.time.runtimeTimer>);
     begin
       var lInterval := (aTimer.when - go.time.runtimeNano()) div 1000000; // ns to ms
       if lInterval < 0 then
@@ -378,7 +378,7 @@ type
       lTimer.Start;
     end;
 
-    class method StopTimer(aTimer: go.builtin.Reference<go.time.runtimeTimer>): Boolean;
+    class method StopTimer(aTimer: Memory<go.time.runtimeTimer>): Boolean;
     begin
       var lTimer := aTimer.pt;
       if lTimer = nil then exit;
@@ -407,7 +407,7 @@ type
       if (not ok) then begin
         var (z, err) := loadLocation("localtime", new go.builtin.Slice<go.builtin.string>(["/etc/"]));
         if err = nil then begin
-          localLoc := go.builtin.Reference<go.time.Location>.Get(z);
+          localLoc := Memory<go.time.Location>.Get(z);
           localLoc.name := "Local";
           exit;
         end;
@@ -416,7 +416,7 @@ type
          var (z, err) := loadLocation(tz, zoneSources);
 
         if err = nil  then begin
-          localLoc := go.builtin.Reference<go.time.Location>.Get(z);
+          localLoc := Memory<go.time.Location>.Get(z);
           exit;
         end;
       end;
@@ -456,12 +456,12 @@ type
       exit (fd.Read(buff.fArray, buff.fStart, buff.Length), nil);
     end;
   public
-    class method startTimer(t: go.builtin.Reference<go.time.runtimeTimer>);
+    class method startTimer(t: Memory<go.time.runtimeTimer>);
     begin
       go.time.TimerPool.AddTimer(t);
     end;
 
-    class method stopTimer(t: go.builtin.Reference<go.time.runtimeTimer>): Boolean;
+    class method stopTimer(t: Memory<go.time.runtimeTimer>): Boolean;
     begin
       exit go.time.TimerPool.StopTimer(t);
     end;
@@ -704,7 +704,7 @@ type
   public
   end;
 
-  method ReadMemStats(m: go.builtin.Reference<MemStats>);
+  method ReadMemStats(m: Memory<MemStats>);
   begin
 
   end;

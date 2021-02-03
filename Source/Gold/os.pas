@@ -624,17 +624,17 @@ type
       end;
     end;
 
-    class method TempFile(dir, pattern: String): tuple of (go.builtin.Reference<go.os.File>, go.builtin.error);
+    class method TempFile(dir, pattern: String): tuple of (Memory<go.os.File>, go.builtin.error);
     begin
       {$IF ISLAND}
       if String.IsNullOrEmpty(dir) then
         dir := Environment.TempFolder.FullName;
-      exit (new go.builtin.Reference<go.os.File>(new go.os.File(fs := new FileStream(Path.Combine(dir, pattern+Guid.NewGuid.ToString.Replace('{','').Replace('}', '').Replace('-', '')), :System.FileMode.Create, :System.FileAccess.ReadWrite))), nil);
+      exit (new Memory<go.os.File>(new go.os.File(fs := new FileStream(Path.Combine(dir, pattern+Guid.NewGuid.ToString.Replace('{','').Replace('}', '').Replace('-', '')), :System.FileMode.Create, :System.FileAccess.ReadWrite))), nil);
       // TODO
       {$ELSEIF ECHOES}
       if String.IsNullOrEmpty(dir) then
         dir := Path.GetTempPath;
-      exit (new go.builtin.Reference<go.os.File>(new go.os.File(fs := System.IO.File.Create(System.IO.Path.GetTempFileName))), nil);
+      exit (new Memory<go.os.File>(new go.os.File(fs := System.IO.File.Create(System.IO.Path.GetTempFileName))), nil);
       {$ENDIF}
     end;
 
@@ -722,7 +722,7 @@ public
     exit go.errors.New('Not supported');
   end;
 
-  method Wait: tuple of (go.builtin.Reference<ProcessState>, go.builtin.error);
+  method Wait: tuple of (Memory<ProcessState>, go.builtin.error);
   begin
     try
       {$IF ISLAND}
@@ -745,7 +745,7 @@ public
   Env: go.builtin.Slice<go.builtin.string>;
 end;
 
-method IntStartProcess(name: go.builtin.string; argv: go.builtin.Slice<go.builtin.string>; attr: go.builtin.Reference<ProcAttr>): tuple of (go.builtin.Reference<Process>, go.builtin.error);
+method IntStartProcess(name: go.builtin.string; argv: go.builtin.Slice<go.builtin.string>; attr: Memory<ProcAttr>): tuple of (Memory<Process>, go.builtin.error);
 begin
   var lArgv := new List<String>();
   if argv <> nil then begin
@@ -756,7 +756,7 @@ begin
   var lEnv := new Dictionary<String, String>();
   var lWorkingDir := '';
   if (attr <> nil) then begin
-    var p := go.builtin.Reference<ProcAttr>.Get(attr);
+    var p := Memory<ProcAttr>.Get(attr);
     if p <> nil then begin
       if p.Dir <> nil then
         lWorkingDir := p.Dir;
@@ -798,12 +798,12 @@ begin
   end;
 end;
 
-method StartProcess(name: go.builtin.string; argv: go.builtin.Slice<go.builtin.string>; attr: go.builtin.Reference<ProcAttr>): tuple of (go.builtin.Reference<Process>, go.builtin.error);
+method StartProcess(name: go.builtin.string; argv: go.builtin.Slice<go.builtin.string>; attr: Memory<ProcAttr>): tuple of (Memory<Process>, go.builtin.error);
 begin
   exit IntStartProcess(name, argv, attr);
 end;
 
-method FindProcess(pid: Integer): tuple of (go.builtin.Reference<Process>, go.builtin.error);
+method FindProcess(pid: Integer): tuple of (Memory<Process>, go.builtin.error);
 begin
   try
     {$IF ISLAND}
@@ -948,7 +948,7 @@ go.crypto.x509.__Global = public partial class
     exit(0);
   end;
 
-  class method loadSystemRoots: tuple of (go.builtin.Reference<go.crypto.x509.CertPool>, go.builtin.error);
+  class method loadSystemRoots: tuple of (Memory<go.crypto.x509.CertPool>, go.builtin.error);
   begin
     var roots := NewCertPool();
     var data: CFDataRef := 0;

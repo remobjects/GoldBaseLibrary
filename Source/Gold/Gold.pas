@@ -303,6 +303,11 @@ type
       fStart := aStart;
       fCount := aCount;
     end;
+    
+    method Ref(i: Int64): Memory<T>; unsafe;
+    begin 
+      exit @fArray[i];
+    end;
 
     constructor;
     begin
@@ -557,71 +562,6 @@ type
     method TrySend(aVal: T): IWaitSendMessage;
   end;
 
-  IReference = public interface
-    method Get: Object;
-    method &Set(o: Object);
-  end;
-
-  [TransparentType]
-  &Reference<T> = public class(IReference)
-  public
-    constructor(aRead: Func<T>; aWrite: Action<T>);
-    begin
-      &Read := aRead;
-      &Write := aWrite;
-    end;
-
-    constructor(aValue: T);
-    begin
-      var lValue := aValue;
-      &Read := -> lValue;
-      &Write := a -> begin lValue := a; end;
-    end;
-    method Get: Object;
-    begin
-      if self = nil then
-        exit default(T);
-
-      exit Object(Value);
-    end;
-
-    method &Set(o: Object);
-    begin
-      Value := T(o);
-    end;
-
-    property &Read: Func<T>; readonly;
-    property &Write: Action<T>; readonly;
-
-    property Value: T read &Read() write value -> &Write(value);
-
-    class method &Set(aVal: Reference<T>; aValue: T);
-    begin
-      aVal.Value := aValue;
-    end;
-
-    class method &Get(aVal: Reference<T>): T;
-    begin
-      if aVal = nil then
-        exit default(T);
-
-      exit aVal.Value;
-    end;
-
-    class operator Implicit(aVal: Reference<T>): T;
-    begin
-      if aVal = nil then
-        exit nil
-      else
-        exit aVal.Value;
-    end;
-
-    class operator Implicit(aVal: T): Reference<T>;
-    begin
-      exit new Reference<T>(aVal);
-    end;
-  end;
-
   GoException = public class(Exception)
   public
     property Value: Object; readonly;
@@ -870,10 +810,8 @@ type
 
   method TypeAssert<T>(v: Object): tuple of (T, Boolean);
   begin
-    if (v ≠ nil) and (v is go.builtin.IReference) then begin
-      var lNewV := go.builtin.IReference(v).Get;
-      if lNewV is T then
-        exit (T(lNewV), true);
+    if (v ≠ nil) and (v is Memory<T>) then begin
+      exit (Memory<T>(v).Value, true);
     end;
 
     if v is T then
@@ -892,12 +830,12 @@ type
     exit (default(T), false); // for integers, T(V) cast would fail otherwise.
   end;
 
-  method TypeAssertReference<T>(v: Object): tuple of (&Reference<T>, Boolean);
+  method TypeAssertReference<T>(v: Object): tuple of (&Memory<T>, Boolean);
   begin
-    result := TypeAssert<Reference<T>>(v);
+    result := TypeAssert<Memory<T>>(v);
     if result[1] then exit;
     if v is T then
-      exit (new Reference<T>(T(v)), true);
+      exit (new Memory<T>(T(v)), true);
   end;
 
   method panic(v: Object);
