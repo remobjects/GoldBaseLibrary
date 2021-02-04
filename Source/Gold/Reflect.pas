@@ -19,11 +19,11 @@ type
     VMT: IntPtr;
     aVal: Object;
   end;
-  
+
   MemoryExt<T> = extension record(Memory<T>)
-  public 
+  public
     class method Get(aVal: Memory<T>): T;
-    begin 
+    begin
       exit aVal^;
     end;
   end;
@@ -356,12 +356,15 @@ type
       end
       else begin
         if fExtended <> nil then begin // struct field
-          (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, lValue);
+          //(fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, lValue);
+          (fExtended as FieldInfo).SetValue(IMemory(fPtr).GetValue, lValue);
           fValue := lValue;
         end
         else begin
-          if fPtr is go.builtin.IReference then
-            go.builtin.IReference(fPtr).Set(lValue);
+          //if fPtr is go.builtin.IReference then
+            //go.builtin.IReference(fPtr).Set(lValue);
+          if fPtr is IMemory then
+            IMemory(fPtr).SetValue(lValue);
           fValue := lValue;
         end;
       end;
@@ -374,10 +377,12 @@ type
       end
       else begin
         if fExtended <> nil then begin // struct field
-          (fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, aValue);
+          //(fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, aValue);
+          (fExtended as FieldInfo).SetValue(IMemory(fPtr).GetValue, aValue);
         end
         else begin
-          go.builtin.IReference(fPtr).Set(aValue);
+          //go.builtin.IReference(fPtr).Set(aValue);
+          IMemory(fPtr).SetValue(aValue);
           fValue := aValue;
         end;
       end;
@@ -502,7 +507,8 @@ type
           exit fValue;
         var lValue: Object;
         if fExtended <> nil then begin
-          lValue := (fExtended as FieldInfo).GetValue(if fPtr is go.builtin.IReference then go.builtin.IReference(fPtr).Get else fPtr);
+          //lValue := (fExtended as FieldInfo).GetValue(if fPtr is go.builtin.IReference then go.builtin.IReference(fPtr).Get else fPtr);
+          lValue := (fExtended as FieldInfo).GetValue(if fPtr is IMemory then IMemory(fPtr).GetValue else fPtr);
         end
         else
           lValue := fValue;
@@ -621,7 +627,8 @@ type
         {$ELSEIF ECHOES}
         lRealType := lType.GenericTypeArguments[0];
         {$ENDIF}
-        exit new Value(go.builtin.IReference(fValue).Get, new TypeImpl(lRealType), fValue);
+        //exit new Value(go.builtin.IReference(fValue).Get, new TypeImpl(lRealType), fValue);
+        exit new Value(IMemory(fValue).GetValue, new TypeImpl(lRealType), fValue);
       end;
       raise new NotSupportedException;
     end;
@@ -1297,7 +1304,7 @@ type
     {$ENDIF}
   end;
 
-  method PtrTo(t: &Type): &Type; public;
+  method PtrTo(t: &Type): Memory<&Type>; public;
   begin
     result := new Memory<&Type>(t);
   end;
@@ -1343,7 +1350,8 @@ type
       {$ENDIF}
       var lValue: Object;
       if aVal.fExtended <> nil then begin
-        lValue := (aVal.fExtended as FieldInfo).GetValue(if aVal.fPtr is go.builtin.IReference then go.builtin.IReference(aVal.fPtr).Get else aVal.fPtr);
+        //lValue := (aVal.fExtended as FieldInfo).GetValue(if aVal.fPtr is go.builtin.IReference then go.builtin.IReference(aVal.fPtr).Get else aVal.fPtr);
+        lValue := (aVal.fExtended as FieldInfo).GetValue(if aVal.fPtr is IMemory then IMemory(aVal.fPtr).GetValue else aVal.fPtr);
       end
       else
         lValue := aVal.fValue;
