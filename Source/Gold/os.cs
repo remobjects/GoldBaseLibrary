@@ -273,7 +273,7 @@ namespace go.os {
 			public Memory<os.ProcessState> ProcessState;
 
 			public builtin.error Start() {
-				var pp = StartProcess(Path, Args, new ProcAttr {
+				var pp = StartProcess(Path, Args, (Memory<ProcAttr>)new ProcAttr {
 					Dir = Dir,
 					Env = Env
 				});

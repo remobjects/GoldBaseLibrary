@@ -407,7 +407,8 @@ type
       if (not ok) then begin
         var (z, err) := loadLocation("localtime", new go.builtin.Slice<go.builtin.string>(["/etc/"]));
         if err = nil then begin
-          localLoc := Memory<go.time.Location>.Get(z);
+          //localLoc := Memory<go.time.Location>.Get(z);
+          localLoc := z^;
           localLoc.name := "Local";
           exit;
         end;
@@ -416,7 +417,8 @@ type
          var (z, err) := loadLocation(tz, zoneSources);
 
         if err = nil  then begin
-          localLoc := Memory<go.time.Location>.Get(z);
+          //localLoc := Memory<go.time.Location>.Get(z);
+          localLoc := z^;
           exit;
         end;
       end;

@@ -730,7 +730,7 @@ public
       {$ELSEIF ECHOES}
       Process.WaitForExit;
       {$ENDIF}
-      exit (new ProcessState(Process), nil);
+      exit (Memory<ProcessState>(new ProcessState(Process)), nil);
     except
       on e: Exception do
         exit (nil, go.errors.New(e.Message));
@@ -756,7 +756,7 @@ begin
   var lEnv := new Dictionary<String, String>();
   var lWorkingDir := '';
   if (attr <> nil) then begin
-    var p := Memory<ProcAttr>.Get(attr);
+    var p := attr.Value;
     if p <> nil then begin
       if p.Dir <> nil then
         lWorkingDir := p.Dir;
@@ -790,7 +790,7 @@ begin
     lProcess.Start;
     exit (new Process(Process := lProcess), nil);
     {$ELSEIF ECHOES}
-    exit (new Process(Process := ProcessType.Start(lPSI)), nil);
+    exit (Memory<Process>(new Process(Process := ProcessType.Start(lPSI))), nil);
     {$ENDIF}
   except
     on e: Exception do
@@ -813,7 +813,7 @@ begin
     {$ENDIF}
     if p = nil then
       exit (nil, go.errors.New('No such process'));;
-    exit (new Process(Process := p), nil);
+    exit (Memory<Process>(new Process(Process := p)), nil);
   except
     on e: Exception do
       exit (nil, go.errors.New(e.Message));

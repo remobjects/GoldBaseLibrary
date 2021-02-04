@@ -275,7 +275,7 @@ type
     begin
       var bw := buffersWriter(w);
       if bw <> nil then
-        exit bw.writeBuffers(self);
+        exit bw.writeBuffers(Memory<Buffers>(self));
       var n: int64 := 0;
       for i: Integer := 0 to Value.Length -1 do begin
         var (c, err) := w.Write(Value[i]);
@@ -340,7 +340,7 @@ Listener = public interface
   method Addr: Addr;
 end;
 
-method FileListener(f: Reference<go.os.File>): tuple of (Listener, go.builtin.error);
+method FileListener(f: Memory<go.os.File>): tuple of (Listener, go.builtin.error);
 begin
   exit (nil, go.Errors.New('not supported'));
 end;
@@ -578,7 +578,7 @@ type
         var lAddr := IPEndPoint(ep);
         a := new UDPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
 
-        exit (n, a, nil);
+        exit (n, Memory<UDPAddr>(a), nil);
       except
         on e: Exception do
           exit (0, nil, go.Errors.New(e.Message));
@@ -594,7 +594,7 @@ type
         var lAddr := IPEndPoint(ep);
         a := new IPAddr(IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
 
-        exit (n, a, nil);
+        exit (n, Memory<IPAddr>(a), nil);
       except
         on e: Exception do
           exit (0, nil, go.Errors.New(e.Message));
@@ -841,9 +841,10 @@ type
       var p := go.strings.SplitN(address, ':', 2);
       if p.Length <> 2 then exit (nil, go.Errors.New('Port missing; address/ip:port'));
       try
-        var lPort := coalesce(Reference<Resolver>.Get(self.Resolver), go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
+        //var lPort := coalesce(Reference<Resolver>.Get(self.Resolver), go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
+        var lPort := coalesce(self.Resolver.Value, go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
         if lPort.Item2 <> nil then exit (nil, lPort.Item2);
-        var lHost := coalesce(Reference<Resolver>.Get(self.Resolver),go. net.Resolver.Default).LookupIPAddr(ctx, p[0]);
+        var lHost := coalesce(self.Resolver.Value,go. net.Resolver.Default).LookupIPAddr(ctx, p[0]);
         if lHost.Item2 <> nil then exit (Nil, lPort.Item2);
 
         var lRep: IPEndPoint;
