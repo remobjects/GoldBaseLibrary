@@ -842,9 +842,9 @@ type
       if p.Length <> 2 then exit (nil, go.Errors.New('Port missing; address/ip:port'));
       try
         //var lPort := coalesce(Reference<Resolver>.Get(self.Resolver), go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
-        var lPort := coalesce(self.Resolver.Value, go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
+        var lPort := coalesce(self.Resolver^, go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
         if lPort.Item2 <> nil then exit (nil, lPort.Item2);
-        var lHost := coalesce(self.Resolver.Value,go. net.Resolver.Default).LookupIPAddr(ctx, p[0]);
+        var lHost := coalesce(self.Resolver^, go.net.Resolver.Default).LookupIPAddr(ctx, p[0]);
         if lHost.Item2 <> nil then exit (Nil, lPort.Item2);
 
         var lRep: IPEndPoint;

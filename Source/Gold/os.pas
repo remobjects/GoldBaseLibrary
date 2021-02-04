@@ -756,7 +756,7 @@ begin
   var lEnv := new Dictionary<String, String>();
   var lWorkingDir := '';
   if (attr <> nil) then begin
-    var p := attr.Value;
+    var p := attr^;
     if p <> nil then begin
       if p.Dir <> nil then
         lWorkingDir := p.Dir;

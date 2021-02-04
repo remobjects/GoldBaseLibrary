@@ -303,9 +303,9 @@ type
       fStart := aStart;
       fCount := aCount;
     end;
-    
+
     method Ref(i: Int64): Memory<T>; unsafe;
-    begin 
+    begin
       exit @fArray[i];
     end;
 
@@ -811,7 +811,7 @@ type
   method TypeAssert<T>(v: Object): tuple of (T, Boolean);
   begin
     if (v ≠ nil) and (v is Memory<T>) then begin
-      exit (Memory<T>(v).Value, true);
+      exit (Memory<T>(v)^, true);
     end;
 
     if v is T then
