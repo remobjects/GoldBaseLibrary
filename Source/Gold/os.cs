@@ -36,7 +36,8 @@ namespace go.crypto {
 					var (lNewCert, lErr) = go.crypto.x509.ParseCertificate(lRawCert);
 					if (lErr == null)
 					{
-						lRoots.AddCert(lNewCert);
+						//lRoots.AddCert(lNewCert);
+						CertPool.AddCert(lRoots, lNewCert);
 					}
 				}
 				lStore.Close();
