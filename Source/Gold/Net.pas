@@ -775,6 +775,7 @@ type
     constructor;
     begin
       self.Resolver := Resolver.Default;
+      Deadline := new go.time.Time;
     end;
     // Timeout is the maximum amount of time a dial will wait for
     // a connect to complete. If Deadline is also set, it may fail
