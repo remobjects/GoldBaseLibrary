@@ -1095,7 +1095,7 @@ type
 
     method Elem: &Type;
     begin
-      if fRealType is Memory<Object> then begin
+      if IsMemoryType(fTrueType) then begin
         var lRealType: PlatformType;
         {$IF ISLAND}
         lRealType := fTrueType.GenericArguments.FirstOrDefault;
@@ -1484,6 +1484,17 @@ type
   method NewAt(t: &Type; p: go.unsafe.Pointer): Value;
   begin
     raise new NotImplementedException;
+  end;
+
+  method IsMemoryType(aType: PlatformType): Boolean; assembly;
+  begin
+    {$IF ECHOES}
+    if aType.FullName.StartsWith('RemObjects.Elements.System.Memory') then
+      exit true;
+    {$ELSE}
+    raise new Expcetion("Not implemented!!");
+    {$ENDIF}
+    result := false;
   end;
 
 end.
