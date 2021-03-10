@@ -139,14 +139,14 @@ type
 
     method String: String;
     begin
-      exit (if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue).ToString;
+      exit (if fValue is IMemory then IMemory(fValue).GetValue else fValue).ToString;
     end;
 
     method Int: Int64;
     begin
       var lValue := InternalGetValue;
-      if lValue is Memory<Object> then
-        lValue := Memory<Object>.Get(Memory<Object>(lValue));
+      if lValue is IMemory then
+        lValue := IMemory(lValue).GetValue;
       {$IFDEF ISLAND}
       exit RemObjects.Elements.System.Convert.ToInt64(lValue);
       {$ELSE}
@@ -163,8 +163,8 @@ type
     method Uint: UInt64;
     begin
       var lValue := InternalGetValue;
-      if lValue is Memory<Object> then
-        lValue := Memory<Object>.Get(Memory<Object>(lValue));
+      if lValue is IMemory then
+        lValue := IMemory(lValue).GetValue;
 
       {$IFDEF ISLAND}
       exit RemObjects.Elements.System.Convert.ToUInt64(lValue);
@@ -180,14 +180,14 @@ type
     end;
     method Float: Double;
     begin
-      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToDouble(if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue);
+      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToDouble(if fValue is IMemory then IMemory(fValue).GetValue else fValue);
     end;
 
     method IsNil: Boolean;
     begin
       case fType.Kind of
         Chan, Func, Map, go.reflect.Interface, UnsafePointer, __Global.Slice: // missing &Interface Kind(20) --> &Interface
-          exit (if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue) = nil;
+          exit (if fValue is IMemory then IMemory(fValue).GetValue else fValue) = nil;
 
         else
           raise new Exception('Wrong value type');
@@ -196,12 +196,12 @@ type
 
     method Complex: go.builtin.complex128;
     begin
-      exit go.builtin.complex128(if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue);
+      exit go.builtin.complex128(if fValue is IMemory then IMemory(fValue).GetValue else fValue);
     end;
 
     method Bool: Boolean;
     begin
-      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToBoolean(if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue);
+      exit {$IFDEF ISLAND}RemObjects.Elements.System.Convert{$ELSE}System.Convert{$ENDIF}.ToBoolean(if fValue is IMemory then IMemory(fValue).GetValue else fValue);
     end;
 
     method Convert(aTo: &Type): Value;
@@ -214,7 +214,7 @@ type
       if fValue = nil then
         exit false;
 
-      var lValue := if fValue is Memory<Object> then Memory<Object>.Get(Memory<Object>(fValue)) else fValue;
+      var lValue := if fValue is IMemory then IMemory(fValue).GetValue else fValue;
       result := lValue ≠ go.reflect.Zero(fType);
     end;
 
@@ -619,7 +619,7 @@ type
 
     method Elem: Value;
     begin
-      if fValue is Memory<Object> then begin
+      if fValue is IMemory then begin
         var lType := TypeImpl(fType).RealType;
         var lRealType: PlatformType;
         {$IF ISLAND}
@@ -1095,7 +1095,9 @@ type
 
     method Elem: &Type;
     begin
-      if IsMemoryType(fTrueType) then begin
+      //if IsMemoryType(fTrueType) then begin
+      var lKind := Kind;
+      if (lKind = go.reflect.ptr) or (lKind = go.reflect.slice) or (lKind = go.reflect.chan) then begin
         var lRealType: PlatformType;
         {$IF ISLAND}
         lRealType := fTrueType.GenericArguments.FirstOrDefault;
