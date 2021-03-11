@@ -357,7 +357,10 @@ type
       else begin
         if fExtended <> nil then begin // struct field
           //(fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, lValue);
-          (fExtended as FieldInfo).SetValue(IMemory(fPtr).GetValue, lValue);
+          if fPtr is IMemory then
+            (fExtended as FieldInfo).SetValue(IMemory(fPtr).GetValue, lValue)
+          else
+            (fExtended as FieldInfo).SetValue(fPtr, lValue);
           fValue := lValue;
         end
         else begin
@@ -378,7 +381,10 @@ type
       else begin
         if fExtended <> nil then begin // struct field
           //(fExtended as FieldInfo).SetValue(go.builtin.IReference(fPtr).Get, aValue);
-          (fExtended as FieldInfo).SetValue(IMemory(fPtr).GetValue, aValue);
+          if fPtr is IMemory then
+            (fExtended as FieldInfo).SetValue(IMemory(fPtr).GetValue, aValue)
+          else
+            (fExtended as FieldInfo).SetValue(fPtr, aValue);
         end
         else begin
           //go.builtin.IReference(fPtr).Set(aValue);
