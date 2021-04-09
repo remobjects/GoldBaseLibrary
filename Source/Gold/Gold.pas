@@ -304,7 +304,7 @@ type
       fCount := aCount;
     end;
 
-    method Ref(i: Int64): Memory<T>; unsafe;
+    method Ref(i: int64): Memory<T>; unsafe;
     begin
       exit @fArray[i];
     end;
