@@ -49,7 +49,7 @@ end;
 method CompareAndSwapInt32(addr: Memory<int32>; aold, anew: int32): bool; public;
 begin
   {$IFDEF ISLAND}
-  exit InternalCalls.CompareExchange(var addr, anew, aold) = aold;
+  exit InternalCalls.CompareExchange(var addr^, anew, aold) = aold;
   {$ELSE}
   exit System.Threading.Interlocked.CompareExchange(var addr^, anew, aold) = aold;
   {$ENDIF}
