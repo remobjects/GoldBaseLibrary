@@ -1500,7 +1500,8 @@ type
     if aType.FullName.StartsWith('RemObjects.Elements.System.Memory') then
       exit true;
     {$ELSE}
-    raise new Exception("Not implemented!!");
+    if aType.Name.StartsWith('RemObjects.Elements.System.Memory`1') then
+      exit true;
     {$ENDIF}
     result := false;
   end;
