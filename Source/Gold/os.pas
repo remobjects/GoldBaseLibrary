@@ -965,7 +965,8 @@ go.crypto.x509.__Global = public partial class
       inc(buf);
     end;
 
-    roots.AppendCertsFromPEM(lSlice);
+    //roots.AppendCertsFromPEM(lSlice);
+    go.crypto.x509.CertPool.AppendCertsFromPEM(roots, lSlice);
     if untrustedData = nil then begin
       CFRelease(data);
       exit (roots, nil);
@@ -978,11 +979,14 @@ go.crypto.x509.__Global = public partial class
       lSlice[i] := buf^;
       inc(buf);
     end;
-    untrustedRoots.AppendCertsFromPEM(lSlice);
-    var trustedRoots := NewCertPool();
+    //untrustedRoots.AppendCertsFromPEM(lSlice);
+    go.crypto.x509.CertPool.AppendCertsFromPEM(untrustedRoots, lSlice);
+    var trustedRoots := go.crypto.x509.NewCertPool();
     for lCert in roots.certs do
-      if not untrustedRoots.contains(lCert[1]) then begin
-        trustedRoots.AddCert(lCert[1]);
+      //if not untrustedRoots.contains(lCert[1]) then begin
+      if not go.crypto.x509.CertPool.contains(untrustedRoots, lCert[1]) then begin
+        //trustedRoots.AddCert(lCert[1]);
+        go.crypto.x509.CertPool.AddCert(trustedRoots, lCert[1]);
       end;
 
     CFRelease(data);
