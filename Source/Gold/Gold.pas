@@ -353,7 +353,8 @@ type
     end;
 
     class var fZero: Slice<T> := new Slice<T>;
-    class property Zero: Slice<T> := fZero; published;
+    //class property Zero: Slice<T> := fZero; published;
+    class property Zero: Slice<T> read new Slice<T>;
 
     class operator IsNil(aVal: Slice<T>): Boolean;
     begin
@@ -504,6 +505,19 @@ type
         exit new T[0];
 
       exit aVal.ToArray();
+    end;
+
+    class operator Equal(Value1, Value2: Slice<T>): Boolean;
+    begin
+      if ((Object(Value1) = nil) and (Object(Value2) = Object(fZero))) or ((Object(Value1) = Object(fZero)) and (Object(Value2) = nil)) then
+        exit true;
+
+      exit Object(Value1) = Object(Value2);
+    end;
+
+    class operator NotEqual(Value1, Value2: Slice<T>): Boolean;
+    begin
+      result := not (Value1 = Value2);
     end;
 
     /*method Get(idxs: Slice<go.builtin.int32>; idx1: go.builtin.int32; idx2: go.builtin.int32): T;

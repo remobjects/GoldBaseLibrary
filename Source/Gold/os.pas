@@ -403,7 +403,10 @@ method &Open(name: go.builtin.string): tuple of (File, go.builtin.error);public;
 begin
   try
     {$IF ISLAND}
-    exit (new File(fs := new FileStream(name, RemObjects.Elements.System.FileMode.Open, FileAccess.Read), path := name), nil);
+    if RemObjects.Elements.System.File.Exists(name) then
+      exit (new File(fs := new FileStream(name, RemObjects.Elements.System.FileMode.Open, FileAccess.Read), path := name), nil)
+    else
+      exit (nil, go.errors.New('File do not exists!'));
     {$ELSEIF ECHOES}
     exit (new File(fs := System.IO.File.OpenRead(name), path := name), nil);
     {$ENDIF}

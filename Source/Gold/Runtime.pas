@@ -97,7 +97,8 @@ type
       var lTickCount := ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 
       var q := new DateTime(DateTime.UtcNow.Ticks - dtbase.Ticks);
-      exit (Int64(q.Ticks / DateTime.TicksPerMillisecond), (q.Ticks * 100) mod 1 000 000 000, lTickCount  * 100);
+      exit (Int64(q.Ticks / DateTime.TicksPerSecond), (q.Ticks * 100) mod 1 000 000 000, lTickCount  * DateTime.TicksPerMillisecond * 100);
+      //exit (Int64(q.Ticks / DateTime.TicksPerMillisecond), (q.Ticks * 100) mod 1 000 000 000, lTickCount  * 100);
       {$ELSEIF ECHOES}
       var q := DateTime.UtcNow - dtbase;
       exit (Int64(q.TotalSeconds), (q.Ticks * 100) mod 1 000 000 000, System.Diagnostics.StopWatch.GetTimestamp  * 100);
@@ -430,6 +431,10 @@ type
     class method open(name: String): tuple of (Stream, go.builtin.error);
     begin
       try
+        {$IF ISLAND}
+        if not RemObjects.Elements.System.File.Exists(name) then
+          exit (nil, new ExceptionError(new Exception('File does not exists!')));
+        {$ENDIF}
         exit (new FileStream(name, FileMode.Open, FileAccess.Read), nil);
       except
         on e: Exception do
