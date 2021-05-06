@@ -372,4 +372,14 @@ type
     {$ENDIF}
   end;
 
+  operator implicit(aVal: PlatformString): Slice<go.builtin.rune>; public;
+  begin
+    if aVal ≠ nil then begin
+      var lChars := aVal.ToCharArray;
+      result := new go.builtin.Slice<go.builtin.rune>(lChars.Select(a -> go.builtin.rune(a)).ToArray());
+    end
+    else
+      result := new go.builtin.Slice<go.builtin.rune>(0);
+  end;
+
   end.
