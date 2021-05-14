@@ -2,10 +2,14 @@
 
 {$IF ISLAND}
 uses
-  RemObjects.Elements.System;
+  RemObjects.Elements.System
+{$IF DARWIN}
+  , CoreFoundation, Security,
+{$ENDIF}
+  ;
 {$ELSEIF ECHOES}
 uses
-  System.IO, System.Diagnostics, System.Linq;
+  System.IO, System.Diagnostics, System.Collections.Generic, System.Linq;
 {$ENDIF}
 
 
@@ -108,30 +112,47 @@ type
   end;
   go.internal.poll.__Global = public partial class
   public
-
     class var ErrNoDeadline := go.errors.New("file type does not support deadline");
   end;
+
   __Global = public partial class
   public
     {$IF ISLAND AND WINDOWS}
-    class property Stdin: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_INPUT_HANDLE), FileAccess.Read)); lazy;
-    class property Stderr: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_ERROR_HANDLE), FileAccess.Write)); lazy;
-    class property Stdout: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_OUTPUT_HANDLE), FileAccess.Write)); lazy;
+    class property Stdin: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_INPUT_HANDLE), FileAccess.Read)); lazy; readonly;
+    class property Stderr: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_ERROR_HANDLE), FileAccess.Write)); lazy; readonly;
+    class property Stdout: File := new File(fs := new FileStream(rtl.GetStdHandle(rtl.STD_OUTPUT_HANDLE), FileAccess.Write)); lazy; readonly;
+    {$ELSEIF ISLAND AND ANDROID}
+    class property Stdin: File := new File(fs := new NullStream()); lazy; readonly;
+    class property Stderr: File := new File(fs := new NullStream()); lazy; readonly;
+    class property Stdout: File := new File(fs := new NullStream()); lazy; readonly;
     {$ELSEIF ISLAND AND POSIX}
-    class property Stdin: File := new File(fs := new FileStream(rtl.fdopen(rtl.STDIN_FILENO, "r"), FileAccess.Read)); lazy;
-    class property Stderr: File := new File(fs := new FileStream(rtl.fdopen(rtl.STDERR_FILENO, "w"), FileAccess.Write)); lazy;
-    class property Stdout: File := new File(fs := new FileStream(rtl.fdopen(rtl.STDOUT_FILENO, "w"), FileAccess.Write)); lazy;
+    class property Stdin: File := new File(fs := new FileStream(rtl.stdin, FileAccess.Read)); lazy; readonly;
+    class property Stderr: File := new File(fs := new FileStream(rtl.stderr, FileAccess.Write)); lazy; readonly;
+    class property Stdout: File := new File(fs := new FileStream(rtl.stdout, FileAccess.Write)); lazy; readonly;
     {$ELSEIF ECHOES}
-    class property Stdin: File := new File(fs := Console.OpenStandardInput); lazy;
-    class property Stderr: File := new File(fs := Console.OpenStandardError); lazy;
-    class property Stdout: File := new File(fs := Console.OpenStandardOutput); lazy;
+    class property Stdin: File := new File(fs := Console.OpenStandardInput); lazy; readonly;
+    class property Stderr: File := new File(fs := Console.OpenStandardError); lazy; readonly;
+    class property Stdout: File := new File(fs := Console.OpenStandardOutput); lazy; readonly;
+    {$ENDIF}
+
+    {$IF (NOT ECHOES) AND NOT (ISLAND AND WINDOWS)}
+    class method removeAll(path: String): go.builtin.error;
+    begin
+      // TODO
+    end;
     {$ENDIF}
   end;
+
   File = public partial class(go.io.ReaderAt, go.io.Reader, go.io.Writer)
-  public
+  unit
+    {$IF ECHOES}
     fs: Stream;
+    {$ELSE}
+    fs: RemObjects.Elements.System.Stream;
+    {$ENDIF}
     path: String;
 
+  public
     method Name: String;
     begin
       exit path;
@@ -229,6 +250,11 @@ type
       exit nil;
     end;
 
+    method Sync();
+    begin
+
+    end;
+
     method &Read(p: go.builtin.Slice<go.builtin.byte>): tuple of (go.builtin.int, go.builtin.error);
     begin
       try
@@ -254,6 +280,11 @@ type
       end;
     end;
 
+    method WriteString(p: go.builtin.string): tuple of (go.builtin.int, go.builtin.error);
+    begin
+      exit &Write(p.Value);
+    end;
+
     method &Seek(offset: go.builtin.int64; whence: go.builtin.int): tuple of (go.builtin.int64, go.builtin.error);
     begin
       try
@@ -264,10 +295,30 @@ type
      end;
     end;
   end;
-  method Getwd: tuple of (string, go.builtin.error); public;
+  method Getwd: tuple of (go.builtin.string, go.builtin.error); public;
   begin
     exit (Environment.CurrentDirectory, nil);
   end;
+
+  method Chdir(p: String): go.builtin.error;
+  begin
+    try
+      {$IFDEF ECHOES}
+      Environment.CurrentDirectory := p;
+      {$ELSE}
+      raise new NotImplementedException;
+      {$ENDIF}
+    except
+      on e: Exception do
+        exit go.Errors.New(e.Message);
+    end;
+  end;
+
+  method Getgid: Int64; public; empty;
+  method Getuid: Int64; public; empty;
+  method Geteuid: Int64; public; empty;
+  method Getpid: Int64; public; empty;
+  method Getppid: Int64; public; empty;
 
   method executable(): tuple of (go.builtin.string, go.builtin.error); public;
   begin
@@ -282,7 +333,7 @@ type
     {$ENDIF}
   end;
 
-  method Mkdir(name: string; perm :FileMode): go.builtin.error;
+  method Mkdir(name: go.builtin.string; perm :FileMode): go.builtin.error;
   begin
     try
       {$IF ISLAND}
@@ -297,7 +348,7 @@ type
       end;
   end;
 
-  method Remove(s: string): go.builtin.error;
+  method Remove(s: go.builtin.string): go.builtin.error;
   begin
     try
       {$IF ISLAND}
@@ -318,7 +369,7 @@ type
     end;
   end;
 
-  method fixRootDirectory(s: string): string;
+  method fixRootDirectory(s: go.builtin.string): go.builtin.string;
   begin
     if defined('WINDOWS') or (defined('ECHOES') and (Environment.OSVersion.Platform = PlatformID.Win32NT)) then begin
       if s.Length <3 then
@@ -327,7 +378,7 @@ type
     exit s;
   end;
 
-  method &Create(name: string): tuple of (File, go.builtin.error); public;
+  method &Create(name: go.builtin.string): tuple of (File, go.builtin.error); public;
 begin
   try
   {$IF ISLAND}
@@ -342,17 +393,20 @@ begin
 end;
 
 
-method NewFile(fd: uint64; name: string): File;public;
+method NewFile(fd: go.builtin.uint64; name: go.builtin.string): File;public;
 begin
   raise new NotSupportedException;
 end;
 
 
-method &Open(name: string): tuple of (File, go.builtin.error);public;
+method &Open(name: go.builtin.string): tuple of (File, go.builtin.error);public;
 begin
   try
     {$IF ISLAND}
-    exit (new File(fs := new FileStream(name, RemObjects.Elements.System.FileMode.Open, FileAccess.Read), path := name), nil);
+    if RemObjects.Elements.System.File.Exists(name) then
+      exit (new File(fs := new FileStream(name, RemObjects.Elements.System.FileMode.Open, FileAccess.Read), path := name), nil)
+    else
+      exit (nil, go.errors.New('File do not exists!'));
     {$ELSEIF ECHOES}
     exit (new File(fs := System.IO.File.OpenRead(name), path := name), nil);
     {$ENDIF}
@@ -362,7 +416,7 @@ begin
    end;
 end;
 
-method &OpenFile(name: string; aFlags: Integer; perm: FileMode): tuple of (File, go.builtin.error);public;
+method &OpenFile(name: go.builtin.string; aFlags: Integer; perm: FileMode): tuple of (File, go.builtin.error);public;
 begin
   try
     {$IF ISLAND}
@@ -385,7 +439,7 @@ begin
       exit (nil, go.errors.New(e.Message));
   end;
 end;
-method hostname: tuple of (string, go.builtin.error);
+method hostname: tuple of (go.builtin.string, go.builtin.error);
 begin
   {$IF ISLAND}
   raise new NotImplementedException;
@@ -394,7 +448,26 @@ begin
   {$ENDIF}
 end;
 
-var Args: go.builtin.Slice<go.builtin.string> := {$IF ISLAND}new go.builtin.Slice<go.builtin.string>(''){raise new NotImplementedException}{$ELSEIF ECHOES}go.builtin.string.PlatformStringArrayToGoSlice(Environment.GetCommandLineArgs){$ENDIF};
+{$IF ISLAND}
+method GetArgs: array of String;
+begin
+  {$IF WINDOWS}
+  var lTotal: Int32;
+  var lRawArgs := rtl.CommandLineToArgvW(rtl.GetCommandLineW(), @lTotal);
+  var lArgs := new String[lTotal - 1];
+  for i: Integer := 1 to lTotal - 1 do
+    lArgs[i-1] := String.FromPChar(lRawArgs[i]);
+  exit lArgs;
+  {$ELSE}
+  var lArgs := new String[ExternalCalls.nargs];
+  for i: Integer := 0 to ExternalCalls.nargs - 1 do
+    lArgs[i] := String.FromPAnsiChars(ExternalCalls.args[i]);
+  exit lArgs;
+  {$ENDIF}
+end;
+{$ENDIF}
+
+var Args: go.builtin.Slice<go.builtin.string> := go.builtin.string.PlatformStringArrayToGoSlice({$IF ISLAND}GetArgs{$ELSEIF ECHOES}Environment.GetCommandLineArgs{$ENDIF});
 
 method &Exit(i: Integer);
 begin
@@ -405,7 +478,7 @@ begin
   {$ENDIF}
 end;
 
-method lstatNolog(fn: string): tuple of(FileInfo, go.builtin.error);
+method lstatNolog(fn: go.builtin.string): tuple of(FileInfo, go.builtin.error);
 begin
   {$IF ISLAND}
   var lFile := new RemObjects.Elements.System.File(fn);
@@ -419,7 +492,7 @@ begin
   exit (nil, go.errors.New('Not found '+fn));
 end;
 
-method statNolog(fn: string): tuple of (FileInfo, go.builtin.error);
+method statNolog(fn: go.builtin.string): tuple of (FileInfo, go.builtin.error);
 begin
   {$IF ISLAND}
   var lFile := new RemObjects.Elements.System.File(fn);
@@ -449,7 +522,7 @@ type
     fFile: String;
   public
     constructor(aFile: String); begin fFile := aFile; end;
-    method Name: go.builtin.string; begin exit Path.GetFilename(fFile); end;
+    method Name: go.builtin.string; begin exit Path.GetFileName(fFile); end;
     method Size: go.builtin.int64; begin {$IF ISLAND}exit new RemObjects.Elements.System.File(fFile).Length;{$ELSEIF ECHOES}exit new System.IO.FileInfo(fFile).Length;{$ENDIF} end;
     method Mode: FileMode;
     begin
@@ -482,7 +555,7 @@ type
   var PathListSeparator:  Char := {$IF ISLAND}Path.ListSeparator{$ELSEIF ECHOES}System.IO.Path.PathSeparator{$ENDIF}; readonly;public;
 
   method IsPathSeparator(c: Char): Boolean; begin exit c = PathSeparator; end;
-  method Readlink(name: string): tuple of (string, builtin.error);
+  method Readlink(name: go.builtin.string): tuple of (go.builtin.string, go.builtin.error);
   begin
     exit ('', go.Errors.New('Not supported'));
   end;
@@ -518,15 +591,53 @@ type
 
   public
     class var Discard: go.io.Writer := new DiscardWriter;
-
-    class method TempFile(dir, pattern: String): tuple of (go.builtin.Reference<go.os.File>, go.builtin.error);
+    class method TempDir(dir, aPrefix: String): tuple of (go.builtin.string, go.builtin.error);
     begin
       {$IF ISLAND}
+      if String.IsNullOrEmpty(dir) then
+        dir := Environment.TempFolder.FullName;
+      {$ELSEIF ECHOES}
+      if String.IsNullOrEmpty(dir) then
+        dir := Path.GetTempPath;
+      {$ENDIF}
+
+      dir := Path.Combine(dir, aPrefix+Guid.NewGuid.ToString.Replace('{','').Replace('}', '').Replace('-', ''));
+      exit (dir, nil);
+    end;
+    class method WriteFile(filename: String; data: go.builtin.Slice<Byte>; per: go.os.FileMode): go.builtin.error;
+    begin
+      var res := OpenFile(filename, O_RDWR or O_CREATE, per); // 0755
+      if res.Item2 <> nil then exit res.Item2;
+      try
+        var res2 := res.Item1.Write(data);
+        if (res2.Item2 <> nil) then
+          exit res2.Item2;
+      finally
+        res.Item1.Close;
+      end;
+      exit nil;
+    end;
+    class method ReadDir(dir: String): tuple of (go.builtin.Slice<go.os.FileInfo>, go.builtin.error);
+    begin
+      try
+        exit new File(path := dir).Readdir(-1);
+      except
+        on e: Exception do
+          exit (nil, go.errors.New(e.Message));
+      end;
+    end;
+
+    class method TempFile(dir, pattern: String): tuple of (Memory<go.os.File>, go.builtin.error);
+    begin
+      {$IF ISLAND}
+      if String.IsNullOrEmpty(dir) then
+        dir := Environment.TempFolder.FullName;
+      exit (new Memory<go.os.File>(new go.os.File(fs := new FileStream(Path.Combine(dir, pattern+Guid.NewGuid.ToString.Replace('{','').Replace('}', '').Replace('-', '')), :System.FileMode.Create, :System.FileAccess.ReadWrite))), nil);
       // TODO
       {$ELSEIF ECHOES}
       if String.IsNullOrEmpty(dir) then
         dir := Path.GetTempPath;
-      exit (new go.builtin.Reference<go.os.File>(new go.os.File(fs := System.IO.File.Create(System.IO.Path.GetTempFileName))), nil);
+      exit (new Memory<go.os.File>(new go.os.File(fs := System.IO.File.Create(System.IO.Path.GetTempFileName))), nil);
       {$ENDIF}
     end;
 
@@ -614,7 +725,7 @@ public
     exit go.errors.New('Not supported');
   end;
 
-  method Wait: tuple of (go.builtin.Reference<ProcessState>, go.builtin.error);
+  method Wait: tuple of (Memory<ProcessState>, go.builtin.error);
   begin
     try
       {$IF ISLAND}
@@ -622,7 +733,7 @@ public
       {$ELSEIF ECHOES}
       Process.WaitForExit;
       {$ENDIF}
-      exit (new ProcessState(Process), nil);
+      exit (Memory<ProcessState>(new ProcessState(Process)), nil);
     except
       on e: Exception do
         exit (nil, go.errors.New(e.Message));
@@ -637,53 +748,65 @@ public
   Env: go.builtin.Slice<go.builtin.string>;
 end;
 
-method IntStartProcess(name: string; argv: go.builtin.Slice<string>; attr: go.builtin.Reference<ProcAttr>): tuple of (Reference<Process>, go.builtin.error);
+method IntStartProcess(name: go.builtin.string; argv: go.builtin.Slice<go.builtin.string>; attr: Memory<ProcAttr>): tuple of (Memory<Process>, go.builtin.error);
 begin
-  {$IF ISLAND}
-  // TODO
-  {$ELSEIF ECHOES}
-  var lPSI := new System.Diagnostics.ProcessStartInfo(name);
+  var lArgv := new List<String>();
   if argv <> nil then begin
     for each el in argv do
-      if string.IsNullOrEmpty(lPSI.Arguments) then begin
-        lPSI.Arguments := '"'+el.Item2+'"';
-      end else begin
-        lPSI.Arguments := lPSI.Arguments+' "'+el.Item2+'"';
-      end;
+      lArgv.Add(el[1]);
   end;
-  lPSI.UseShellExecute := false;
+
+  var lEnv := new Dictionary<String, String>();
+  var lWorkingDir := '';
   if (attr <> nil) then begin
-    var p := go.builtin.Reference<ProcAttr>.Get(attr);
+    var p := attr^;
     if p <> nil then begin
       if p.Dir <> nil then
-        lPSI.WorkingDirectory := p.Dir;
+        lWorkingDir := p.Dir;
       if p.Env <> nil then
         for each el in p.Env do begin
-          var n := go.strings.SplitN(el.Item2, '=', 2);
+          var n := go.strings.SplitN(el[1], '=', 2);
           if n.Length <> 2 then continue;
-          lPSI.EnvironmentVariables.Add(n[0], n[1]);
+          lEnv.Add(n[0], n[1]);
         end;
     end;
   end;
+  {$IF ECHOES}
+  var lPSI := new System.Diagnostics.ProcessStartInfo(name);
+  for each el in lArgv do
+    if go.builtin.string.IsNullOrEmpty(lPSI.Arguments) then begin
+      lPSI.Arguments := '"'+ el +'"';
+    end else begin
+      lPSI.Arguments := lPSI.Arguments+' "' + el + '"';
+    end;
+
+  lPSI.UseShellExecute := false;
+  lPSI.WorkingDirectory := lWorkingDir;
+
+  for each el in lEnv do
+    lPSI.EnvironmentVariables.Add(el.Key, el.Value);
+  {$ENDIF}
   try
     {$IF ISLAND}
-    exit (new Process(Process := ProcessType.Run(lPSI)), nil);
+    var lProcess := new ProcessType(name, lArgv, lEnv, lWorkingDir);
+    lProcess.RedirectOutput := true;
+    lProcess.Start;
+    exit (Memory<Process>(new Process(Process := lProcess)), nil);
     {$ELSEIF ECHOES}
-    exit (new Process(Process := ProcessType.Start(lPSI)), nil);
+    exit (Memory<Process>(new Process(Process := ProcessType.Start(lPSI))), nil);
     {$ENDIF}
   except
     on e: Exception do
       exit (nil, go.errors.New(e.Message));
   end;
-  {$ENDIF}
 end;
 
-method StartProcess(name: string; argv: go.builtin.Slice<string>; attr: builtin.Reference<ProcAttr>): tuple of (Reference<Process>, go.builtin.error);
+method StartProcess(name: go.builtin.string; argv: go.builtin.Slice<go.builtin.string>; attr: Memory<ProcAttr>): tuple of (Memory<Process>, go.builtin.error);
 begin
   exit IntStartProcess(name, argv, attr);
 end;
 
-method FindProcess(pid: Integer): tuple of (go.builtin.Reference<Process>, go.builtin.error);
+method FindProcess(pid: Integer): tuple of (Memory<Process>, go.builtin.error);
 begin
   try
     {$IF ISLAND}
@@ -693,12 +816,187 @@ begin
     {$ENDIF}
     if p = nil then
       exit (nil, go.errors.New('No such process'));;
-    exit (new Process(Process := p), nil);
+    exit (Memory<Process>(new Process(Process := p)), nil);
   except
     on e: Exception do
       exit (nil, go.errors.New(e.Message));
   end;
-  //exit (nil, errors.New('Not implemented'));
+end;
+
+type
+go.crypto.x509.__Global = public partial class
+{$IF ISLAND AND DARWIN AND NOT (IOS OR TVOS OR WATCHOS)}
+  class method FetchPEMRoots(pemRoots: ^CFDataRef; untrustedPemRoots: ^CFDataRef): Integer;
+  begin
+    var domains: array of SecTrustSettingsDomain := [SecTrustSettingsDomain.kSecTrustSettingsDomainSystem, SecTrustSettingsDomain.kSecTrustSettingsDomainAdmin,
+                                                     SecTrustSettingsDomain.kSecTrustSettingsDomainUser];
+    var numDomains := sizeOf(domains) / sizeOf(SecTrustSettingsDomain);
+    if pemRoots = nil then
+      exit -1;
+
+    var policy: CFStringRef := CFStringCreateWithCString(NULL, "kSecTrustSettingsResult", CFStringBuiltInEncodings.kCFStringEncodingUTF8);
+    var combinedData: CFMutableDataRef := CFDataCreateMutable(kCFAllocatorDefault, 0);
+    var combinedUntrustedData: CFMutableDataRef := CFDataCreateMutable(kCFAllocatorDefault, 0);
+    var appendTo: CFMutableDataRef;
+    for i: Integer := 0 to numDomains - 1 do begin
+      var j: Integer;
+      var certs: CFArrayRef := nil;
+      var err: OSStatus := SecTrustSettingsCopyCertificates(domains[i], @certs);
+      if err <> rtl.noErr then
+        continue;
+
+      var untrusted: Integer := 0;
+      var trustAsRoot: Integer := 0;
+      var trustRoot: Integer := 0;
+      var numCerts: CFIndex := CFArrayGetCount(certs);
+
+      for j: Integer := 0 to  numCerts - 1 do begin
+        var data: CFDataRef := nil;
+        var errRef: CFErrorRef := nil;
+        var trustSettings: CFArrayRef := nil;
+        var cert: SecCertificateRef := SecCertificateRef(CFArrayGetValueAtIndex(certs, j));
+        if cert = nil then
+          continue;
+        // We only want trusted certs.
+        untrusted := 0;
+        trustAsRoot := 0;
+        trustRoot := 0;
+        if i = 0 then
+          trustAsRoot := 1
+        else begin
+          var k: Integer;
+          var m: CFIndex;
+          // Certs found in the system domain are always trusted. If the user
+          // configures "Never Trust" on such a cert, it will also be found in the
+          // admin or user domain, causing it to be added to untrustedPemRoots. The
+          // Go code will then clean this up.
+
+          // Trust may be stored in any of the domains. According to Apple's
+          // SecTrustServer.c, "user trust settings overrule admin trust settings",
+          // so take the last trust settings array we find.
+          // Skip the system domain since it is always trusted.
+          for k := i to numDomains - 1 do begin
+            var domainTrustSettings: CFArrayRef := nil;
+            err := SecTrustSettingsCopyTrustSettings(cert, domains[k], @domainTrustSettings);
+            if (err = errSecSuccess) and (domainTrustSettings <> nil) then begin
+              if trustSettings ≠ nil then
+                CFRelease(trustSettings);
+              trustSettings := domainTrustSettings;
+            end;
+          end;
+
+          if trustSettings = nil then
+            // "this certificate must be verified to a known trusted certificate"; aka not a root.
+            continue;
+
+          for m := 0 to CFArrayGetCount(trustSettings) - 1 do begin
+            var cfNum: CFNumberRef;
+            var tSetting: CFDictionaryRef := CFDictionaryRef(CFArrayGetValueAtIndex(trustSettings, m));
+            if CFDictionaryGetValueIfPresent(tSetting, policy, @cfNum) then begin
+              var lResult: SecTrustSettingsResult := SecTrustSettingsResult.kSecTrustSettingsResultUnspecified;
+              CFNumberGetValue(cfNum, CFNumberType.kCFNumberSInt32Type, ^Void(@lResult));
+              // TODO: The rest of the dictionary specifies conditions for evaluation.
+              if lResult = SecTrustSettingsResult.kSecTrustSettingsResultDeny then
+                untrusted := 1
+              else
+                if lResult = SecTrustSettingsResult.kSecTrustSettingsResultTrustAsRoot then
+                  trustAsRoot := 1
+                else
+                  if lResult = SecTrustSettingsResult.kSecTrustSettingsResultTrustRoot then
+                    trustRoot := 1
+            end;
+          end;
+          CFRelease(trustSettings);
+        end;
+
+        if trustRoot > 0 then begin
+          // We only want to add Root CAs, so make sure Subject and Issuer Name match
+          var subjectName: CFDataRef := SecCertificateCopyNormalizedSubjectContent(cert, @errRef);
+          if errRef ≠ nil then begin
+            CFRelease(errRef);
+            continue;
+          end;
+          var issuerName: CFDataRef := SecCertificateCopyNormalizedIssuerContent(cert, @errRef);
+          if errRef ≠ nil then begin
+            CFRelease(subjectName);
+            CFRelease(errRef);
+            continue;
+          end;
+          var equal: Boolean := CFEqual(subjectName, issuerName);
+          CFRelease(subjectName);
+          CFRelease(issuerName);
+          if not equal then
+            continue;
+        end;
+
+        err := SecItemExport(cert, SecExternalFormat.kSecFormatX509Cert, SecItemImportExportFlags.kSecItemPemArmour, nil, @data);
+        if err ≠ rtl.noErr then
+          continue;
+
+        if data ≠ nil then begin
+          if (trustRoot = 0) and (trustAsRoot = 0) then
+            untrusted := 1;
+
+          appendTo := if untrusted = 1 then combinedUntrustedData else combinedData;
+          CFDataAppendBytes(appendTo, CFDataGetBytePtr(data), CFDataGetLength(data));
+          CFRelease(data);
+        end;
+      end;
+      CFRelease(certs);
+    end;
+
+    CFRelease(policy);
+    pemRoots^ := combinedData;
+    untrustedPemRoots^ := combinedUntrustedData;
+    exit(0);
+  end;
+
+  class method loadSystemRoots: tuple of (Memory<go.crypto.x509.CertPool>, go.builtin.error);
+  begin
+    var roots := NewCertPool();
+    var data: CFDataRef := 0;
+    var untrustedData: CFDataRef := 0;
+    var err := FetchPEMRoots(@data, @untrustedData);
+    if err = -1 then
+      exit (nil, go.errors.New("crypto/x509: failed to load darwin system roots with cgo"));
+
+    var buf := CFDataGetBytePtr(data);
+    var lTotal := CFDataGetLength(data);
+    var lSlice := new go.builtin.Slice<go.builtin.byte>(lTotal);
+    for i: Integer := 0 to lTotal - 1 do begin
+      lSlice[i] := buf^;
+      inc(buf);
+    end;
+
+    //roots.AppendCertsFromPEM(lSlice);
+    go.crypto.x509.CertPool.AppendCertsFromPEM(roots, lSlice);
+    if untrustedData = nil then begin
+      CFRelease(data);
+      exit (roots, nil);
+    end;
+    buf := CFDataGetBytePtr(untrustedData);
+    lTotal := CFDataGetLength(untrustedData);
+    var untrustedRoots := NewCertPool();
+    lSlice := new go.builtin.Slice<go.builtin.byte>(lTotal);
+    for i: Integer := 0 to lTotal - 1 do begin
+      lSlice[i] := buf^;
+      inc(buf);
+    end;
+    //untrustedRoots.AppendCertsFromPEM(lSlice);
+    go.crypto.x509.CertPool.AppendCertsFromPEM(untrustedRoots, lSlice);
+    var trustedRoots := go.crypto.x509.NewCertPool();
+    for lCert in roots.certs do
+      //if not untrustedRoots.contains(lCert[1]) then begin
+      if not go.crypto.x509.CertPool.contains(untrustedRoots, lCert[1]) then begin
+        //trustedRoots.AddCert(lCert[1]);
+        go.crypto.x509.CertPool.AddCert(trustedRoots, lCert[1]);
+      end;
+
+    CFRelease(data);
+    CFRelease(untrustedData);
+    exit (trustedRoots, nil);
+  end;
+{$ENDIF}
 end;
 
 method Pipe: tuple of (r: go.builtin.Reference<File>, w: go.builtin.Reference<File>, err: go.builtin.error);

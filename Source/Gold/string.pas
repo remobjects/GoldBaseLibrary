@@ -1,7 +1,7 @@
 ﻿namespace go.builtin;
 
 uses
-{$IFDEF ECHOES}  System.Linq, System.Collections.Generic{$ENDIF}
+{$IFDEF ECHOES}  System.Text, System.Linq, System.Collections.Generic{$ENDIF}
   ;
 
 type
@@ -18,22 +18,19 @@ type
       {$ENDIF}
     end;
 
+    constructor;
+    begin
+      Value := new Slice<byte>(0);
+    end;
+
     constructor(aValue: array of Char);
     begin
-      // TODO optimize!!
-      var lBytes := new List<byte>();
-      var z: array of byte;
-      for each lChar in aValue do begin
-        var lRune := uint32(lChar);
-        {$IFDEF ECHOES}
-        z := System.Text.Encoding.UTF8.GetBytes(chr(lRune));
-        {$ELSE}
-        z := Encoding.UTF8.GetBytes(chr(lRune));
-        {$ENDIF}
-        for i: Integer := 0 to z.Length - 1 do
-          lBytes.Add(z[i]);
-      end;
-      Value := lBytes.ToArray();
+      {$IF ECHOES}
+      Value := Encoding.UTF8.GetBytes(aValue);
+      {$ELSE}
+      var lString := PlatformString.FromCharArray(aValue);
+      Value := Encoding.UTF8.GetBytes(lString);
+      {$ENDIF}
     end;
 
     constructor(aValue: Slice<byte>);
@@ -44,19 +41,11 @@ type
 
     constructor(aValue: array of rune);
     begin
-      // TODO optimize!!
-      var lBytes := new List<byte>();
-      var z: array of byte;
-      for each lRune in aValue do begin
-        {$IFDEF ECHOES}
-        z := System.Text.Encoding.UTF8.GetBytes(chr(lRune));
-        {$ELSE}
-        z := Encoding.UTF8.GetBytes(chr(lRune));
-        {$ENDIF}
-        for i: Integer := 0 to z.Length - 1 do
-          lBytes.Add(z[i]);
-      end;
-      Value := lBytes.ToArray();
+      var lArray := new Char[aValue.Length];
+      for i: Integer := 0 to aValue.Length - 1 do
+        lArray[i] := chr(aValue[i]);
+
+      constructor(lArray);
     end;
 
     class operator Implicit(aValue: string): PlatformString;
@@ -77,9 +66,19 @@ type
       {$ENDIF}
     end;
 
+    class operator Implicit(aValue: array of uint8): string;
+    begin
+      result := new string(aValue);
+    end;
+
     class operator Implicit(aValue: string): Slice<byte>;
     begin
-      result := new Slice<byte>(aValue.Value);
+      if aValue.Value ≠ nil then begin
+        var lData := aValue.Value.ToArray;
+        result := new Slice<byte>(lData);
+      end
+      else
+        result := new Slice<byte>(0);
     end;
 
     class operator Implicit(aValue: Char): string;
@@ -143,7 +142,10 @@ type
 
     method Substring(aIndex: int32; aLen: int32): string;
     begin
-      result := new string(new Slice<byte>(Value, aIndex, (aIndex + aLen) - 1));
+      var lLength := (aIndex + aLen) - 1;
+      if lLength < 0 then
+        lLength := 0;
+      result := new string(new Slice<byte>(Value, aIndex, lLength));
     end;
 
     class method IsNullOrEmpty(aValue: string): Boolean; public;
@@ -155,7 +157,7 @@ type
       result := Value[aIndex];
     end; default; inline;
 
-    property Length: Integer read Value.Length;
+    property Length: Integer read if Value ≠ nil then Value.Length else 0;
 
     method GetSequence: sequence of tuple of (Integer, rune); iterator;
     begin
@@ -185,10 +187,13 @@ type
 
     method GetHashCode: Integer; override; public;
     begin
-      // TODO optimize
       {$IF ISLAND}
+      if (Value.fArray ≠ nil) and (Value.fArray.Length > 0) then
+        result := Utilities.CalcHash(^Void(@Value.fArray[0]), Value.Length)
+      else
+        result := 0;
       {$ELSEIF ECHOES}
-      result := System.Text.Encoding.UTF8.GetString(Value).GetHashCode();
+      result := System.Collections.IStructuralEquatable(Value).GetHashCode(EqualityComparer<byte>.Default);
       {$ENDIF}
     end;
 
@@ -200,7 +205,7 @@ type
     end;
 
     class var fZero: string := new string();
-    class property Zero: string := fZero; public;
+    class property Zero: string := fZero; published;
 
     class method UTF8ToString(aValue: array of byte; aIndex: Integer; var aSize: Integer): rune;
     begin
@@ -282,27 +287,15 @@ type
     end;
   end;
 
-
   operator implicit(aVal: string): Slice<Char>; public;
   begin
-    // TODO optimize!!
-    {$IF ISLAND}
     var lString := Encoding.UTF8.GetString(aVal.Value);
     result := new Slice<Char>(lString.ToCharArray);
-    {$ELSEIF ECHOES}
-    var lString := System.Text.Encoding.UTF8.GetString(aVal.Value);
-    result := new Slice<Char>(lString.ToCharArray);
-    {$ENDIF}
   end;
 
   operator implicit(aVal: string): Slice<go.builtin.rune>; public;
   begin
-    // TODO optimize!!
-    {$IF ISLAND}
     var lString := Encoding.UTF8.GetString(aVal.Value);
-    {$ELSEIF ECHOES}
-    var lString := System.Text.Encoding.UTF8.GetString(aVal.Value);
-    {$ENDIF}
     result := new Slice<rune>(lString.Select(a -> rune(a)).ToArray());
   end;
 
@@ -345,12 +338,11 @@ type
   begin
     var q: go.builtin.Slice<byte> := (aVal as go.builtin.Slice<byte>);
     {$IF ISLAND}
-    // TODO
+    exit new go.net.http.htmlSig(Value := Encoding.UTF8.GetBytes(aVal));
     result := nil;
     {$ELSEIF ECHOES}
     exit new go.net.http.htmlSig(Value := System.Text.Encoding.UTF8.GetBytes(aVal));
     {$ENDIF}
-    //exit new go.net.http.htmlSig(Value := q);
   end;
 
   operator Implicit(aVal: Slice<byte>): string; public;
@@ -370,7 +362,7 @@ type
   operator Implicit(aVal: PlatformString): array of byte; public;
   begin
     {$IF ISLAND}
-    // TODO
+    result := Encoding.UTF8.GetBytes(aVal);
     {$ELSEIF ECHOES}
     result := System.Text.Encoding.UTF8.GetBytes(aVal);
     {$ENDIF}
@@ -383,6 +375,16 @@ type
     {$ELSEIF ECHOES}
     result := System.Text.Encoding.UTF8.GetString(aVal);
     {$ENDIF}
+  end;
+
+  operator implicit(aVal: PlatformString): Slice<go.builtin.rune>; public;
+  begin
+    if aVal ≠ nil then begin
+      var lChars := aVal.ToCharArray;
+      result := new go.builtin.Slice<go.builtin.rune>(lChars.Select(a -> go.builtin.rune(a)).ToArray());
+    end
+    else
+      result := new go.builtin.Slice<go.builtin.rune>(0);
   end;
 
   end.

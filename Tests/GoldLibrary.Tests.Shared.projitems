@@ -32,5 +32,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)BytesTests.go" />
     <Compile Include="$(MSBuildThisFileDirectory)StringTests.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)StringTests.go" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImageTests.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImageTests.go" />
+    <Compile Include="$(MSBuildThisFileDirectory)MimeTests.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)MimeTEsts.go" />
+    <Compile Include="$(MSBuildThisFileDirectory)IssuesTests.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)IssuesTests.go" />
   </ItemGroup>
 </Project>

@@ -5,16 +5,16 @@ uses
 
 
 type
+  PlatformRandom = {$IF ECHOES}System.Random{$ELSEIF ISLAND}RemObjects.Elements.System.Random{$ENDIF};
   RandReader = public partial class(go.io.Reader)
-    {$IF ECHOES}
-    class var fRandom: System.Random;
-    {$ENDIF}
+    class var fRandom: PlatformRandom;
 
     method &Read(p: Slice<byte>): tuple of (int, go.builtin.error);
     begin
       {$IF ISLAND}
-      raise new NotImplementedException();
-      exit (0, nil)
+      // need 0 as array start parameter: Slice (Go) -> Array (.Net) and this one always starts on 0
+      fRandom.CryptoSafeRandom(p, 0, p.Length);
+      exit(p.Length, nil);
       {$ELSEIF ECHOES}
       for i: Integer := 0 to p.Length - 1 do
         p[i] := fRandom.Next(256);
@@ -25,9 +25,7 @@ type
 
     class constructor;
     begin
-      {$IF ECHOES}
-      fRandom := new System.Random();
-      {$ENDIF}
+      fRandom := new PlatformRandom();
     end;
   end;
 

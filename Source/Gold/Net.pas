@@ -55,7 +55,7 @@ errNoSuitableAddress := go.errors.New("no suitable address found");
 
 type
   buffersWriter = public interface
-    method writeBuffers(v: Reference<Buffers>): tuple of (int64, go.builtin.error);
+    method writeBuffers(v: Memory<Buffers>): tuple of (int64, go.builtin.error);
   end;
   Error = public partial interface (go.builtin.error)
     method Timeout(): Boolean;
@@ -275,7 +275,7 @@ type
     begin
       var bw := buffersWriter(w);
       if bw <> nil then
-        exit bw.writeBuffers(self);
+        exit bw.writeBuffers(Memory<Buffers>(self));
       var n: int64 := 0;
       for i: Integer := 0 to Value.Length -1 do begin
         var (c, err) := w.Write(Value[i]);
@@ -340,9 +340,9 @@ Listener = public interface
   method Addr: Addr;
 end;
 
-method FileListener(f: Reference<go.os.File>): tuple of (Listener, go.builtin.error);
+method FileListener(f: Memory<go.os.File>): tuple of (Listener, go.builtin.error);
 begin
-  exit (nil, go.Errors.new('not supported'));
+  exit (nil, go.Errors.New('not supported'));
 end;
 
 type
@@ -361,7 +361,7 @@ type
         exit (new IPConn(fSock.Accept()), nil);
       except
         on e: Exception do
-          exit (nil, go.Errors.new(e.Message));
+          exit (nil, go.Errors.New(e.Message));
       end;
     end;
     method AcceptTCP: tuple of (TCPConn, go.builtin.error);
@@ -370,7 +370,7 @@ type
         exit (new TCPConn(fSock.Accept()), nil);
       except
         on e: Exception do
-          exit (nil, go.Errors.new(e.Message));
+          exit (nil, go.Errors.New(e.Message));
       end;
     end;
     method Close: go.builtin.error;
@@ -380,7 +380,7 @@ type
         exit nil;
       except
         on e: Exception do
-          exit go.Errors.new(e.Message);
+          exit go.Errors.New(e.Message);
       end;
     end;
 
@@ -449,6 +449,20 @@ type
   IPConn = public partial class(Conn)
   private
     fSock: Socket;
+    method CreateNetOpError(aOp: string; aCall: string; e: Exception): go.net.OpError;
+    begin
+      result := new go.net.OpError();
+      result.Op := aOp;
+      result.Net := e.Message;
+      {$IF ECHOES}
+      if e is SocketException then begin
+        var lE := SocketException(e);
+        var err: go.syscall.Errno;
+        err := lE.ErrorCode;
+        result.Err := new go.os.SyscallError(aCall, err);
+      end;
+      {$ENDIF}
+    end;
   public
     constructor(aSock: Socket);
     begin
@@ -461,7 +475,7 @@ type
         exit (fSock.Receive(b.fArray, b.fStart, b.fCount, SocketFlags.None), nil);
       except
         on e: Exception do
-          exit (0, go.Errors.new(e.Message));
+          exit (0, CreateNetOpError('read', 'wsarecv', e));
       end;
     end;
 
@@ -472,7 +486,7 @@ type
         exit (b.fCount, nil);
       except
         on e: Exception do
-          exit (0, go.Errors.new(e.Message));
+          exit (0, CreateNetOpError('write', 'wsasend', e));
       end;
     end;
 
@@ -529,20 +543,20 @@ type
         fSock.Close();
       except
         on e: Exception do
-          exit go.Errors.new(e.Message);
+          exit go.Errors.New(e.Message);
       end;
     end;
 
 
-    method File(): tuple of (Reference<go.os.File>, go.builtin.error);
+    method File(): tuple of (Memory<go.os.File>, go.builtin.error);
     begin
-      exit (nil, go.Errors.new('Not supported'));
+      exit (nil, go.Errors.New('Not supported'));
     end;
     method ReadFrom(b: Slice<byte>): tuple of  (int, Addr, go.builtin.error);
     begin
       try
         var ep: EndPoint;
-        var n := fSock.Receivefrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
+        var n := fSock.ReceiveFrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
         var a: Addr;
         var lAddr := IPEndPoint(ep);
         if fSock.SocketType = SocketType.Stream then
@@ -552,38 +566,38 @@ type
         exit (n, a, nil);
       except
         on e: Exception do
-          exit (0, nil, go.Errors.new(e.Message));
+          exit (0, nil, go.Errors.New(e.Message));
       end;
     end;
-    method ReadFromUDP(b: Slice<byte>): tuple of  (int, Reference<UDPAddr>, go.builtin.error);
+    method ReadFromUDP(b: Slice<byte>): tuple of  (int, Memory<UDPAddr>, go.builtin.error);
     begin
       try
         var ep: EndPoint;
-        var n := fSock.Receivefrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
+        var n := fSock.ReceiveFrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
         var a: UDPAddr;
         var lAddr := IPEndPoint(ep);
         a := new UDPAddr(Port := lAddr.Port, IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
 
-        exit (n, a, nil);
+        exit (n, Memory<UDPAddr>(a), nil);
       except
         on e: Exception do
-          exit (0, nil, go.Errors.new(e.Message));
+          exit (0, nil, go.Errors.New(e.Message));
       end;
     end;
 
-    method ReadFromIP(b: Slice<byte>): tuple of  (int, Reference<IPAddr>, go.builtin.error);
+    method ReadFromIP(b: Slice<byte>): tuple of  (int, Memory<IPAddr>, go.builtin.error);
     begin
       try
         var ep: EndPoint;
-        var n := fSock.Receivefrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
+        var n := fSock.ReceiveFrom(b.fArray, b.fStart, b.fCount, SocketFlags.None, var ep);
         var a: IPAddr;
         var lAddr := IPEndPoint(ep);
         a := new IPAddr(IP := new IP(Value := new Slice<byte>(lAddr.Address.GetAddressBytes)));
 
-        exit (n, a, nil);
+        exit (n, Memory<IPAddr>(a), nil);
       except
         on e: Exception do
-          exit (0, nil, go.Errors.new(e.Message));
+          exit (0, nil, go.Errors.New(e.Message));
       end;
     end;
     method SetReadBuffer(bytes: int):  go.builtin.error;
@@ -596,7 +610,7 @@ type
         {$ENDIF}
       except
         on e: Exception do
-          exit go.Errors.new(e.Message);
+          exit go.Errors.New(e.Message);
       end;
     end;
     method SetWriteBuffer(bytes: int):  go.builtin.error;
@@ -609,12 +623,12 @@ type
         {$ENDIF}
       except
         on e: Exception do
-          exit go.Errors.new(e.Message);
+          exit go.Errors.New(e.Message);
       end;
     end;
     method SyscallConn(): tuple of  (go.syscall.RawConn, go.builtin.error);
     begin
-      exit (nil, go.Errors.new('Not supported'));
+      exit (nil, go.Errors.New('Not supported'));
     end;
     method CloseRead(): go.builtin.error;
     begin
@@ -622,7 +636,7 @@ type
         fSock.Shutdown(SocketShutdown.Receive);
       except
         on e: Exception do
-        exit go.Errors.new(e.Message);
+        exit go.Errors.New(e.Message);
       end;
     end;
     method CloseWrite(): go.builtin.error;
@@ -631,7 +645,7 @@ type
         fSock.Shutdown(SocketShutdown.Send);
       except
         on e: Exception do
-          exit go.Errors.new(e.Message);
+          exit go.Errors.New(e.Message);
       end;
     end;
 
@@ -641,7 +655,7 @@ type
         fSock.SetSocketOption(SocketOptionLevel.Socket,  SocketOptionName.KeepAlive, b);
       except
         on e: Exception do
-          exit go.Errors.new(e.Message);
+          exit go.Errors.New(e.Message);
       end;
     end;
 
@@ -652,7 +666,7 @@ type
         fSock.SetSocketOption(SocketOptionLevel.Socket,  SocketOptionName.NoDelay, b);
       except
         on e: Exception do
-          exit go.Errors.new(e.Message);
+          exit go.Errors.New(e.Message);
       end;
     end;
 
@@ -663,7 +677,7 @@ type
         fSock.SetSocketOption(SocketOptionLevel.Socket,  SocketOptionName.Linger, b);
       except
         on e: Exception do
-          exit go.Errors.new(e.Message);
+          exit go.Errors.New(e.Message);
       end;
     end;
 
@@ -685,18 +699,18 @@ type
         exit (b.fCount, nil);
       except
         on e: Exception do
-          exit (0, go.Errors.new(e.Message));
+          exit (0, go.Errors.New(e.Message));
       end;
     end;
 
     /*
-    method WriteToIP(b: Slice<byte>; addr: Reference<IPAddr>): tuple of  (int, builtin.error);
+    method WriteToIP(b: Slice<byte>; addr: Memory<IPAddr>): tuple of  (int, builtin.error);
     method WriteTo(b: Slice<byte>; addr: Addr): tuple of  (int, builtin.error);
 
-    method ReadFromUnix(b: Slice<byte>): tuple of  (int, Reference<UnixAddr>, builtin.error)
-    method ReadMsgUnix(b: Slice<byte>; oob: Slice<byte>): tuple of  (n, oobn, flags int, Reference<UnixAddr>, err builtin.error)
-    method WriteMsgUnix(b: Slice<byte>; oob: Slice<byte>; addr Reference<UnixAddr>): tuple of  (n, oobn int, err builtin.error) ;
-    method WriteToUnix(b: Slice<byte>;addr Reference<UnixAddr>): tuple of  (int, builtin.error) ;*/
+    method ReadFromUnix(b: Slice<byte>): tuple of  (int, Memory<UnixAddr>, builtin.error)
+    method ReadMsgUnix(b: Slice<byte>; oob: Slice<byte>): tuple of  (n, oobn, flags int, Memory<UnixAddr>, err builtin.error)
+    method WriteMsgUnix(b: Slice<byte>; oob: Slice<byte>; addr Memory<UnixAddr>): tuple of  (n, oobn int, err builtin.error) ;
+    method WriteToUnix(b: Slice<byte>;addr Memory<UnixAddr>): tuple of  (int, builtin.error) ;*/
   end;
 
 method ParseAddress(s: string): tuple of (string, Integer);
@@ -704,7 +718,7 @@ begin
   var n := go.strings.LastIndex(s, ':');
   var q := go.strings.LastIndex(s, ']');
   if n < q then n := -1;
-  if( n > 0) and Integer.TryParse(s.Substring(n+1), out var port) then begin
+  if( n >= 0) and Integer.TryParse(s.Substring(n+1), out var port) then begin
     s := s.Substring(0, n);
   end;
   exit (s, port);
@@ -715,20 +729,26 @@ begin
   try
     var s: Socket;
     var p := ParseAddress(address);
-    if string.IsNullOrempty(p[0]) then
+    var lCurrentAddr: IPAddress;
+    if string.IsNullOrEmpty(p[0]) then begin
       p := ('0.0.0.0', p[1]);
-    var addr := Dns.GetHostEntry (p[0]);
+      lCurrentAddr := IPAddress.Parse(p[0]);
+    end
+    else begin
+      var addr := Dns.GetHostEntry (p[0]);
+      lCurrentAddr := addr.AddressList[0];
+    end;
 
     case network of
       'tcp': begin
-          if addr.AddressList[0].AddressFamily = AddressFamily.InterNetworkV6 then goto ipv6;
+          if lCurrentAddr.AddressFamily = AddressFamily.InterNetworkV6 then goto ipv6;
           goto ipv4;
         end;
       'tcp4':
       begin
         ipv4:;
         s := new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        s.Bind(new IPEndPoint(addr.AddressList[0], p[1]));
+        s.Bind(new IPEndPoint(lCurrentAddr, p[1]));
         s.Listen(10);
       end;
 
@@ -736,15 +756,15 @@ begin
       begin
         ipv6:;
         s := new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-        s.Bind(new IPEndPoint(addr.AddressList[0], p[1]));
+        s.Bind(new IPEndPoint(lCurrentAddr, p[1]));
         s.Listen(10);
       end;
-    else exit (nil, go.Errors.new('only tcp, tcp4 and tcp6 supported'));
+    else exit (nil, go.Errors.New('only tcp, tcp4 and tcp6 supported'));
     end;
     exit (new TCPListener(s), nil);
   except
   on e: Exception do
-    exit (nil, go.Errors.new(e.Message));
+    exit (nil, go.Errors.New(e.Message));
   end;
 end;
 
@@ -755,6 +775,7 @@ type
     constructor;
     begin
       self.Resolver := Resolver.Default;
+      Deadline := new go.time.Time;
     end;
     // Timeout is the maximum amount of time a dial will wait for
     // a connect to complete. If Deadline is also set, it may fail
@@ -801,7 +822,7 @@ type
     KeepAlive: go.time.Duration; // Go 1.3
 
     // Resolver optionally specifies an alternate resolver to use.
-    Resolver: Reference<Resolver>; // Go 1.8
+    Resolver: Memory<Resolver>; // Go 1.8
 
     // If Control is not nil, it is called after creating the network
     // connection but before actually dialing.
@@ -819,11 +840,12 @@ type
     method DialContext(ctx: go.context.Context; network, address: string): tuple of (Conn, go.builtin.error);
     begin
       var p := go.strings.SplitN(address, ':', 2);
-      if p.Length <> 2 then exit (nil, go.Errors.new('Port missing; address/ip:port'));
+      if p.Length <> 2 then exit (nil, go.Errors.New('Port missing; address/ip:port'));
       try
-        var lPort := coalesce(Reference<Resolver>.Get(self.Resolver), go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
+        //var lPort := coalesce(Reference<Resolver>.Get(self.Resolver), go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
+        var lPort := coalesce(self.Resolver^, go.net.Resolver.Default).LookupPort(ctx, network, p[1]);
         if lPort.Item2 <> nil then exit (nil, lPort.Item2);
-        var lHost := coalesce(Reference<Resolver>.Get(self.Resolver),go. net.Resolver.Default).LookupIPAddr(ctx, p[0]);
+        var lHost := coalesce(self.Resolver^, go.net.Resolver.Default).LookupIPAddr(ctx, p[0]);
         if lHost.Item2 <> nil then exit (Nil, lPort.Item2);
 
         var lRep: IPEndPoint;
@@ -867,14 +889,14 @@ type
               goto udp6;
           end;
         else
-          exit (nil, go.Errors.new('Unknown network'));
+          exit (nil, go.Errors.New('Unknown network'));
         end;
         var lSock := new Socket(lAF, lST, if lST = SocketType.Dgram then ProtocolType.Udp else ProtocolType.Tcp);
         lSock.Connect(lRep);
         exit (new IPConn(lSock), nil);
       except
         on e: Exception do
-          exit (nil, go.Errors.new(e.Message));
+          exit (nil, go.Errors.New(e.Message));
       end;
     end;
   end;
@@ -891,6 +913,7 @@ type
     dc.Timeout := dt;
     exit dc.Dial(network, address);
   end;
+
 type
   [ValueTypeSemantics]
   Resolver = public class
@@ -902,7 +925,7 @@ type
       if Integer.TryParse(service, out var res) then begin
         exit (res, nil);
       end;
-      exit (0, go.Errors.new('Unknown port'));
+      exit (0, go.Errors.New('Unknown port'));
     end;
     method LookupIPAddr(ctx: go.context.Context; host: string): tuple of (Slice<IPAddr>, go.builtin.error);
     begin
@@ -914,6 +937,11 @@ type
         on e: Exception do
           exit (nil, new DNSError(e.Message, host, '', false, false));
       end;
+    end;
+
+    method lookupIPAddr(ctx: go.context.Context; net: string; host: string): tuple of (Slice<IPAddr>, go.builtin.error);
+    begin
+      // TODO
     end;
 
     class var &Default: Resolver := new Resolver;

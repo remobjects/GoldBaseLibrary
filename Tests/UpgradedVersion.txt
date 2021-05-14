@@ -1,0 +1,73 @@
+Previous version 1.11.4
+Current Go version 1.13.5
+-----------
++ bytes_decl.go does not exists anymore
+
++ comment these functions (they exists now on go code):
+go.bytes.__Global = public partial class
+public
+class method IndexByte(b: go.builtin.Slice<Byte>; c: Byte): Integer;
+class method Equal(a, b: go.builtin.Slice<Byte>): Boolean;
+class method Compare(a,b: go.builtin.Slice<Byte>) :Integer;
+
+
++ context: added reflectlite.TypeOf function (TODO)
+
++ crypto:
+/cipher: xor_elements.go is the one to use for xor functions, xor_generic.go and so on not used
+/eliptic: p256.go modified, see p256Assign method.
+/md5: md5_elements is the file to use. Changed in this file: chunk --> BlockSize
+/tls: new units: key_schedule, key_agreement, handshake_client13, handshake_server13
+added golang.x/crypto/hkdf 
+fixedNonceAEAD, 
+/x509: root_darwin_armx:
+  comment first build : +build cgo
+  add tvos and watchos to build comment: +build arm arm64 ios tvos watchos
+
+
++ errors: there is a new file, wrap.go, it's not added to the project
+
++ fmt: need to add internal/fmtsort/sort.go
+new unit errors.go, added to project
+
++ index/suffixarray: 3 new files: gen.go, sais.go and sais2.go, added to the project.
+
++ math: the fun begin:
+do not copy root math units, not used
+inside big directory, there is nat.go, need to rename to nat_elements.go and change alias function as show:
+func alias(x, y nat) bool {
+//return cap(x) > 0 && cap(y) > 0 && &x[0:cap(x)][cap(x)-1] == &y[0:cap(y)][cap(y)-1]
+// elements change
+return (x != nil) && (y != nil) && (x.fArray == y.fArray)
+}
+
+inside rand: rng.go is renamed to a_renamed_rng.go
+inside bits: added bits_error.go to project
+
++ net: new method Resolver.lookupIPAddr(ctx, net, host)
+net/http: add clone.go to project (new unit)
+transferBodyReader type removed (delete from partials.pas)
+
++ os: added internal/oserror and added to project
+added error_errno.go to project
+added go.syscall.Errno.Is method (runtime.pas) TODO
+added class var EINVAL: go.syscall.Errno in runtime.pas
+
+
++ sort: add sort_go18.go (uses reflect.swapper), renamed to sort_go18_elements, changed build
+
++ strconv: atoi.go unit is modified, atoi_elements.go: 3 values changed, commented with // elements change
+
++ strings: strings.s and strings_decl.go missing, does not exists anymore
+
++ skip sync (does not exists in our repo)
+
++ syscall: just copy net.go
+
++ skip testdata (not needed)
+
++ skip testing
+
++ text: added reflect.Slice3 method
+
++ unicode: maketables.go does not exists anymore

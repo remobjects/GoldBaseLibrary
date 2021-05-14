@@ -119,10 +119,10 @@ type
 
   end;
 
-  //method complex(r, i: Single): complex64;
-  //begin
-    //exit new complex64(r := r, i := i);
-  //end;
+  method complex(r, i: Single): complex64;
+  begin
+    exit new complex64(r := r, i := i);
+  end;
 
   method complex(r, i: Double): complex128;
   begin

@@ -11,6 +11,12 @@ type
     begin
       TestApplication2.DoGetTest();
     end;
+
+    method SSLGet;
+    begin
+      TestApplication2.DoSSLGetTest();
+    end;
+
   end;
 
 end.

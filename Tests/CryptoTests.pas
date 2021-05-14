@@ -36,7 +36,7 @@ type
 
     method ECDSAVerify;
     begin
-      //Assert.AreEqual(TestApplication2.DoECDSAVerify(), true); // T82197 array inside struct
+      Assert.AreEqual(TestApplication2.DoECDSAVerify(), true); // T82197 array inside struct
     end;
 
     method DoMD5;

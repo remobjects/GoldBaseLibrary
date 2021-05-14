@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # RemObjects Fire
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Gold", "Gold\Gold.elements", "{1589467E-2C45-4FD0-B0BA-F09FBAEC2E2B}"
 EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Gold.Cooper", "Gold\Gold.Cooper.elements", "{9068B27E-56B6-4E4A-ADFF-86159E789AE2}"
+EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "GoldAspect", "GoldAspect\GoldAspect.elements", "{631D3965-3D71-4DFD-9864-EBF841EA6192}"
 EndProject
 Global
@@ -15,6 +17,10 @@ Global
 		{1589467E-2C45-4FD0-B0BA-F09FBAEC2E2B}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{1589467E-2C45-4FD0-B0BA-F09FBAEC2E2B}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
 		{1589467E-2C45-4FD0-B0BA-F09FBAEC2E2B}.Release|AnyCPU.Build.0 = Release|AnyCPU
+		{9068B27E-56B6-4E4A-ADFF-86159E789AE2}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{9068B27E-56B6-4E4A-ADFF-86159E789AE2}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{9068B27E-56B6-4E4A-ADFF-86159E789AE2}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{9068B27E-56B6-4E4A-ADFF-86159E789AE2}.Release|AnyCPU.Build.0 = Release|AnyCPU
 		{631D3965-3D71-4DFD-9864-EBF841EA6192}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
 		{631D3965-3D71-4DFD-9864-EBF841EA6192}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{631D3965-3D71-4DFD-9864-EBF841EA6192}.Release|AnyCPU.ActiveCfg = Release|AnyCPU

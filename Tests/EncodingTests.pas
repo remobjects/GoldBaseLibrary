@@ -47,8 +47,6 @@ type
     method JsonTest;
     begin
       var lString := TestApplication2.DoEncodingJsonMarshal();
-      var lPString: System.String;
-      lPString := lString;
       Assert.AreEqual(lString, '{"ID":1,"Name":"Reds","Colors":["Crimson","Red","Ruby","Maroon"]}'); // T81705 issue, T81774
     end;
 
@@ -59,7 +57,9 @@ type
       Assert.AreEqual(lLines.Count, 4);
       Assert.AreEqual(lLines[0], '-----BEGIN MESSAGE-----');
       Assert.AreEqual(lLines[3], '-----END MESSAGE-----');
-      Assert.IsTrue(TestApplication2.DoDecodingPEMDecode());
+      var lRes := TestApplication2.DoDecodingPEMDecode();
+      Assert.IsTrue(lRes);
+      //Assert.IsTrue(TestApplication2.DoDecodingPEMDecode());
     end;
 
   end;

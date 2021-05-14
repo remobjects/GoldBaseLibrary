@@ -22,13 +22,14 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	"golang_org/x/net/http/httpguts"
+	"golang.org/x/net/http/httpguts"
 )
 
 // Errors used by the HTTP server.
@@ -230,13 +231,13 @@ type CloseNotifier interface {
 
 var (
 	// ServerContextKey is a context key. It can be used in HTTP
-	// handlers with context.WithValue to access the server that
+	// handlers with Context.Value to access the server that
 	// started the handler. The associated value will be of
 	// type *Server.
 	ServerContextKey = &contextKey{"http-server"}
 
 	// LocalAddrContextKey is a context key. It can be used in
-	// HTTP handlers with context.WithValue to access the local
+	// HTTP handlers with Context.Value to access the local
 	// address the connection arrived on.
 	// The associated value will be of type net.Addr.
 	LocalAddrContextKey = &contextKey{"local-addr"}
@@ -748,10 +749,8 @@ func (cr *connReader) handleReadError(_ error) {
 // may be called from multiple goroutines.
 func (cr *connReader) closeNotify() {
 	res, _ := cr.conn.curReq.Load().(*response)
-	if res != nil {
-		if atomic.CompareAndSwapInt32(&res.didCloseNotify, 0, 1) {
-			res.closeNotifyCh <- true
-		}
+	if res != nil && atomic.CompareAndSwapInt32(&res.didCloseNotify, 0, 1) {
+		res.closeNotifyCh <- true
 	}
 }
 
@@ -1059,7 +1058,7 @@ func (w *response) Header() Header {
 		// Accessing the header between logically writing it
 		// and physically writing it means we need to allocate
 		// a clone to snapshot the logically written state.
-		w.cw.header = w.handlerHeader.clone()
+		w.cw.header = w.handlerHeader.Clone()
 	}
 	w.calledHeader = true
 	return w.handlerHeader
@@ -1128,7 +1127,7 @@ func (w *response) WriteHeader(code int) {
 	w.status = code
 
 	if w.calledHeader && w.cw.header == nil {
-		w.cw.header = w.handlerHeader.clone()
+		w.cw.header = w.handlerHeader.Clone()
 	}
 
 	if cl := w.handlerHeader.get("Content-Length"); cl != "" {
@@ -1389,7 +1388,7 @@ func (cw *chunkWriter) writeHeader(p []byte) {
 		}
 	}
 
-	if _, ok := header["Date"]; !ok {
+	if !header.has("Date") {
 		setHeader.date = appendTime(cw.res.dateBuf[:0], time.Now())
 	}
 
@@ -1782,6 +1781,14 @@ func (c *conn) serve(ctx context.Context) {
 			c.rwc.SetWriteDeadline(time.Now().Add(d))
 		}
 		if err := tlsConn.Handshake(); err != nil {
+			// If the handshake failed due to the client not speaking
+			// TLS, assume they're speaking plaintext HTTP and write a
+			// 400 response on the TLS conn's underlying net.Conn.
+			if re, ok := err.(tls.RecordHeaderError); ok && re.Conn != nil && tlsRecordHeaderLooksLikeHTTP(re.RecordHeader) {
+				io.WriteString(re.Conn, "HTTP/1.0 400 Bad Request\r\n\r\nClient sent an HTTP request to an HTTPS server.\n")
+				re.Conn.Close()
+				return
+			}
 			c.server.logf("http: TLS handshake error from %s: %v", c.rwc.RemoteAddr(), err)
 			return
 		}
@@ -1789,7 +1796,7 @@ func (c *conn) serve(ctx context.Context) {
 		*c.tlsState = tlsConn.ConnectionState()
 		if proto := c.tlsState.NegotiatedProtocol; validNPN(proto) {
 			if fn := c.server.TLSNextProto[proto]; fn != nil {
-				h := initNPNRequest{tlsConn, serverHandler{c.server}}
+				h := initNPNRequest{ctx, tlsConn, serverHandler{c.server}}
 				fn(c.server, tlsConn, h)
 			}
 			return
@@ -1815,7 +1822,8 @@ func (c *conn) serve(ctx context.Context) {
 		if err != nil {
 			const errorHeaders = "\r\nContent-Type: text/plain; charset=utf-8\r\nConnection: close\r\n\r\n"
 
-			if err == errTooLarge {
+			switch {
+			case err == errTooLarge:
 				// Their HTTP client may or may not be
 				// able to read this if we're
 				// responding to them and hanging up
@@ -1825,18 +1833,31 @@ func (c *conn) serve(ctx context.Context) {
 				fmt.Fprintf(c.rwc, "HTTP/1.1 "+publicErr+errorHeaders+publicErr)
 				c.closeWriteAndWait()
 				return
-			}
-			if isCommonNetReadError(err) {
+
+			case isUnsupportedTEError(err):
+				// Respond as per RFC 7230 Section 3.3.1 which says,
+				//      A server that receives a request message with a
+				//      transfer coding it does not understand SHOULD
+				//      respond with 501 (Unimplemented).
+				code := StatusNotImplemented
+
+				// We purposefully aren't echoing back the transfer-encoding's value,
+				// so as to mitigate the risk of cross side scripting by an attacker.
+				fmt.Fprintf(c.rwc, "HTTP/1.1 %d %s%sUnsupported transfer encoding", code, StatusText(code), errorHeaders)
+				return
+
+			case isCommonNetReadError(err):
 				return // don't reply
-			}
 
-			publicErr := "400 Bad Request"
-			if v, ok := err.(badRequestError); ok {
-				publicErr = publicErr + ": " + string(v)
-			}
+			default:
+				publicErr := "400 Bad Request"
+				if v, ok := err.(badRequestError); ok {
+					publicErr = publicErr + ": " + string(v)
+				}
 
-			fmt.Fprintf(c.rwc, "HTTP/1.1 "+publicErr+errorHeaders+publicErr)
-			return
+				fmt.Fprintf(c.rwc, "HTTP/1.1 "+publicErr+errorHeaders+publicErr)
+				return
+			}
 		}
 
 		// Expect 100 Continue support
@@ -2171,7 +2192,8 @@ func RedirectHandler(url string, code int) Handler {
 type ServeMux struct {
 	mu    sync.RWMutex
 	m     map[string]muxEntry
-	hosts bool // whether any patterns contain hostnames
+	es    []muxEntry // slice of entries sorted from longest to shortest.
+	hosts bool       // whether any patterns contain hostnames
 }
 
 type muxEntry struct {
@@ -2186,19 +2208,6 @@ func NewServeMux() *ServeMux { return new(ServeMux) }
 var DefaultServeMux = &defaultServeMux
 
 var defaultServeMux ServeMux
-
-// Does path match pattern?
-func pathMatch(pattern, path string) bool {
-	if len(pattern) == 0 {
-		// should not happen
-		return false
-	}
-	n := len(pattern)
-	if pattern[n-1] != '/' {
-		return pattern == path
-	}
-	return len(path) >= n && path[0:n] == pattern
-}
 
 // cleanPath returns the canonical path for p, eliminating . and .. elements.
 func cleanPath(p string) string {
@@ -2244,19 +2253,14 @@ func (mux *ServeMux) match(path string) (h Handler, pattern string) {
 		return v.h, v.pattern
 	}
 
-	// Check for longest valid match.
-	var n = 0
-	for k, v := range mux.m {
-		if !pathMatch(k, path) {
-			continue
-		}
-		if h == nil || len(k) > n {
-			n = len(k)
-			h = v.h
-			pattern = v.pattern
+	// Check for longest valid match.  mux.es contains all patterns
+	// that end in / sorted from longest to shortest.
+	for _, e := range mux.es {
+		if strings.HasPrefix(path, e.pattern) {
+			return e.h, e.pattern
 		}
 	}
-	return
+	return nil, ""
 }
 
 // redirectToPathSlash determines if the given path needs appending "/" to it.
@@ -2402,11 +2406,30 @@ func (mux *ServeMux) Handle(pattern string, handler Handler) {
 	if mux.m == nil {
 		mux.m = make(map[string]muxEntry)
 	}
-	mux.m[pattern] = muxEntry{h: handler, pattern: pattern}
+	e := muxEntry{h: handler, pattern: pattern}
+	mux.m[pattern] = e
+	if pattern[len(pattern)-1] == '/' {
+		mux.es = appendSorted(mux.es, e)
+	}
 
 	if pattern[0] != '/' {
 		mux.hosts = true
 	}
+}
+
+func appendSorted(es []muxEntry, e muxEntry) []muxEntry {
+	n := len(es)
+	i := sort.Search(n, func(i int) bool {
+		return len(es[i].pattern) < len(e.pattern)
+	})
+	if i == n {
+		return append(es, e)
+	}
+	// we now know that i points at where we want to insert
+	es = append(es, muxEntry{}) // try to grow the slice in place, any entry works.
+	copy(es[i+1:], es[i:])      // Move shorter entries down
+	es[i] = e
+	return es
 }
 
 // HandleFunc registers the handler function for the given pattern.
@@ -2489,7 +2512,9 @@ type Server struct {
 	// ReadHeaderTimeout is the amount of time allowed to read
 	// request headers. The connection's read deadline is reset
 	// after reading the headers and the Handler can decide what
-	// is considered too slow for the body.
+	// is considered too slow for the body. If ReadHeaderTimeout
+	// is zero, the value of ReadTimeout is used. If both are
+	// zero, there is no timeout.
 	ReadHeaderTimeout time.Duration
 
 	// WriteTimeout is the maximum duration before timing out
@@ -2501,7 +2526,7 @@ type Server struct {
 	// IdleTimeout is the maximum amount of time to wait for the
 	// next request when keep-alives are enabled. If IdleTimeout
 	// is zero, the value of ReadTimeout is used. If both are
-	// zero, ReadHeaderTimeout is used.
+	// zero, there is no timeout.
 	IdleTimeout time.Duration
 
 	// MaxHeaderBytes controls the maximum number of bytes the
@@ -2532,6 +2557,20 @@ type Server struct {
 	// underlying FileSystem errors.
 	// If nil, logging is done via the log package's standard logger.
 	ErrorLog *log.Logger
+
+	// BaseContext optionally specifies a function that returns
+	// the base context for incoming requests on this server.
+	// The provided Listener is the specific Listener that's
+	// about to start accepting requests.
+	// If BaseContext is nil, the default is context.Background().
+	// If non-nil, it must return a non-nil context.
+	BaseContext func(net.Listener) context.Context
+
+	// ConnContext optionally specifies a function that modifies
+	// the context used for a new connection c. The provided ctx
+	// is derived from the base context and has a ServerContextKey
+	// value.
+	ConnContext func(ctx context.Context, c net.Conn) context.Context
 
 	disableKeepAlives int32     // accessed atomically.
 	inShutdown        int32     // accessed atomically (non-zero means we're in Shutdown)
@@ -2783,7 +2822,7 @@ func (srv *Server) ListenAndServe() error {
 	if err != nil {
 		return err
 	}
-	return srv.Serve(tcpKeepAliveListener{ln.(*net.TCPListener)})
+	return srv.Serve(ln)
 }
 
 var testHookServerServe func(*Server, net.Listener) // used if non-nil
@@ -2829,6 +2868,7 @@ func (srv *Server) Serve(l net.Listener) error {
 		fn(srv, l) // call hook with unwrapped listener
 	}
 
+	origListener := l
 	l = &onceCloseListener{Listener: l}
 	defer l.Close()
 
@@ -2841,8 +2881,16 @@ func (srv *Server) Serve(l net.Listener) error {
 	}
 	defer srv.trackListener(&l, false)
 
-	var tempDelay time.Duration     // how long to sleep on accept failure
-	baseCtx := context.Background() // base is always background, per Issue 16220
+	var tempDelay time.Duration // how long to sleep on accept failure
+
+	baseCtx := context.Background()
+	if srv.BaseContext != nil {
+		baseCtx = srv.BaseContext(origListener)
+		if baseCtx == nil {
+			panic("BaseContext returned a nil context")
+		}
+	}
+
 	ctx := context.WithValue(baseCtx, ServerContextKey, srv)
 	for {
 		rw, e := l.Accept()
@@ -2867,10 +2915,17 @@ func (srv *Server) Serve(l net.Listener) error {
 			}
 			return e
 		}
+		connCtx := ctx
+		if cc := srv.ConnContext; cc != nil {
+			connCtx = cc(connCtx, rw)
+			if connCtx == nil {
+				panic("ConnContext returned nil")
+			}
+		}
 		tempDelay = 0
 		c := srv.newConn(rw)
 		c.setState(c.rwc, StateNew) // before Serve can return
-		go c.serve(ctx)
+		go c.serve(connCtx)
 	}
 }
 
@@ -3067,11 +3122,11 @@ func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error {
 
 	defer ln.Close()
 
-	return srv.ServeTLS(tcpKeepAliveListener{ln.(*net.TCPListener)}, certFile, keyFile)
+	return srv.ServeTLS(ln, certFile, keyFile)
 }
 
 // setupHTTP2_ServeTLS conditionally configures HTTP/2 on
-// srv and returns whether there was an error setting it up. If it is
+// srv and reports whether there was an error setting it up. If it is
 // not configured for policy reasons, nil is returned.
 func (srv *Server) setupHTTP2_ServeTLS() error {
 	srv.nextProtoOnce.Do(srv.onceSetNextProtoDefaults)
@@ -3123,8 +3178,8 @@ func (srv *Server) onceSetNextProtoDefaults() {
 // After such a timeout, writes by h to its ResponseWriter will return
 // ErrHandlerTimeout.
 //
-// TimeoutHandler buffers all Handler writes to memory and does not
-// support the Hijacker or Flusher interfaces.
+// TimeoutHandler supports the Flusher and Pusher interfaces but does not
+// support the Hijacker interface.
 func TimeoutHandler(h Handler, dt time.Duration, msg string) Handler {
 	return &timeoutHandler{
 		handler: h,
@@ -3212,6 +3267,16 @@ type timeoutWriter struct {
 	code        int
 }
 
+var _ Pusher = (*timeoutWriter)(nil)
+
+// Push implements the Pusher interface.
+func (tw *timeoutWriter) Push(target string, opts *PushOptions) error {
+	if pusher, ok := tw.w.(Pusher); ok {
+		return pusher.Push(target, opts)
+	}
+	return ErrNotSupported
+}
+
 func (tw *timeoutWriter) Header() Header { return tw.h }
 
 func (tw *timeoutWriter) Write(p []byte) (int, error) {
@@ -3239,24 +3304,6 @@ func (tw *timeoutWriter) WriteHeader(code int) {
 func (tw *timeoutWriter) writeHeader(code int) {
 	tw.wroteHeader = true
 	tw.code = code
-}
-
-// tcpKeepAliveListener sets TCP keep-alive timeouts on accepted
-// connections. It's used by ListenAndServe and ListenAndServeTLS so
-// dead TCP connections (e.g. closing laptop mid-download) eventually
-// go away.
-type tcpKeepAliveListener struct {
-	*net.TCPListener
-}
-
-func (ln tcpKeepAliveListener) Accept() (net.Conn, error) {
-	tc, err := ln.AcceptTCP()
-	if err != nil {
-		return nil, err
-	}
-	tc.SetKeepAlive(true)
-	tc.SetKeepAlivePeriod(3 * time.Minute)
-	return tc, nil
 }
 
 // onceCloseListener wraps a net.Listener, protecting it from
@@ -3294,9 +3341,16 @@ func (globalOptionsHandler) ServeHTTP(w ResponseWriter, r *Request) {
 // uninitialized fields in its *Request. Such partially-initialized
 // Requests come from NPN protocol handlers.
 type initNPNRequest struct {
-	c *tls.Conn
-	h serverHandler
+	ctx context.Context
+	c   *tls.Conn
+	h   serverHandler
 }
+
+// BaseContext is an exported but unadvertised http.Handler method
+// recognized by x/net/http2 to pass down a context; the TLSNextProto
+// API predates context support so we shoehorn through the only
+// interface we have available.
+func (h initNPNRequest) BaseContext() context.Context { return h.ctx }
 
 func (h initNPNRequest) ServeHTTP(rw ResponseWriter, req *Request) {
 	if req.TLS == nil {
@@ -3387,6 +3441,16 @@ func strSliceContains(ss []string, s string) bool {
 		if v == s {
 			return true
 		}
+	}
+	return false
+}
+
+// tlsRecordHeaderLooksLikeHTTP reports whether a TLS record header
+// looks like it might've been a misdirected plaintext HTTP request.
+func tlsRecordHeaderLooksLikeHTTP(hdr [5]byte) bool {
+	switch string(hdr[:]) {
+	case "GET /", "HEAD ", "POST ", "PUT /", "OPTIO":
+		return true
 	}
 	return false
 }

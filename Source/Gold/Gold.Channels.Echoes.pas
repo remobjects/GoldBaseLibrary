@@ -90,12 +90,12 @@ type
     end;
   end;
 
-
-  BidirectionalChannel<T> = public class(SendingChannel<T>, ReceivingChannel<T>)
+  [ValueTypeSemantics]
+  BidirectionalChannel<T> = public class(SendingChannel<T>, ReceivingChannel<T>, IChannel)
   assembly
   {$IFDEF ISLAND}
     fLock: Monitor := new Monitor;
-    fCS: ConditionalVariable;
+    fCS: ConditionalVariable := new ConditionalVariable;
   {$ELSE}
     fLock: Object := new Object;
   {$ENDIF}
@@ -174,16 +174,21 @@ type
       fQueueSize := aQueueSize + 1;
     end;
 
+    property Length: Integer read fData.Count;
     property Capacity: Integer read fQueueSize -1;
 
     class var fZero: BidirectionalChannel<T> := new BidirectionalChannel<T>();
-    class property Zero: BidirectionalChannel<T> := fZero;
+    class property Zero: BidirectionalChannel<T> := fZero; published;
 
     class operator IsNil(aVal: BidirectionalChannel<T>): Boolean;
     begin
       result := (Object(aVal) = nil) or (Object(aVal) = Object(fZero));
     end;
 
+    method __Clone: BidirectionalChannel<T>;
+    begin
+      exit self;
+    end;
 
     method Send(aVal: T);
     begin
@@ -262,7 +267,7 @@ type
 
     method TryReceive: IWaitReceiveMessage<T>;
     begin
-      if fClosed <> 0 then raise new Exception('Channel closed!');
+      if (fClosed <> 0) or (self = fZero) then exit nil;
       exit new ReceiveMessage<T>(self);
     end;
 
@@ -313,6 +318,23 @@ type
     end;
   end;
 
+  RandNumber = static class
+    class var fRandom: go.crypto.rand.PlatformRandom;
+
+    method Random(aMax: Cardinal): Cardinal;
+    begin
+      {$IF ISLAND}
+      exit fRandom.Random mod aMax;
+      {$ELSEIF ECHOES}
+      exit fRandom.Next(aMax);
+      {$ENDIF}
+    end;
+
+    class constructor;
+    begin
+      fRandom := new go.crypto.rand.PlatformRandom();
+    end;
+  end;
 
   method Channel_Select(aHandles: array of IWaitMessage; aBlock: Boolean): Integer; public;
   begin
@@ -350,6 +372,16 @@ type
     end;
     if not aBlock then
       exit -1;
+    // if all channels are nil (reading closed channels), choose one using random number (Go way)
+    var lAnyChannel := false;
+    for x: Integer := 0 to aHandles.Length - 1 do begin
+      if aHandles[x] ≠ nil then begin
+        lAnyChannel := true;
+        break;
+      end;
+    end;
+    if not lAnyChannel then
+      exit RandNumber.Random(aHandles.Length);
     loop begin
       locking lLock do begin
         if lDone <> -1 then break;

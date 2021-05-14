@@ -28,7 +28,7 @@ func blockGeneric(dig *digest, p []byte) {
 	d := dig.s[3]
 	var X *[16]uint32
 	var xbuf [16]uint32
-	for len(p) >= chunk {
+	for len(p) >= BlockSize {
 		aa, bb, cc, dd := a, b, c, d
 
 		// This is a constant condition - it is not evaluated on each iteration.
@@ -255,7 +255,7 @@ func blockGeneric(dig *digest, p []byte) {
 		c += cc
 		d += dd
 
-		p = p[chunk:]
+		p = p[BlockSize:]
 	}
 
 	dig.s[0] = a

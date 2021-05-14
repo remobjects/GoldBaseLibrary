@@ -2,11 +2,25 @@
 
 uses
   go.builtin
-{$IFDEF ECHOES}  , System.Linq, System.Collections.Generic{$ENDIF}
+{$IFDEF ECHOES}  , System.Linq, System.Collections, System.Collections.Generic{$ENDIF}
 
   ;
 
 type
+  [AttributeUsage(AttributeTargets.Assembly, AllowMultiple := true)]
+  PackageNameAttribute = public class(Attribute)
+  public
+    constructor(aNamespace, aName: System.String);
+    begin
+      &Namespace := aNamespace;
+      Name := aName;
+    end;
+
+    property Name: System.String; readonly;
+    property &Namespace: System.String; readonly;
+  end;
+
+
   VTCheck<V> = class
   public
     class var IsVT := false; readonly;
@@ -24,13 +38,29 @@ type
     end;
   end;
 
+  CloneHelper<T> = class
+    {$IF ISLAND}
+    class var CloneMethod: MethodInfo := typeOf(T).Methods.FirstOrDefault(a -> a.Name = '__Clone'); readonly;
+    {$ELSE}
+    class var CloneMethod: System.Reflection.MethodInfo := typeOf(T).GetMethods.FirstOrDefault(a -> a.Name = '__Clone'); readonly;
+    {$ENDIF}
+  end;
+
+  IMap = public interface
+    method GetReflectSequence: sequence of tuple of(go.reflect.Value, go.reflect.Value);
+    method GetReflectValue(aKey: go.reflect.Value): go.reflect.Value;
+    method GetReflectKeys: Slice<go.reflect.Value>;
+    method SetReflectKeyValue(aKey: go.reflect.Value; aValue: go.reflect.Value);
+    method GetLen: Integer;
+  end;
+
   [ValueTypeSemantics]
-  Map<K, V> = public class
+  Map<K, V> = public class(IMap)
   private
   {$IFDEF ECHOES}
     fDict: System.Collections.Generic.Dictionary<K, V> := new System.Collections.Generic.Dictionary<K, V>;
   {$ELSEIF ISLAND}
-  fDict: Dictionary<K, V> := new Dictionary<K, V>;
+    fDict: Dictionary<K, V> := new Dictionary<K, V>;
   {$ELSE}
   {$ERROR NOT SUPPORTED}
   {$ENDIF}
@@ -111,7 +141,12 @@ type
     end;
 
     class var fZero: Map<K, V> := new Map<K, V>();
-    class property Zero: Map<K, V> := fZero;
+    class property Zero: Map<K, V> := fZero; published;
+
+    method __Clone: Map<K, V>;
+    begin
+      exit self;
+    end;
 
     class operator IsNil(aVal: Map<K, V>): Boolean;
     begin
@@ -157,17 +192,21 @@ type
       if VTCheck<V>.IsVT then
         exit (Activator.CreateInstance<V>(), false);
       {$ENDIF}
-      {$IF ECHOES}
       var lZero := go.reflect.Zero(new go.reflect.TypeImpl(typeOf(V)));
       if lZero.fValue <> nil then
         exit (lZero.fValue as V, false);
-      {$ENDIF}
+
       exit (default(V), false);
     end;
 
     method Delete(aKey: K);
     begin
       fDict.Remove(aKey);
+    end;
+
+    method GetLen: Integer;
+    begin
+      result := Length;
     end;
 
     property Length: Integer read fDict.Count;
@@ -180,6 +219,37 @@ type
       exit fDict.Select(a -> (a.Key, a.Value));
       {$ENDIF}
     end;
+
+    method GetReflectSequence: sequence of tuple of(go.reflect.Value, go.reflect.Value);
+    begin
+      {$IFDEF ISLAND}
+      exit fDict.GetSequence.Select(a -> (new go.reflect.Value(a.Key), new go.reflect.Value(a.Value)));
+      {$ELSE}
+      exit fDict.Select(a -> (new go.reflect.Value(a.Key), new go.reflect.Value(a.Value)));
+      {$ENDIF}
+    end;
+
+    method GetReflectValue(aKey: go.reflect.Value): go.reflect.Value;
+    begin
+      result := new go.reflect.Value(Item[K(aKey.fValue)]);
+    end;
+
+    method GetReflectKeys: Slice<go.reflect.Value>;
+    begin
+      {$IFDEF ISLAND}
+      exit fDict.GetSequence.Select(a -> (new go.reflect.Value(a.Key))).ToArray;
+      {$ELSE}
+      exit fDict.Select(a -> (new go.reflect.Value(a.Key))).ToArray;
+      {$ENDIF}
+    end;
+
+    method SetReflectKeyValue(aKey: go.reflect.Value; aValue: go.reflect.Value);
+    begin
+      if aValue.IsValid then
+        &Add(aKey.fValue as K, aValue.fValue as V)
+      else
+        Delete(aKey.fValue as K);
+    end;
   end;
 
 {$IFDEF ISLAND}
@@ -191,8 +261,11 @@ type
     method getCap: Integer;
     method setCap: Integer;
     method getLen: Integer;
-    method setLen: Integer;
+    method setLen(aValue: Integer): Integer;
     method setFrom(aSrc: ISlice);
+    method getReflectSlice(i: Integer; j: Integer): go.reflect.Value;
+    method AppendObject(aObject: Object): go.reflect.Value;
+    method CloneElems: Object;
   end;
 
 
@@ -217,7 +290,7 @@ type
 
     method set_Item(i: Integer; aVal: T);
     begin
-      if (i < 0) or (i ≥ fCount) then raise new IndexOutOfRangeException('Index out of range');
+      if (i < 0) or (i ≥ Capacity) then raise new IndexOutOfRangeException('Index out of range');
       fArray[i + fStart] := aVal;
     end;
     class var EmptyArray: array of T := [];
@@ -229,6 +302,11 @@ type
       fArray := aArray;
       fStart := aStart;
       fCount := aCount;
+    end;
+
+    method Ref(i: int64): Memory<T>; unsafe;
+    begin
+      exit @fArray[i];
     end;
 
     constructor;
@@ -275,7 +353,8 @@ type
     end;
 
     class var fZero: Slice<T> := new Slice<T>;
-    class property Zero: Slice<T> := fZero;
+    //class property Zero: Slice<T> := fZero; published;
+    class property Zero: Slice<T> read new Slice<T>;
 
     class operator IsNil(aVal: Slice<T>): Boolean;
     begin
@@ -303,6 +382,11 @@ type
       result := get_Item(i);
     end;
 
+    method AppendObject(aObject: Object): go.reflect.Value;
+    begin
+      exit new go.reflect.Value(append(self, T(aObject)));
+    end;
+
     method setAtIndex(i: Integer; aValue: Object);
     begin
       set_Item(i, T(aValue));
@@ -318,9 +402,9 @@ type
 
     end;
 
-    method setLen: Integer;
+    method setLen(aValue: Integer): Integer;
     begin
-
+      fCount := aValue;
     end;
 
     method getLen: Integer;
@@ -345,6 +429,11 @@ type
     method Len: go.builtin.int;
     begin
       result := fCount;
+    end;
+
+    method getReflectSlice(i: Integer; j: Integer): go.reflect.Value;
+    begin
+      result := new go.reflect.Value(new Slice<T>(fArray, i, j-i));
     end;
 
     method Less(a, b: go.builtin.int): go.builtin.bool;
@@ -376,6 +465,22 @@ type
         aDest[i] := aSource[i];
     end;
 
+    method CloneElems: Object;
+    begin
+      if CloneHelper<T>.CloneMethod <> nil then begin
+        var lNewArray := new T[Capacity];
+        for i: Integer := 0 to fArray.Length -1 do
+          if fArray[i] <> nil then
+            lNewArray[i] := T(CloneHelper<T>.CloneMethod.Invoke(fArray[i], []))
+          else
+            lNewArray[i] := nil;
+
+        exit new Slice<T>(lNewArray, fStart, fCount);
+      end
+      else
+        exit self;
+    end;
+
     method Grow(aNewLen: Integer): Slice<T>;
     begin
       if aNewLen > Capacity then raise new ArgumentException('Length larger than capacity!');
@@ -396,11 +501,44 @@ type
 
     class operator implicit(aVal: Slice<T>): array of T;
     begin
+      if aVal = nil then
+        exit new T[0];
+
       exit aVal.ToArray();
     end;
+
+    class operator Equal(Value1, Value2: Slice<T>): Boolean;
+    begin
+      if ((Object(Value1) = nil) and (Object(Value2) = Object(fZero))) or ((Object(Value1) = Object(fZero)) and (Object(Value2) = nil)) then
+        exit true;
+
+      exit Object(Value1) = Object(Value2);
+    end;
+
+    class operator NotEqual(Value1, Value2: Slice<T>): Boolean;
+    begin
+      result := not (Value1 = Value2);
+    end;
+
+    /*method Get(idxs: Slice<go.builtin.int32>; idx1: go.builtin.int32; idx2: go.builtin.int32): T;
+    begin
+      raise new NotImplementedException;
+    end;
+
+    method Get(idxs: Slice<go.builtin.int32>; idx1: go.builtin.int32): T;
+    begin
+      raise new NotImplementedException;
+    end;*/
+
+    method Get(idx1: go.builtin.int32; idx2: go.builtin.int32): T;
+    begin
+      raise new NotImplementedException;
+    end;
+
+
   end;
 
-  error = public interface
+  error = public soft interface
     method Error: string;
   end;
 
@@ -418,6 +556,10 @@ type
     property Data: tuple of (T, Boolean) read;
   end;
 
+  IChannel = public interface
+    property Length: Integer read;
+  end;
+
   Channel<T> = public interface
     property Capacity: Integer read;
     method Close;
@@ -426,76 +568,12 @@ type
   ReceivingChannel<T> = public interface(Channel<T>)
     method Receive: tuple of (T, Boolean);
     method TryReceive: IWaitReceiveMessage<T>;
+    method GetSequence: sequence of T;
   end;
 
   SendingChannel<T> = public interface(Channel<T>)
     method Send(aVal: T);
     method TrySend(aVal: T): IWaitSendMessage;
-  end;
-
-  IReference = public interface
-    method Get: Object;
-    method &Set(o: Object);
-  end;
-
-  [TransparentType]
-  &Reference<T> = public class(IReference)
-  public
-    constructor(aRead: Func<T>; aWrite: Action<T>);
-    begin
-      &Read := aRead;
-      &Write := aWrite;
-    end;
-
-    constructor(aValue: T);
-    begin
-      var lValue := aValue;
-      &Read := -> lValue;
-      &Write := a -> begin lValue := a; end;
-    end;
-    method Get: Object;
-    begin
-      if self = nil then
-        exit default(T);
-
-      exit Object(Value);
-    end;
-
-    method &Set(o: Object);
-    begin
-      Value := T(o);
-    end;
-
-    property &Read: Func<T>; readonly;
-    property &Write: Action<T>; readonly;
-
-    property Value: T read &Read() write value -> &Write(value);
-
-    class method &Set(aVal: Reference<T>; aValue: T);
-    begin
-      aVal.Value := aValue;
-    end;
-
-    class method &Get(aVal: Reference<T>): T;
-    begin
-      if aVal = nil then
-        exit default(T);
-
-      exit aVal.Value;
-    end;
-
-    class operator Implicit(aVal: Reference<T>): T;
-    begin
-      if aVal = nil then
-        exit nil
-      else
-        exit aVal.Value;
-    end;
-
-    class operator Implicit(aVal: T): Reference<T>;
-    begin
-      exit new Reference<T>(aVal);
-    end;
   end;
 
   GoException = public class(Exception)
@@ -518,9 +596,9 @@ type
   method copy(dst: Slice<byte>; src: string): Integer;
   begin
     {$IFDEF ISLAND}
-    exit copy(dst, Encoding.UTF8.GetBytes(src));
+    exit copy(dst, new Slice<byte>(Encoding.UTF8.GetBytes(src)));
     {$ELSE}
-    exit copy(dst, System.Text.Encoding.UTF8.GetBytes(src));
+    exit copy(dst, new Slice<byte>(System.Text.Encoding.UTF8.GetBytes(src)));
     {$ENDIF}
   end;
 
@@ -530,7 +608,41 @@ type
     var lNew := new T[slc + 1];
     for i: Integer := 0 to slc -1 do
       lNew[i] := sl[i];
-      lNew[slc] := elems;
+
+    if (elems is IList) then begin
+      {$IF ECHOES}
+      var lType := typeOf(T);
+      var lElementsType := lType.GetElementType();
+      var CloneMethod: System.Reflection.MethodInfo := lElementsType.GetMethods.FirstOrDefault(a -> a.Name = '__Clone');
+      var lTmp := Array.CreateInstance(lElementsType, IList(elems).Count);
+      for i: Integer := 0 to IList(elems).Count - 1 do begin
+        if CloneMethod <> nil then
+          lTmp.SetValue(CloneMethod.Invoke(IList(elems)[i], []), i)
+        else
+          lTmp.SetValue(IList(elems)[i], i);
+      end;
+      {$ELSE}
+      var lType := typeOf(sl);
+      var lGeneric := lType.GenericArguments.First;
+      var lElementsType := lGeneric.GenericArguments.First;
+      var CloneMethod: MethodInfo := lElementsType.Methods.FirstOrDefault(a -> a.Name = '__Clone');
+      var lTmp := InternalCalls.Cast<&Array>(Utilities.NewArray(lGeneric.RTTI, lElementsType.SizeOfType, IList(elems).Count));
+      for i: Integer := 0 to IList(elems).Count - 1 do begin
+        if CloneMethod <> nil then
+          IList(lTmp)[i] := CloneMethod.Invoke(IList(elems)[i], [])
+        else
+          IList(lTmp)[i]:= IList(elems)[i];
+        end;
+      {$ENDIF}
+      lNew[slc] := T(lTmp);
+    end
+    else
+      //if (elems is go.builtin.ISlice) then begin
+        //lNew[slc] := T(go.builtin.ISlice(elems).CloneElems);
+      //end
+      //else
+          lNew[slc] := elems;
+
     exit lNew;
   end;
 
@@ -538,31 +650,23 @@ type
   begin
     var c := if elems = nil then 0 else IList<T>(elems).Count;
     var slc := if sl = nil then 0 else sl.Length;
-    var lNew := new T[slc + c + 1];
-    for i: Integer := 0 to slc -1 do
-      lNew[i] := sl[i];
-    lNew[slc] := a;
-    for i: Integer := 0 to c -1 do
-      lNew[i + slc + 1] := IList<T>(elems)[i];
-    exit lNew;
+    if c + slc + 1 ≤ sl.Capacity then begin
+      sl[slc] := a;
+      for i: Integer := 0 to c -1 do
+        sl[slc + i + 1] := IList<T>(elems)[i];
+      sl.setLen(slc + c + 1);
+      exit sl;
+    end
+    else begin
+      var lNew := new T[slc + c + 1];
+      for i: Integer := 0 to slc -1 do
+        lNew[i] := sl[i];
+      lNew[slc] := a;
+      for i: Integer := 0 to c -1 do
+        lNew[i + slc + 1] := IList<T>(elems)[i];
+      exit lNew;
+    end;
   end;
-
-/*
-  method append<T>(sl: Slice<T>; elems: Object): Slice<T>;
-  begin
-    if elems is Slice<T> then
-      exit appendSlice(sl, elems as Slice<T>);
-    var c := if elems = nil then 0 else IList<T>(elems).Count;
-    var slc := if sl = nil then 0 else sl.Length;
-    var slCap := if sl = nil then 0 else sl.Capacity;
-    var lNew := new T[if (slc + c) <= slCap then slCap else slc + c];
-
-    for i: Integer := 0 to slc -1 do
-      lNew[i] := sl[i];
-    for i: Integer := 0 to c -1 do
-      lNew[i + slc] := IList<T>(elems)[i];
-    exit new Slice<T>(lNew, 0, slc + c);
-  end;*/
 
   method append<T>(sl, elems: Slice<T>): Slice<T>;
   begin
@@ -601,7 +705,8 @@ type
 
   method len(v: string): Integer; public;
   begin
-    exit v.Value.Length;
+    //exit v.Value.Length;
+    exit v.Length;
   end;
 
   method len<T>(v: array of T): Integer; public;
@@ -719,6 +824,10 @@ type
 
   method TypeAssert<T>(v: Object): tuple of (T, Boolean);
   begin
+    if (v ≠ nil) and (v is Memory<T>) then begin
+      exit (Memory<T>(v)^, true);
+    end;
+
     if v is T then
       exit (T(v), true);
     {$IFDEF ISLAND}
@@ -728,15 +837,19 @@ type
     if VTCheck<T>.IsVT then
       exit (Activator.CreateInstance<T>(), false);
     {$ENDIF}
+    var lZero := go.reflect.Zero(new go.reflect.TypeImpl(typeOf(T)));
+    if lZero.fValue <> nil then
+      exit (lZero.fValue as T, false);
+
     exit (default(T), false); // for integers, T(V) cast would fail otherwise.
   end;
 
-  method TypeAssertReference<T>(v: Object): tuple of (&Reference<T>, Boolean);
+  method TypeAssertReference<T>(v: Object): tuple of (&Memory<T>, Boolean);
   begin
-    result := TypeAssert<Reference<T>>(v);
+    result := TypeAssert<Memory<T>>(v);
     if result[1] then exit;
     if v is T then
-      exit (new Reference<T>(T(v)), true);
+      exit (new Memory<T>(T(v)), true);
   end;
 
   method panic(v: Object);
@@ -792,6 +905,42 @@ type
   end;
 
   [assembly:GoldAspect.GoldFixer]
+
+
+  extension method go.reflect.Kind.String(): go.builtin.string; public;
+  begin
+    case Integer(self) of
+      0: exit 'Invalid';
+      1: exit 'Bool';
+      2: exit 'Int';
+      3: exit 'Int8';
+      4: exit 'Int16';
+      5: exit 'Int32';
+      6: exit 'Int64';
+      7: exit 'Uint';
+      8: exit 'Uint8';
+      9: exit 'Uint16';
+      10: exit 'Uint32';
+      11: exit 'Uint64';
+      12: exit 'Uintptr';
+      13: exit 'Float32';
+      14: exit 'Float64';
+      15: exit 'Complex64';
+      16: exit 'Complex128';
+      17: exit '&Array';
+      18: exit 'Chan';
+      19: exit 'Func';
+      20: exit '&Interface';
+      21: exit 'Map';
+      22: exit 'Ptr';
+      23: exit 'Slice';
+      24: exit 'String';
+      25: exit 'Struct';
+      26: exit 'UnsafePointer';
+    end;
+    exit 'Unknown';
+  end;
+
 
 
 end.

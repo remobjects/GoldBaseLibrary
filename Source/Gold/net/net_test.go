@@ -525,11 +525,14 @@ func TestNotTemporaryRead(t *testing.T) {
 	if runtime.GOOS == "freebsd" {
 		testenv.SkipFlaky(t, 25289)
 	}
+	if runtime.GOOS == "aix" {
+		testenv.SkipFlaky(t, 29685)
+	}
 	t.Parallel()
 	server := func(cs *TCPConn) error {
 		cs.SetLinger(0)
 		// Give the client time to get stuck in a Read.
-		time.Sleep(20 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 		cs.Close()
 		return nil
 	}

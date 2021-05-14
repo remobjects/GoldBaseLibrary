@@ -1,6 +1,7 @@
 ﻿using go.builtin;
 #if ECHOES
 using System.Security.Cryptography.X509Certificates;
+using System.IO;
 #endif
 
 
@@ -19,8 +20,9 @@ namespace go.net {
 }
 namespace go.crypto {
 	namespace x509 {
+		#if ECHOES || (ISLAND && WINDOWS)
 		public partial class __Global {
-			public static (Reference<CertPool>, go.builtin.error) loadSystemRoots()
+			public static (Memory<CertPool>, go.builtin.error) loadSystemRoots()
 			{
 				#if ECHOES
 				var lRoots = go.crypto.x509.NewCertPool();
@@ -34,7 +36,8 @@ namespace go.crypto {
 					var (lNewCert, lErr) = go.crypto.x509.ParseCertificate(lRawCert);
 					if (lErr == null)
 					{
-						lRoots.AddCert(lNewCert);
+						//lRoots.AddCert(lNewCert);
+						CertPool.AddCert(lRoots, lNewCert);
 					}
 				}
 				lStore.Close();
@@ -46,16 +49,17 @@ namespace go.crypto {
 			}
 		}
 		public partial class Certificate {
-			public (Slice<Slice<Reference<crypto.x509.Certificate>>>, go.builtin.error) systemVerify(Reference<go.crypto.x509.VerifyOptions> opts)
+			public (Slice<Slice<Memory<crypto.x509.Certificate>>>, go.builtin.error) systemVerify(Memory<go.crypto.x509.VerifyOptions> opts)
 			{
 				#if ECHOES
 				var lHasDNSName = (opts != null) && (opts.DNSName.Length > 0);
 				X509Certificate2 lCert = new X509Certificate2(this.Raw);
 				X509Chain lChain = new X509Chain();
+				lChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
 				if (lChain.Build(lCert))
 				{
-					var lResult = new Slice<Slice<Reference<go.crypto.x509.Certificate>>>(1);
-					var lNewChain = new Slice<Reference<go.crypto.x509.Certificate>>(lChain.ChainElements.Count);
+					var lResult = new Slice<Slice<Memory<go.crypto.x509.Certificate>>>(1);
+					var lNewChain = new Slice<Memory<go.crypto.x509.Certificate>>(lChain.ChainElements.Count);
 					for (var i = 0; i < lChain.ChainElements.Count; i++)
 					{
 						var lCertificate = lChain.ChainElements[i].Certificate;
@@ -80,6 +84,7 @@ namespace go.crypto {
 				#endif
 			}
 		}
+		#endif
 	}
 	namespace tls {
 		public partial class Conn: go.net.Conn { }
@@ -125,11 +130,29 @@ namespace go.path
 				return (null, go.errors.New(e.Message));
 			}
 		}
+
+		public static bool IsAbs(string s) {
+			return abs(s)[0] == s;
+		}
 	}
 
 }
 
 namespace go.os {
+
+	public go.builtin.error Rename(go.builtin.string oldpath, go.builtin.string newpath)
+	{
+		try
+		{
+			#if ECHOES
+			global::System.IO.File.Move(oldpath, newpath);
+			#else
+			new global::System.File(oldpath).Rename(newpath);
+			#endif
+		} catch(Exception e) {
+			return go.errors.New(e.Message);
+		}
+	}
 
 	bool isExist(error err){
 		throw new NotImplementedException();
@@ -144,6 +167,13 @@ namespace go.os {
 		throw new NotImplementedException();
 	}
 
+	public (string, go.builtin.error) UserHomeDir() {
+		#if ECHOES
+		return (System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), null);
+		#else
+		return (Environment.UserHomeFolder().FullName, null);
+		#endif
+	}
 
 
 	[ValueTypeSemantics]
@@ -221,7 +251,7 @@ namespace go.os {
 				#endif
 				return ("", go.errors.New("Could not find file"));
 			}
-			public static Reference<Cmd> Command(string name, params go.builtin.string[] args) {
+			public static Memory<Cmd> Command(string name, params go.builtin.string[] args) {
 				return new Cmd {
 					Path = name,
 					Args = args
@@ -231,27 +261,35 @@ namespace go.os {
 
 		[ValueTypeSemantics]
 		public partial class Cmd {
-			public string Path;
+			public go.builtin.string Path;
 			public Slice<go.builtin.string> Args;
 			public Slice<go.builtin.string> Env;
-			public string Dir;
+			public go.builtin.string Dir;
 			public io.Reader Stdin;
 			public io.Writer Stdout;
 			public io.Writer Stderr;
 
-			public Slice<Reference<os.File>> ExtraFiles; // not used!
-			public Reference<os.Process> Process;
-			public Reference<os.ProcessState> ProcessState;
+			public Slice<Memory<os.File>> ExtraFiles; // not used!
+			public Memory<os.Process> Process;
+			public Memory<os.ProcessState> ProcessState;
 
 			public builtin.error Start() {
-				var pp = StartProcess(Path, Args, new ProcAttr {
+				var pp = StartProcess(Path, Args, (Memory<ProcAttr>)new ProcAttr {
 					Dir = Dir,
 					Env = Env
 				});
 				if (pp.Item2 != null) return pp.Item2;
 				Process = pp.Item1;
-				ProcessState = new Reference<os.ProcessState>(new os.ProcessState(pp.Item1.Process));
+				ProcessState = new Memory<os.ProcessState>(new os.ProcessState(pp.Item1.Process));
 				return null;
+			}
+
+			public builtin.error Run() {
+				var lRes = Start();
+				if (lRes != null)
+					return lRes;
+
+				return Wait();
 			}
 
 			public builtin.error Wait() {
@@ -263,15 +301,66 @@ namespace go.os {
 			}
 
 			public (go.io.ReadCloser, go.builtin.error) StdoutPipe() {
+				#if ECHOES
+				return (new ReadCloserImpl(Process.Process.StandardOutput.BaseStream), null);
+				#else
+				return (new ReadCloserImpl(Process.Process.StandardOutputStream), null);
+				#endif
+			}
+
+			public (go.io.WriteCloser, go.builtin.error) StdinPipe() {
 				return (null, go.errors.New("not implemented"));
 			}
 
 			public (Slice<byte>, go.builtin.error) Output() {
-				return (null, go.errors.New("not implemented"));
+				var lRes = Run();
+				if (lRes != null)
+					return (null, lRes);
+
+				#if ECHOES
+				var lOutput = System.Text.Encoding.UTF8.GetBytes(Process.Process.StandardOutput.ReadToEnd());
+				#else
+				var lOutput = Encoding.UTF8.GetBytes(Process.Process.StandardOutput);
+				#endif
+
+				return (lOutput, null);
+			}
+		}
+
+		partial class ReadCloserImpl: go.io.ReadCloser {
+			private Stream fs;
+
+			public ReadCloserImpl(Stream newFs) {
+				fs = newFs;
 			}
 
-			// stdoutpipe
+			public (go.builtin.int, go.builtin.error) Read(Slice<go.builtin.byte> p) {
+				return (fs.Read(p.fArray, p.fStart, p.fCount), null);
+			}
 
+			public go.builtin.error Close() {
+				fs.Close();
+				return null;
+			}
+		}
+
+
+		partial class WriteCloserImpl: go.io.WriteCloser {
+			private Stream fs;
+
+			public WriteCloserImpl(Stream newFs) {
+				fs = newFs;
+			}
+
+			public (go.builtin.int, go.builtin.error) Write(Slice<go.builtin.byte> p) {
+				fs.Write(p.fArray, p.fStart, p.fCount);
+				return (p.fCount, null);
+			}
+
+			public go.builtin.error Close() {
+				fs.Close();
+				return null;
+			}
 		}
 	}
 }

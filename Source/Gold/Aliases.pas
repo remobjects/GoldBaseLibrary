@@ -8,9 +8,11 @@ type
   byte = public RemObjects.Elements.System.Byte;
   int16 = public RemObjects.Elements.System.Int16;
   uint16 = public RemObjects.Elements.System.UInt16;
+  {$IF NOT JAVA}
   uintptr = public RemObjects.Elements.System.NativeUInt;
   intptr = public RemObjects.Elements.System.NativeInt;
-  go.unsafe.Pointer = public RemObjects.Elements.System.NativeUInt;
+  {$ENDIF}
+
   [AliasSemantics]
   int64 = public partial record
   public
@@ -18,6 +20,7 @@ type
     constructor; empty;
     constructor(aValue: RemObjects.Elements.System.Int64); begin Value := aValue; end;
   end;
+
   [AliasSemantics]
   uint64 = public partial record
   public
@@ -25,11 +28,13 @@ type
     constructor; empty;
     constructor(aValue: RemObjects.Elements.System.UInt64); begin Value := aValue; end;
   end;
+
   int32 = public RemObjects.Elements.System.Int32;
   uint32 = public RemObjects.Elements.System.UInt32;
   float32 = public Single;
   float64 = public Double;
   bool = public Boolean;
+
   [AliasSemantics]
   rune = public partial record
   public
@@ -37,11 +42,14 @@ type
     constructor; empty;
     constructor(aValue: Integer); begin Value := aValue; end;
   end;
-  PlatformString = {$IF ISLAND}RemObjects.Elements.System.String{$ELSEIF ECHOES}System.String{$ENDIF};
+
+  PlatformString = {$IF COOPER}java.lang.String{$ELSE}System.String{$ENDIF};
+
   //{$IF NOT NEWSTRING}
   //string = public RemObjects.Elements.System.String;
   //{$ENDIF}
 
+  {$IF NOT COOPER}
   method print(params x: array of Object);
   begin
     go.fmt.Print(x);
@@ -51,5 +59,6 @@ type
   begin
     go.fmt.Println(x);
   end;
+  {$ENDIF}
 
 end.

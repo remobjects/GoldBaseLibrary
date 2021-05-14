@@ -32,8 +32,14 @@ type
       System.Threading.Monitor.Exit(fMutex);
       {$ENDIF}
     end;
+
+    method __Clone: Mutex;
+    begin
+      exit self;
+    end;
   end;
 
+  [ValueTypeSemantics]
   Cond = public class
   private
     fMutex: Locker;
@@ -62,7 +68,8 @@ type
       {$IFDEF ISLAND}
       fCond.Broadcast;
       {$ELSE}
-      System.Threading.Monitor.PulseAll(Mutex(fMutex).fMutex);
+      if System.Threading.Monitor.IsEntered(Mutex(fMutex).fMutex) then
+        System.Threading.Monitor.PulseAll(Mutex(fMutex).fMutex);
       {$ENDIF}
     end;
 
@@ -73,6 +80,11 @@ type
       {$ELSE}
       System.Threading.Monitor.Pulse(Mutex(fMutex).fMutex);
       {$ENDIF}
+    end;
+
+    method __Clone: Cond;
+    begin
+      exit self;
     end;
   end;
 
@@ -123,6 +135,11 @@ type
     method RLocker: Locker;
     begin
       exit fLocker;
+    end;
+
+    method __Clone: RWMutex;
+    begin
+      exit self;
     end;
   end;
   [ValueTypeSemantics]
@@ -184,7 +201,7 @@ type
     fLock: Object := new Object;
     {$ENDIF}
   public
-    method &Do(a: Action);
+    method &Do(a: method());
     begin
       if fDone = 1 then exit;
       locking fLock do begin
@@ -266,6 +283,11 @@ type
       end;
 
       fMutex.Unlock;
+    end;
+
+    method __Clone: WaitGroup;
+    begin
+      exit self;
     end;
   end;
 end.

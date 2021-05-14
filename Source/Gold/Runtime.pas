@@ -10,7 +10,7 @@ type
   Frame = public partial class
   public
     PC: go.builtin.uintptr;
-    Func: go.builtin.Reference<Func>;
+    Func: Memory<Func>;
     &Function: String;
     File: String;
     Line: Integer;
@@ -32,14 +32,19 @@ type
 
   end;
 
+method SetFinalizer(aObj: Object; aFinalizer: Object);
+begin
+  // empty
+end;
+
 method Callers(&skip: Integer; pc: go.builtin.Slice<go.builtin.uintptr>): Integer;
 begin
   exit 1;
 end;
 
-method CallersFrames(acallers: go.builtin.Slice<go.builtin.uintptr>): go.builtin.Reference<Frames>;
+method CallersFrames(acallers: go.builtin.Slice<go.builtin.uintptr>): Memory<Frames>;
 begin
-  exit new go.builtin.Reference<Frames>(new Frames);
+  exit new Memory<Frames>(new Frames);
 end;
 
 method Stack(buf: go.builtin.Slice<Byte>; all: Boolean): Integer; public;
@@ -47,7 +52,7 @@ begin
   exit 0;
 end;
 
-var GOOS: String := {$IFDEF ECHOES}if Environment.OSVersion.Platform.ToString.ToLower.Contains('win32nt') then 'windows' else Environment.OSVersion.Platform.ToString{$ELSE}Environment.OSName{$ENDIF};
+var GOOS: String := {$IFDEF ECHOES}if Environment.OSVersion.Platform.ToString.ToLower.Contains('win32nt') then 'windows' else Environment.OSVersion.Platform.ToString{$ELSEIF (ISLAND AND WINDOWS)}'windows'{$ELSE}Environment.OSName{$ENDIF};
 var GOARCH: String := 'unknown';
 
 method GOROOT: String;
@@ -57,7 +62,7 @@ end;
 
 method StartTrace: go.builtin.error;
 begin
-  exit go.Errors.new('Not supported');
+  exit go.Errors.New('Not supported');
 end;
 
 method StopTrace;
@@ -118,9 +123,15 @@ type
     begin
       {$IF ISLAND AND WINDOWS}
       var q := new DateTime(DateTime.UtcNow.Ticks - dtbase.Ticks);
-      exit (Int64(q.Ticks / DateTime.TicksPerSecond), (q.Ticks * 100) mod 1 000 000 000, rtl.GetTickCount  * 100);
+      exit (Int64(q.Ticks / DateTime.TicksPerSecond), (q.Ticks * 100) mod 1 000 000 000, rtl.GetTickCount  * DateTime.TicksPerMillisecond * 100);
       {$ELSEIF ISLAND AND POSIX}
-      // TODO
+      var ts: rtl.__struct_timespec;
+      rtl.clock_gettime({$IF ISLAND AND DARWIN}rtl.clockid_t._CLOCK_MONOTONIC{$ELSE}rtl.CLOCK_MONOTONIC{$ENDIF}, @ts);
+      var lTickCount := ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+
+      var q := new DateTime(DateTime.UtcNow.Ticks - dtbase.Ticks);
+      exit (Int64(q.Ticks / DateTime.TicksPerSecond), (q.Ticks * 100) mod 1 000 000 000, lTickCount  * DateTime.TicksPerMillisecond * 100);
+      //exit (Int64(q.Ticks / DateTime.TicksPerMillisecond), (q.Ticks * 100) mod 1 000 000 000, lTickCount  * 100);
       {$ELSEIF ECHOES}
       var q := DateTime.UtcNow - dtbase;
       exit (Int64(q.TotalSeconds), (q.Ticks * 100) mod 1 000 000 000, System.Diagnostics.StopWatch.GetTimestamp  * 100);
@@ -172,10 +183,31 @@ type
     begin
       self.Value := aValue;
     end;
+
     method Error: go.builtin.string;
     begin
       exit Value.ToString;
     end;
+
+    method &Is(target: go.builtin.error): Boolean;
+    begin
+      // TODO
+    end;
+  /*func (e Errno) Is(target error) bool {
+    switch target {
+    case oserror.ErrPermission:
+      return e == ERROR_ACCESS_DENIED
+    case oserror.ErrExist:
+      return e == ERROR_ALREADY_EXISTS ||
+        e == ERROR_DIR_NOT_EMPTY ||
+        e == ERROR_FILE_EXISTS
+    case oserror.ErrNotExist:
+      return e == ERROR_FILE_NOT_FOUND ||
+        e == _ERROR_BAD_NETPATH ||
+        e == ERROR_PATH_NOT_FOUND
+    }
+    return false
+  }*/
   end;
 
 
@@ -295,10 +327,10 @@ type
       {$ENDIF}
     end;
 
-  class method Getgroups: tuple of (go.builtin.Slice<Integer>, go.builtin.error);
-  begin
-    exit (new go.builtin.Slice<Integer>, go.Errors.New('Not supported'));
-  end;
+    class method Getgroups: tuple of (go.builtin.Slice<Integer>, go.builtin.error);
+    begin
+      exit (new go.builtin.Slice<Integer>, go.Errors.New('Not supported'));
+    end;
 
     class var
       ENOENT : go.syscall.Errno := new go.syscall.Errno(1); readonly;
@@ -317,7 +349,9 @@ type
       O_CLOEXEC  = $80000;
 
 
-    class var  ENOTDIR :go.syscall.Errno := new go.syscall.Errno(2); readonly;
+    class var ENOTDIR: go.syscall.Errno := new go.syscall.Errno(2); readonly;
+
+    class var EINVAL: go.syscall.Errno := new go.syscall.Errno(22); readonly; //NewError("bad arg in system call")
 
 
     class method Setenv(key: String; value: String): go.builtin.error;
@@ -347,60 +381,45 @@ type
   end;
 
   PlatformTimer = public {$IF ECHOES}System.Timers.Timer{$ELSEIF ISLAND}RemObjects.Elements.System.Timer{$ENDIF};
+  go.time.runtimeTimer = public partial class
+  assembly
+    property pt: PlatformTimer;
+  end;
   go.time.TimerPool = static class
   private
-    class var fIdles: List<PlatformTimer>;
-    class var fCurrentList: Dictionary<go.time.runtimeTimer, PlatformTimer>;
-    class var fMutex: go.sync.Mutex;
-
-    class constructor;
-    begin
-      fIdles := new List<PlatformTimer>();
-      fCurrentList := new Dictionary<go.time.runtimeTimer, PlatformTimer>();
-      fMutex := new go.sync.Mutex();
-    end;
 
   public
-    class method AddTimer(aTimer: go.time.runtimeTimer);
+    class method AddTimer(aTimer: Memory<go.time.runtimeTimer>);
     begin
-      var lTimer: PlatformTimer;
-      fMutex.Lock();
-      if fIdles.Count > 0 then begin
-        lTimer := fIdles[0];
-        fIdles.RemoveAt(0);
-      end
-      else
-        lTimer := new PlatformTimer();
-
       var lInterval := (aTimer.when - go.time.runtimeNano()) div 1000000; // ns to ms
       if lInterval < 0 then
         lInterval := go.math.MaxInt32;
+      var lTimer := aTimer.pt;
+      if lTimer = nil then begin
+        lTimer := new PlatformTimer;
+        aTimer.pt := lTimer;
+      end;
       {$IF ISLAND}
-      // TODO
+      lTimer.Repeat := false;
+      lTimer.Interval := lInterval;
+      lTimer.Elapsed := (a)-> begin aTimer.f(aTimer.arg, aTimer.seq); end;
       {$ELSEIF ECHOES}
       lTimer.AutoReset := false;
       lTimer.Interval := lInterval;
       lTimer.Elapsed += new System.Timers.ElapsedEventHandler((s, e)-> begin aTimer.f(aTimer.arg, aTimer.seq); end);
       {$ENDIF}
-      fCurrentList.Add(aTimer, lTimer);
-      fMutex.Unlock();
+      aTimer.pt := lTimer;
       lTimer.Start;
     end;
 
-    class method StopTimer(aTimer: go.time.runtimeTimer): Boolean;
+    class method StopTimer(aTimer: Memory<go.time.runtimeTimer>): Boolean;
     begin
-      var lTimer: PlatformTimer;
-      if not fCurrentList.TryGetValue(aTimer, out lTimer) then
-        exit false;
+      var lTimer := aTimer.pt;
+      if lTimer = nil then exit;
 
       var lRes := lTimer.Enabled;
       if lRes then
         lTimer.Stop;
-
-      fMutex.Lock();
-      fCurrentList.Remove(aTimer);
-      fIdles.Add(lTimer);
-      fMutex.Unlock();
       exit lRes;
     end;
   end;
@@ -422,7 +441,8 @@ type
       if (not ok) then begin
         var (z, err) := loadLocation("localtime", new go.builtin.Slice<go.builtin.string>(["/etc/"]));
         if err = nil then begin
-          localLoc := go.builtin.Reference<go.time.Location>.Get(z);
+          //localLoc := Memory<go.time.Location>.Get(z);
+          localLoc := z^;
           localLoc.name := "Local";
           exit;
         end;
@@ -431,7 +451,8 @@ type
          var (z, err) := loadLocation(tz, zoneSources);
 
         if err = nil  then begin
-          localLoc := go.builtin.Reference<go.time.Location>.Get(z);
+          //localLoc := Memory<go.time.Location>.Get(z);
+          localLoc := z^;
           exit;
         end;
       end;
@@ -443,6 +464,10 @@ type
     class method open(name: String): tuple of (Stream, go.builtin.error);
     begin
       try
+        {$IF ISLAND}
+        if not RemObjects.Elements.System.File.Exists(name) then
+          exit (nil, new ExceptionError(new Exception('File does not exists!')));
+        {$ENDIF}
         exit (new FileStream(name, FileMode.Open, FileAccess.Read), nil);
       except
         on e: Exception do
@@ -471,12 +496,12 @@ type
       exit (fd.Read(buff.fArray, buff.fStart, buff.Length), nil);
     end;
   public
-    class method startTimer(t: go.builtin.Reference<go.time.runtimeTimer>);
+    class method startTimer(t: Memory<go.time.runtimeTimer>);
     begin
       go.time.TimerPool.AddTimer(t);
     end;
 
-    class method stopTimer(t: go.builtin.Reference<go.time.runtimeTimer>): Boolean;
+    class method stopTimer(t: Memory<go.time.runtimeTimer>): Boolean;
     begin
       exit go.time.TimerPool.StopTimer(t);
     end;
@@ -514,7 +539,7 @@ type
 
   go.bytes.__Global = public partial class
   public
-    class method IndexByte(b: go.builtin.Slice<Byte>; c: Byte): Integer;
+    /*class method IndexByte(b: go.builtin.Slice<Byte>; c: Byte): Integer;
     begin
       for i: Integer := 0 to b.Length -1 do
         if b[i] = c then exit i;
@@ -546,7 +571,7 @@ type
       if a.Length > b.Length then
         exit 1;
       exit 0;
-    end;
+    end;*/
 
   end;
 
@@ -580,7 +605,19 @@ type
 
     class method Compare(a, b: go.builtin.Slice<Byte>): Integer;
     begin
-      exit go.bytes.Compare(a, b);
+      //exit go.bytes.Compare(a, b);
+      if a = nil then a := new go.builtin.Slice<Byte>;
+      if b = nil then b := new go.builtin.Slice<Byte>;
+      for i: Integer := 0 to Math.Min(a.Length, b.Length) -1 do begin
+        if a[i] < b[i] then exit -1;
+        if a[i] > b[i] then exit 1;
+      end;
+      if a.Length < b.Length then
+        exit -1;
+
+      if a.Length > b.Length then
+        exit 1;
+      exit 0;
     end;
     class method Count(b: go.builtin.Slice<Byte>; c: Byte): Integer;
     begin
@@ -709,7 +746,7 @@ type
     TotalAlloc: go.builtin.uint64;
   end;
 
-  method ReadMemStats(m: go.builtin.Reference<MemStats>);
+  method ReadMemStats(m: Memory<MemStats>);
   begin
 
   end;
