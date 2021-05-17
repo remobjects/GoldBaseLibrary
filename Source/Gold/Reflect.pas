@@ -486,6 +486,9 @@ type
         go.reflect.Slice:
           exit go.builtin.ISlice(lValue).getLen();
 
+        go.reflect.Array:
+          exit System.Array(lValue).Length;
+
         go.reflect.Map:
           exit go.builtin.IMap(lValue).GetLen();
 
@@ -536,6 +539,13 @@ type
       case lKind of
         go.reflect.Slice:
           result := new Value(go.builtin.ISlice(lValue).getAtIndex(i), ValueExtendedInfo.Slice, lValue, i);
+
+        go.reflect.Array:
+          {$IF ISLAND}
+          result := new Value(System.Array(lValue).Get(i));
+          {$ELSEIF ECHOES}
+          result := new Value(System.Array(lValue).GetValue(i));
+          {$ENDIF}
 
         go.reflect.String:
           result := new Value(go.builtin.string(lValue)[i]);
@@ -934,11 +944,16 @@ type
       if fTrueType = nil then
         exit go.reflect.Invalid;
       {$IF ISLAND}
-      if fTrueType = TypeOf(go.builtin.string) then
+      if (fTrueType = TypeOf(go.builtin.string)) and not ((fTrueType.Flags and IslandTypeFlags.TypeKindMask) = IslandTypeFlags.Array) then
         exit go.reflect.String;
 
       if fTrueType.IsDelegate then
         exit go.reflect.Func;
+
+      if fTrueType.Name.StartsWith('gt2_@') then begin
+      //if (fTrueType.Flags and IslandTypeFlags.TypeKindMask) = IslandTypeFlags.Array  then begin
+        exit go.reflect.Array;
+      end;
 
       if (fTrueType.GenericArguments <> nil) and (fTrueType.GenericArguments.Count > 0) then begin
         if fTrueType.Name.Contains('go.builtin.Slice') then
@@ -981,7 +996,7 @@ type
         end;
       end;
       {$ELSEIF ECHOES}
-      if fTrueType = TypeOf(go.builtin.string) then
+      if (fTrueType = TypeOf(go.builtin.string)) and (not fTrueType.IsArray) then
         exit go.reflect.String;
 
       if fTrueType.IsArray then
