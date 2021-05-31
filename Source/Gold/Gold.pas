@@ -507,9 +507,11 @@ type
       exit aVal.ToArray();
     end;
 
-    class operator Equal(Value1, Value2: Slice<T>): Boolean;
+    class operator Equal(Value1, Value2: Slice<T>): Boolean; published;
     begin
-      if ((Object(Value1) = nil) and (Object(Value2) = Object(fZero))) or ((Object(Value1) = Object(fZero)) and (Object(Value2) = nil)) then
+      // Compare also if both are nil, sice fZero is not the same for all instances.
+      if ((Object(Value1) = nil) and (Object(Value2) = Object(fZero))) or ((Object(Value1) = Object(fZero)) and (Object(Value2) = nil)) or
+      (((Value1.fArray = EmptyArray) and (Value1.Length = 0) and (Value1.Capacity = 0)) and ((Value2.fArray = EmptyArray) and (Value2.Length = 0) and (Value2.Capacity = 0))) then
         exit true;
 
       exit Object(Value1) = Object(Value2);

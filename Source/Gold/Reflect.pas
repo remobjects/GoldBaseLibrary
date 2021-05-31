@@ -15,6 +15,10 @@ type
 
   ZeroFunction = method: Object;
 
+  {$IF ISLAND}
+  TEqualsMethod = public method(a: Object; b: Object): Boolean;
+  {$ENDIF}
+
   SliceAlias = record
     VMT: IntPtr;
     aVal: Object;
@@ -186,7 +190,7 @@ type
     method IsNil: Boolean;
     begin
       case fType.Kind of
-        Chan, Func, Map, go.reflect.Interface, UnsafePointer, __Global.Slice: // missing &Interface Kind(20) --> &Interface
+        Chan, Func, Map, go.reflect.Interface, UnsafePointer, __Global.Slice, go.reflect.Ptr: // missing &Interface Kind(20) --> &Interface
           exit (if fValue is IMemory then IMemory(fValue).GetValue else fValue) = nil;
 
         else
@@ -452,6 +456,9 @@ type
       if (not CanSet) or (Kind ≠ go.reflect.String) then
         raise new Exception('Can not set object to string value');
 
+      if aVal.GetType() ≠ go.builtin.string then
+        aVal := new go.builtin.string(aVal);
+
       InternalSet(aVal);
     end;
 
@@ -583,7 +590,7 @@ type
       {$ENDIF}
     end;
 
-    /*method FieldByName(name: String): tuple of (StructField, Boolean);
+    method FieldByName(name: String): tuple of (StructField, Boolean);
     begin
       var lField: &PlatformField;
       {$IF ISLAND}
@@ -595,12 +602,12 @@ type
         exit(new StructFieldImpl(lField), true)
       else
         exit(nil, false);
-    end;*/
+    end;
 
-    method FieldByName(name: go.builtin.string): Value;
+    /*method FieldByName(name: go.builtin.string): Value;
     begin
       raise new NotImplementedException;
-    end;
+    end;*/
 
     method CanAddr: Boolean;
     begin
@@ -1280,9 +1287,48 @@ type
     end;
   end;
 
-  method DeepEqual(a, b: Object): Boolean;public;
+  method DeepEqual(a, b: Object): Boolean; public;
   begin
-    raise new NotImplementedException;
+    var lAType := TypeOf(a);
+    var lBType := TypeOf(b);
+
+    if (lAType = lBType) and (lAType.Kind = go.reflect.Struct) then begin
+      {$IF ISLAND}
+      var lAFields := TypeImpl(lAType).fTrueType.Fields.ToArray();
+      var lBFields := TypeImpl(lBType).fTrueType.Fields.ToArray();
+      {$ELSEIF ECHOES}
+      var lAFields := System.Reflection.TypeInfo(TypeImpl(lAType).fTrueType).DeclaredFields.ToArray();
+      var lBFields := System.Reflection.TypeInfo(TypeImpl(lBType).fTrueType).DeclaredFields.ToArray();
+      {$ENDIF}
+      if lAFields.Length ≠ lBFields.Length then
+        exit false;
+      for i: Integer := 0 to lAFields.Length - 1 do begin
+        var lAValue := lAFields[i].GetValue(a);
+        var lBValue := lBFields[i].GetValue(b);
+        result := DeepEqual(lAValue, lBValue);
+        if not result then
+          exit;
+      end;
+    end
+    else begin
+      var lRealAType := TypeImpl(lAType).fTrueType;
+      {$IF ISLAND}
+      var lMethod := lRealAType.Methods.Where(m -> m.Name = 'op_Equality').FirstOrDefault;
+      if lMethod ≠ nil then begin
+        //result := lMethod.Invoke(lRealAType, [a, b]) as Boolean
+        var lCaller := TEqualsMethod(lMethod.Pointer);
+        result := lCaller(a, b);
+      end
+      else
+        result := a.Equals(b);
+      {$ELSEIF ECHOES}
+      var lMethod := System.Array.Find(lRealAType.GetMethods, m -> m.Name = 'op_Equality');
+      if lMethod ≠ nil then
+        result := lMethod.Invoke(lRealAType, [a, b]) as Boolean
+      else
+        result := Object.Equals(a, b);
+      {$ENDIF}
+    end;
   end;
 
   Method &New(aType: &Type): Value;public;
