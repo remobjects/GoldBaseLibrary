@@ -451,13 +451,10 @@ type
       raise new NotImplementedException;
     end;
 
-    method &SetString(aVal: String);
+    method &SetString(aVal: go.builtin.string);
     begin
       if (not CanSet) or (Kind ≠ go.reflect.String) then
         raise new Exception('Can not set object to string value');
-
-      if aVal.GetType() ≠ go.builtin.string then
-        aVal := new go.builtin.string(aVal);
 
       InternalSet(aVal);
     end;
