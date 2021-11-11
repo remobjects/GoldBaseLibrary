@@ -65,6 +65,34 @@ compileGoBaseLibrary();
 zipName = expand("$(CIReleaseFolder)/GoBaseLibrary.zip");
 zip.compress(zipName, "../Bin", "*.*", true);
 
+zipIslandMac = expand("$(CIReleaseFolder)/Island-macOS-Go.zip");
+zip.compress(zipIslandMac, "../Bin", "macOS/*/Go.*, true);
+
+zipIslandiOS = expand("$(CIReleaseFolder)/Island-iOS-Go.zip");
+zip.compress(zipIslandiOS, "../Bin", "iOS/*/Go.*;iOS\ Simulator/*/Go.*;Mac\ Catalyst/*/Go.*", true);
+
+zipIslandtvOS = expand("$(CIReleaseFolder)/Island-tvOS-Go.zip");
+zip.compress(zipIslandtvOS, "../Bin", "tvOS/*/Go.*;tvOS\ Simulator/*/Go.*", true);
+
+zipIslandwatchOS = expand("$(CIReleaseFolder)/Island-watchOS-Go.zip");
+zip.compress(zipIslandwatchOS, "../Bin", "watchOS/*/Go.*;watchOS\ Simulator/*/Go.*", true);
+
+zipIslandAndroid = expand("$(CIReleaseFolder)/Island-Android-Go.zip");
+zip.compress(zipIslandAndroid, "../Bin", "Android/*/Go.*", true);
+
+zipIslandUbuntu = expand("$(CIReleaseFolder)/Island-Ubuntu-Go.zip");
+zip.compress(zipIslandUbuntu, "../Bin", "Ubuntu/*/Go.*", true);
+
+zipIslandWindows = expand("$(CIReleaseFolder)/Island-Windows-Go.zip");
+zip.compress(zipIslandWindows, "../Bin", "Ubuntu/*/Go.*", true);
+
 var s3 = getSharedS3Bucket();
 s3.uploadFile(zipName, ciSharedPrefix);
 
+s3.uploadFile(zipIslandMac, ciSharedPrefix);
+s3.uploadFile(zipIslandiOS, ciSharedPrefix);
+s3.uploadFile(zipIslandtvOS, ciSharedPrefix);
+s3.uploadFile(zipIslandwatchOS, ciSharedPrefix);
+s3.uploadFile(zipIslandAndroid, ciSharedPrefix);
+s3.uploadFile(zipIslandUbuntu, ciSharedPrefix);
+s3.uploadFile(zipIslandWindows, ciSharedPrefix);
