@@ -19,12 +19,14 @@
     <RuntimeVersion>v25</RuntimeVersion>
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
     <EnableAsserts>True</EnableAsserts>
+    <TargetFramework>.NETFramework4.8</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <OutputPath>.\Bin\Release</OutputPath>
     <CpuType>anycpu</CpuType>
     <RuntimeVersion>v25</RuntimeVersion>
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
+    <TargetFramework>.NETFramework4.8</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

@@ -8,7 +8,7 @@
     <SuppressWarnings>H0;W63;W3;H10;H11;H7;H8;H6;H14;H16</SuppressWarnings>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <AllowUnsafeCode>True</AllowUnsafeCode>
-    <TargetFramework>.NETFramework4.5</TargetFramework>
+    <TargetFramework>.NETFramework4.8</TargetFramework>
     <RootNamespace>go</RootNamespace>
     <DefaultGlobalsToPublic>True</DefaultGlobalsToPublic>
   </PropertyGroup>
@@ -41,7 +41,7 @@
   <PropertyGroup Condition=" '$(Target)' == 'Island.Windows' ">
     <Mode>Island</Mode>
     <SubMode>Windows</SubMode>
-    <Architecture>i386</Architecture>
+    <Architecture>i386;x86_64</Architecture>
     <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Target)' == 'Island.Linux' ">
