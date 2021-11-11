@@ -66,7 +66,7 @@ zipName = expand("$(CIReleaseFolder)/GoBaseLibrary.zip");
 zip.compress(zipName, "../Bin", "*.*", true);
 
 zipIslandMac = expand("$(CIReleaseFolder)/Island-macOS-Go.zip");
-zip.compress(zipIslandMac, "../Bin", "macOS/*/Go.*, true);
+zip.compress(zipIslandMac, "../Bin", "macOS/*/Go.*", true);
 
 zipIslandiOS = expand("$(CIReleaseFolder)/Island-iOS-Go.zip");
 zip.compress(zipIslandiOS, "../Bin", "iOS/*/Go.*;iOS\ Simulator/*/Go.*;Mac\ Catalyst/*/Go.*", true);
