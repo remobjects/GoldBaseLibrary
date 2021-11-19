@@ -832,6 +832,11 @@ type
 
     if v is T then
       exit (T(v), true);
+
+    if v is IMemory then begin
+      if IMemory(v).GetValue is T then
+        exit (IMemory(v).GetValue as T, true);
+    end;
     {$IFDEF ISLAND}
     if VTCheck<T>.IsVT  then
       exit (typeOf(T).Instantiate as T, false);
