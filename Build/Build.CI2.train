@@ -108,6 +108,10 @@ zip.compress(zipIslandWindows, "../Bin/Island", "Windows/*.*", true);
 zipEchoes = expand("$(CIReleaseFolder)/Echoes-Go.zip");
 zip.compress(zipEchoes, "../Bin/Echoes", "*.*", true);
 
+zipCooper = expand("$(CIReleaseFolder)/Cooper-Go.zip");
+zip.compress(zipCooper, "../Bin/Cooper", "*.*", true);
+
+
 var s3 = getSharedS3Bucket();
 s3.uploadFile(zipName, ciSharedPrefix);
 
