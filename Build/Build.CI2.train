@@ -105,6 +105,9 @@ zip.compress(zipIslandUbuntu, "../Bin/Island", "Ubuntu/*.*", true);
 zipIslandWindows = expand("$(CIReleaseFolder)/Island-Windows-Go.zip");
 zip.compress(zipIslandWindows, "../Bin/Island", "Windows/*.*", true);
 
+zipEchoes = expand("$(CIReleaseFolder)/Echoes-Go.zip");
+zip.compress(zipEchoes, "../Bin/Echoes", "*.*", true);
+
 var s3 = getSharedS3Bucket();
 s3.uploadFile(zipName, ciSharedPrefix);
 
