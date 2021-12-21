@@ -122,3 +122,6 @@ s3.uploadFile(zipIslandwatchOS, ciSharedPrefix);
 s3.uploadFile(zipIslandAndroid, ciSharedPrefix);
 s3.uploadFile(zipIslandUbuntu, ciSharedPrefix);
 s3.uploadFile(zipIslandWindows, ciSharedPrefix);
+s3.uploadFile(zipEchoes, ciSharedPrefix);
+s3.uploadFile(zipCooper, ciSharedPrefix);
+
