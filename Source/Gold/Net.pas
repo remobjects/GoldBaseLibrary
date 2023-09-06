@@ -830,7 +830,7 @@ type
     // Network and address parameters passed to Control method are not
     // necessarily the ones passed to Dial. For example, passing "tcp" to Dial
     // will cause the Control function to be called with "tcp4" or "tcp6".
-    Control: method(network, address: string; c: go.syscall.RawConn): go.builtin.error; // Go 1.11
+    Control: delegate(network, address: string; c: go.syscall.RawConn): go.builtin.error; // Go 1.11
 
     method Dial(network, address: string): tuple of (Conn, go.builtin.error);
     begin

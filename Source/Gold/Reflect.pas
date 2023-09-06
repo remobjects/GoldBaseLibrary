@@ -1390,7 +1390,7 @@ type
     result := new TypeImpl(v.GetType());
   end;
 
-  method Swapper(aslice: Object): method(arg0: go.builtin.int; arg1: go.builtin.int); public;
+  method Swapper(aslice: Object): delegate(arg0: go.builtin.int; arg1: go.builtin.int); public;
   begin
     exit @go.sort.Interface(aslice).Swap;
   end;
