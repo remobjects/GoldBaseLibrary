@@ -461,7 +461,7 @@ begin
   {$ELSE}
   var lArgs := new String[ExternalCalls.nargs];
   for i: Integer := 0 to ExternalCalls.nargs - 1 do
-    lArgs[i] := String.FromPAnsiChars(ExternalCalls.args[i]);
+    lArgs[i] := String.FromPAnsiChar(ExternalCalls.args[i]);
   exit lArgs;
   {$ENDIF}
 end;
