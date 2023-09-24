@@ -41,7 +41,6 @@
   <PropertyGroup Condition=" '$(Target)' == 'Island.Windows' ">
     <Mode>Island</Mode>
     <SubMode>Windows</SubMode>
-    <Architecture>i386;x86_64</Architecture>
     <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Target)' == 'Island.Linux' ">
@@ -86,7 +85,7 @@
     <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="GoldAspect">
+    <ProjectReference Include="..\GoldAspect\GoldAspect.elements">
       <HintPath>..\GoldAspect\Bin\Debug\GoldAspect.dll</HintPath>
       <Project>{631D3965-3D71-4DFD-9864-EBF841EA6192}</Project>
       <ProjectFile>..\GoldAspect\GoldAspect.elements</ProjectFile>
