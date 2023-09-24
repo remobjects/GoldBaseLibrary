@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -330,7 +330,9 @@ func setRequestCancel(req *Request, rt RoundTripper, deadline time.Time) (stopTi
 		}
 	}()
 
-	return stopTimer, timedOut.isSet
+	// elements, modification due to: E26781: Gold-Echoes: AV using atomic.StoreInt32
+	//return stopTimer, timedOut.isSet
+	return stopTimer, func() bool { return timedOut.isSet() }
 }
 
 // See 2 (end of page 4) https://www.ietf.org/rfc/rfc2617.txt

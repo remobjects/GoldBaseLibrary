@@ -55,6 +55,7 @@
     <SDK>macOS</SDK>
     <DefineConstants>POSIX;math_big_pure_go</DefineConstants>
     <OutputType>StaticLibrary</OutputType>
+    <Architecture>arm64;x86_64</Architecture>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Target)' == 'Island.Darwin.iOS' ">
     <Mode>Island</Mode>
@@ -312,7 +313,7 @@
     <Compile Include="net\smtp\auth.go" />
     <Compile Include="net\smtp\smtp.go" />
     <Compile Include="net\mail\message.go" />
-    <Compile Include="net\http\client.go" />
+    <Compile Include="net\http\client_elements.go" />
     <Compile Include="net\http\cookie.go" />
     <Compile Include="net\http\doc.go" />
     <Compile Include="net\http\filetransport.go" />

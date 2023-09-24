@@ -43,7 +43,8 @@ type
       "crypto.sha512",
       "errors",
       "fmt"]);*/
-      var lType := Services.GetType('go.net.http.atomicBool');
+
+      {var lType := Services.GetType('go.net.http.atomicBool');
       ITypeDefinition(lType).RemoveMethod(lType.GetStaticMethods('isSet')[0] as IMethodDefinition);
       ITypeDefinition(lType).RemoveMethod(lType.GetStaticMethods('setTrue')[0] as IMethodDefinition);
       var lPar := new SelfValue;
@@ -56,9 +57,9 @@ type
       lsetTrue.ReplaceMethodBody(
       new StandaloneStatement(
       new ProcValue(new TypeValue(Services.GetType('go.sync.atomic.__Global')), 'StoreInt32', [new FieldValue(lPar, lType, 'Value'), new DataValue(1)])
-      ));
+      ));}
 
-      lType := Services.GetType('go.net.http.__Global');
+      var lType := Services.GetType('go.net.http.__Global');
       var lMethod := lType.GetStaticMethods('http2isNoCachedConnError')[0] as IMethodDefinition;
       lMethod.ReplaceMethodBody(
          new ExitStatement(new BinaryValue(new ParamValue(0), new TypeValue(Services.GetType('go.net.http.http2noCachedConnError')), BinaryOperator.Is))
