@@ -7,7 +7,7 @@ uses
   System.Resources,
   System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle('RemObhjects Elements Gold Support Library')]
+[assembly: AssemblyTitle('RemObjects Elements Gold Support Library')]
 [assembly: AssemblyDescription('')]
 [assembly: AssemblyConfiguration('')]
 [assembly: AssemblyCompany('RemObjects Software, LLC')]
