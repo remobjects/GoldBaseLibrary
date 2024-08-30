@@ -72,12 +72,12 @@ type
       exit new complex64(r := x.r, i := x.i);
     end;
 
-    operator Equal(a, b: complex128): Boolean;
+    operator Equal(a, b: complex64): Boolean;
     begin
       exit (a.r = b.r) and (a.i = b.i);
     end;
 
-    operator NotEqual(a, b: complex128): Boolean;
+    operator NotEqual(a, b: complex64): Boolean;
     begin
       exit (a.r <> b.r) or (a.i <> b.i);
     end;
