@@ -72,13 +72,6 @@
     <DefineConstants>POSIX;math_big_pure_go</DefineConstants>
     <OutputType>StaticLibrary</OutputType>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Target)' == 'Island.Darwin.watchOS' ">
-    <Mode>Island</Mode>
-    <SubMode>Darwin</SubMode>
-    <SDK>watchOS</SDK>
-    <DefineConstants>POSIX;math_big_pure_go</DefineConstants>
-    <OutputType>StaticLibrary</OutputType>
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(Target)' == 'Island.Android' ">
     <Mode>Island</Mode>
     <SubMode>Android</SubMode>
@@ -803,14 +796,6 @@
     <Reference Include="Security" />
   </ItemGroup>
   <ItemGroup Condition="'$(Target)' == 'Island.Darwin.tvOS'">
-    <Reference Include="rtl" />
-    <Reference Include="Foundation" />
-    <Reference Include="CoreFoundation" />
-    <Reference Include="gc" />
-    <Reference Include="Island" />
-    <Reference Include="Security" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(Target)' == 'Island.Darwin.watchOS'">
     <Reference Include="rtl" />
     <Reference Include="Foundation" />
     <Reference Include="CoreFoundation" />

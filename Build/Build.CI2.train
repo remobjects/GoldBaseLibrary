@@ -87,15 +87,6 @@ zip.compress(zipIslandtvOS, temp_tvos, "*.*", true);
 folder.remove(temp_tvos);
 //zip.compress(zipIslandtvOS, "../Bin", "tvOS/*/Go.*;tvOS\ Simulator/*/Go.*", true);
 
-var temp_watchos = "../Bin/temp_watchos";
-folder.create(temp_watchos);
-file.copy(path.combine("../Bin/Island/watchOS/", "*.*"), path.combine(temp_watchos, "watchOS"), true);
-file.copy(path.combine("../Bin/Island/watchOS Simulator/", "*.*"), path.combine(temp_watchos, "watchOS Simulator"), true);
-zipIslandwatchOS = expand("$(CIReleaseFolder)/Island-watchOS-Go.zip");
-zip.compress(zipIslandwatchOS, temp_watchos, "*.*", true);
-folder.remove(temp_watchos);
-//zip.compress(zipIslandwatchOS, "../Bin", "watchOS/*/Go.*;watchOS\ Simulator/*/Go.*", true);
-
 zipIslandAndroid = expand("$(CIReleaseFolder)/Island-Android-Go.zip");
 zip.compress(zipIslandAndroid, "../Bin/Island", "Android/*.*", true);
 
@@ -118,7 +109,6 @@ s3.uploadFile(zipName, ciSharedPrefix);
 s3.uploadFile(zipIslandMac, ciSharedPrefix);
 s3.uploadFile(zipIslandiOS, ciSharedPrefix);
 s3.uploadFile(zipIslandtvOS, ciSharedPrefix);
-s3.uploadFile(zipIslandwatchOS, ciSharedPrefix);
 s3.uploadFile(zipIslandAndroid, ciSharedPrefix);
 s3.uploadFile(zipIslandUbuntu, ciSharedPrefix);
 s3.uploadFile(zipIslandWindows, ciSharedPrefix);
